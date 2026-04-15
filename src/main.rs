@@ -3,6 +3,8 @@
 #![no_std]
 #![no_main]
 
+use defmt_rtt as _; // ensure defmt transport is linked
+use panic_probe as _;
 use embassy_executor::Spawner;
 use embassy_sync::{
     blocking_mutex::raw::CriticalSectionRawMutex,
@@ -14,8 +16,6 @@ use static_cell::StaticCell;
 use bahilizator::{
     buttons, coin_acceptor, flash, gsm, hopper, ibutton, nvram, state, ui, vending,
 };
-
-use panic_probe as _;
 
 // ── Статические каналы и сигналы ────────────────────────────────────────
 
@@ -113,13 +113,13 @@ async fn main(spawner: Spawner) {
     }
 
     // Spawn задач
-    spawner.spawn(task_vending(state)).ok();
-    spawner.spawn(task_coin_acceptor(state)).ok();
-    spawner.spawn(task_hopper()).ok();
-    spawner.spawn(task_buttons()).ok();
-    spawner.spawn(task_gsm(state)).ok();
-    spawner.spawn(task_ibutton()).ok();
-    spawner.spawn(task_state_persist(state)).ok();
+    spawner.spawn(task_vending(state).unwrap());
+    spawner.spawn(task_coin_acceptor(state).unwrap());
+    spawner.spawn(task_hopper().unwrap());
+    spawner.spawn(task_buttons().unwrap());
+    spawner.spawn(task_gsm(state).unwrap());
+    spawner.spawn(task_ibutton().unwrap());
+    spawner.spawn(task_state_persist(state).unwrap());
 
     defmt::info!("Все задачи запущены");
 
