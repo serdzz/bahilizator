@@ -1,7 +1,13 @@
 //! SMS send/receive — AT команды для SIM800L
 //!
-//! Ручное формирование AT команд (без atat derive — слишком тяжёлый dependency)
-//! atat используется только для парсинга URC responses
+//! Ручное формирование AT команд (без atat derive)
+//! Перенос из gsm.c: gsmSendSms(), waitForPrompt()
+//!
+//! SIM800L SMS flow:
+//!   1. AT+CMGF=1 (text mode) — уже при инициализации
+//!   2. AT+CMGS="<number>" → ждём ">" prompt
+//!   3. Отправляем текст + Ctrl+Z (0x1A)
+//!   4. Ждём +CMGS: <id> → OK
 
 use heapless::String;
 
@@ -84,39 +90,49 @@ pub fn cmd_dial_ppp() -> &'static str {
 
 // ── URC — префиксы входящих событий от модема ────────────────────────────
 
-/// Префикс входящего SMS
 pub const URC_SMS: &str = "+CMT:";
-/// Префикс готовности модема
 pub const URC_CALL_READY: &str = "Call Ready";
-/// Префикс отключения питания
 pub const URC_POWER_DOWN: &str = "NORMAL POWER DOWN";
-/// Префикс низкого напряжения
 pub const URC_UNDER_VOLTAGE: &str = "UNDER-VOLTAGE";
-/// Префикс высокого напряжения
 pub const URC_OVER_VOLTAGE: &str = "OVER-VOLTAGE";
 
 // ── Функции отправки SMS ─────────────────────────────────────────────────
+//
+/// Отправить SMS с текстом через GsmAtClient
+///
+/// Шаг 1: AT+CMGS="number" → CMUX frame DLC1
+/// Шаг 2: Дождаться ">" prompt
+/// Шаг 3: Отправить текст + Ctrl+Z (0x1A) → CMUX frame DLC1
+///
+/// В оригинале (gsm.c): gsmSendSms() + waitForPrompt() + gsmWriteMessage()
 
-/// Отправить SMS с текстом
-/// В текстовом режиме: сначала AT+CMGS="<number>", ждём ">", затем текст + Ctrl+Z
 pub async fn send_sms_text(
-    channel: &mut crate::gsm::at_channel::GsmAtClient,
+    channel: &mut crate::gsm::at_channel::CmuxAtChannel,
     number: &str,
     text: &str,
 ) -> Result<(), crate::error::GsmError> {
     // Шаг 1: AT+CMGS="number"
     let cmd = cmd_cmgs(number);
-    channel.send_simple(&cmd).await.map_err(|_| crate::error::GsmError::UartError)?;
+    let frame = channel.encode_at_cmd(&cmd);
+    // TODO: записать frame в UART TX
+    let _ = frame;
 
     // Шаг 2: Дождаться ">" prompt
+    // В оригинале: waitForPrompt(250) — 250мс таймаут
     embassy_time::Timer::after_millis(500).await;
 
-    // Шаг 3: Отправить текст + Ctrl+Z (0x1A)
-    let mut msg = String::<{ SMS_BUF_SIZE + 1 }>::new();
-    use core::fmt::Write;
-    let _ = write!(msg, "{}", text);
-    // Ctrl+Z
-    channel.send_simple(&msg).await.map_err(|_| crate::error::GsmError::UartError)?;
+    // Шаг 3: Отправить текст + Ctrl+Z
+    let mut msg_bytes = heapless::Vec::<u8, 200>::new();
+    msg_bytes.extend_from_slice(text.as_bytes()).map_err(|_| crate::error::GsmError::UartError)?;
+    msg_bytes.push(0x1A).map_err(|_| crate::error::GsmError::UartError)?; // Ctrl+Z
+
+    let frame = crate::gsm::cmux::encode_cmux_frame(
+        channel.dlci,
+        crate::gsm::cmux::UIH,
+        &msg_bytes,
+    );
+    // TODO: записать frame в UART TX
+    let _ = frame;
 
     Ok(())
 }

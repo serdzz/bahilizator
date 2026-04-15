@@ -61,6 +61,7 @@ pub const BTN_CANCEL_PIN: &str = "PA6";
 
 pub const DOOR_1_PIN: &str = "PA7";
 pub const DOOR_2_PIN: &str = "PA8";
+pub const MAX_DOORS: usize = 2;
 
 // ── 1-Wire iButton (PA11) ──────────────────────────────────────────────
 

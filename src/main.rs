@@ -48,6 +48,7 @@ async fn task_vending(
         COIN_CHANNEL.receiver(),
         BUTTON_CHANNEL.receiver(),
         HOPPER_EVENT_CHANNEL.receiver(),
+        HOPPER_CMD_CHANNEL.sender(),
         GSM_CMD_CHANNEL.sender(),
         &DISPLAY_SIGNAL,
         &PERSIST_SIGNAL,
