@@ -1,6 +1,13 @@
 # Бахилизатор v2.0
 
-Rust/Embassy порт прошивки вендингового аппарата с MSP430 (C/IAR) на STM32F103C8T6 Bluepill.
+Rust/Embassy порт прошивки вендингового аппарата с MSP430 (C/IAR) на ESP32 LilyGo T-Call.
+
+## Ветки
+
+| Ветка | Платформа | Статус |
+|-------|----------|--------|
+| `master` | STM32F103C8T6 Bluepill | Компилируется, clippy clean |
+| `esp32` | ESP32 LilyGo T-Call SIM800 | Компилируется, clippy clean |
 
 ## Описание
 
@@ -10,32 +17,92 @@ Rust/Embassy порт прошивки вендингового аппарата
 
 **Зачем порт:**
 - Оригинальный MSP430 снят с производства
-- STM32F103C8T6 Bluepill — дешёвая и доступная платформа
+- ESP32 LilyGo T-Call — плата с встроенным SIM800L модемом
 - Embassy даёт async многозадачность без RTOS
 - Rust — безопасность памяти, типобезопасность, без UB
 
-## Аппаратная часть
+## ESP32 Branch — LilyGo T-Call SIM800 v20190610
+
+### Аппаратная часть
 
 | Компонент | Модель | Подключение |
 |-----------|--------|-------------|
-| МК | STM32F103C8T6 Bluepill | 72 MHz, 64KB Flash, 20KB SRAM |
-| Дисплей | HD44780 16×2 | I2C через PCF8574 backpack |
-| EEPROM | 24C08 (1024 байт) | I2C (общая шина с дисплеем) |
+| МК | ESP32 Xtensa LX6 | 240 MHz dual-core, 520KB SRAM, 4MB Flash |
+| GSM модем | SIM800L (onboard) | UART2 (GPIO26/27) |
+| Power Mgmt | IP5306 (onboard) | I2C0 (0x75) |
+| Дисплей | HD44780 16×2 | I2C0 через PCF8574 (GPIO21/22) |
+| EEPROM | 24C08 (1024 байт) | I2C1 (GPIO18/19) |
 | Монетоприёмник | NRI G-13.6000 | 6 каналов + блокировка, через NPN |
-| Хоппер A | Товарный диспенсер | Enable + Sensor, через NPN |
-| Хоппер B | Монетный диспенсер | Enable + Sensor, через NPN |
-| GSM модем | SIM800L | USART1 + PWRKEY + STATUS |
-| iButton | DS1990A | 1-Wire bit-bang на PA11 |
-| Кнопки | 4 шт. | PA3–PA6, active-low, pull-up |
-| Двери | 2 датчика | PA7, PA8, active-low |
-| LED | Красный / Зелёный | PC15 / PB0 |
+| Хоппер A/B | Товарный/монетный | Enable + Sensor |
+| Кнопки | 4 шт. | GPIO2/33/36/39, active-low |
+| LED | User LED | GPIO13 |
 
-### Использование ресурсов
+### Использование ресурсов (ESP32)
 
 ```
-Flash:  ~34 KB / 64 KB  (53%)
-SRAM:   ~4.8 KB / 20 KB (24%)
-Lines:  ~6700
+Flash:  ~80 KB / 4 MB   (2%)
+SRAM:  ~194 KB / 520 KB (37%)
+Lines:  ~7000
+```
+
+### Реальные драйверы esp-hal (без заглушек)
+
+| Периферия | Драйвер | Статус |
+|-----------|---------|--------|
+| UART2 (SIM800L) | `esp_hal::Uart` async split | ✅ Реальный |
+| I2C0 (дисплей) | `esp_hal::i2c::master::I2c` | ✅ Реальный |
+| I2C1 (EEPROM) | `esp_hal::i2c::master::I2c` | ✅ Реальный |
+| GPIO выходы | `esp_hal::gpio::Output` | ✅ Реальный |
+| GPIO входы | `esp_hal::gpio::Input` | ✅ Реальный |
+| LED | `esp_hal::gpio::Output` | ✅ Реальный |
+| GSM PWRKEY/RST/POWER | `esp_hal::gpio::Output` | ✅ Реальный |
+| 1-Wire (iButton) | EspHalPin (заглушка) | ⚠️ Нет свободного GPIO |
+| Двери | Не подключены | ⚠️ Нет свободных input-only GPIO |
+
+### GPIO Map (LilyGo T-Call)
+
+| GPIO | Назначение | Примечание |
+|------|-----------|------------|
+| GPIO0 | Coin CH2 | Strapping (boot mode) |
+| GPIO2 | Кнопка CANCEL | Strapping |
+| GPIO4 | GSM PWRKEY | SIM800L управление |
+| GPIO5 | GSM RST | Hard reset модема |
+| GPIO12 | Coin CH1 | Strapping MTDI |
+| GPIO13 | LED | User LED |
+| GPIO14 | Coin CH3 | — |
+| GPIO15 | Coin CH4 | Strapping MTDO |
+| GPIO16 | Coin CH5 | Занят при PSRAM |
+| GPIO17 | Coin CH6 | Занят при PSRAM |
+| GPIO18 | I2C1 SDA (EEPROM) | — |
+| GPIO19 | I2C1 SCL (EEPROM) | — |
+| GPIO21 | I2C0 SDA (дисплей) | — |
+| GPIO22 | I2C0 SCL (дисплей) | — |
+| GPIO23 | GSM POWER | HIGH = ON |
+| GPIO25 | Hopper B Enable | LOW = мотор ON |
+| GPIO26 | UART2 TX → SIM800L | — |
+| GPIO27 | UART2 RX ← SIM800L | — |
+| GPIO32 | Hopper A Enable | — |
+| GPIO33 | Кнопка NEXT | — |
+| GPIO34 | Hopper A Sensor | Input-only |
+| GPIO35 | Hopper B Sensor | Input-only |
+| GPIO36 | Кнопка PREV | Input-only |
+| GPIO39 | Кнопка OK | Input-only |
+
+### Сборка ESP32
+
+```bash
+# Установить espup
+cargo install espup
+espup install --targets esp32
+
+# Загрузить окружение
+source ~/export-esp.sh  # или . ~/export-esp.sh
+
+# Собрать
+cargo +esp build --release -Zbuild-std=core,alloc
+
+# Прошить
+espflash flash --release -Zbuild-std=core,alloc --monitor
 ```
 
 ### Сетевой стек (GPRS)
@@ -46,311 +113,112 @@ Lines:  ~6700
 | IP Stack | embassy-net | IPv4, DHCP, TCP, UDP, DNS |
 | DNS | embassy-net (dns) | hostname → IP, кэш 4 записи |
 | MQTT | rust-mqtt v5 | Телеметрия, ошибки, события |
-| 1-Wire | one-wire-bus | iButton DS1990A |
+| 1-Wire | one-wire-bus | iButton DS1990A (заглушка) |
 
 ## Схемы подключения
 
-### NRI G-13 → STM32 (через NPN транзистор)
+### NRI G-13 → ESP32 (через NPN транзистор)
 
 ```
-NRI G-13                  NPN (BC547/2N2222)              STM32
+NRI G-13                  NPN (BC547/2N2222)              ESP32
 ┌──────────┐           ┌──────────────┐            ┌──────────┐
 │ Pin 3-4  ├───────────┤ 10kΩ → Base │            │          │
-│ Pin 7-10 │ (6 линий) ├── Emitter→GND│            │ PB8-13   │
+│ Pin 7-10 │ (6 линий) ├── Emitter→GND│            │ GPIO12-17│
 │ (active  │           └── Collector ─┤ 10kΩ ↑3.3V├→ GPIO    │
-│  low)    │                          │            │          │
-│          │                          │            │          │
-│ Pin 6    ├──────────────────────────┤────────────┤ PB14     │
-│ (blocking│ (active HIGH,            │            │ (blocking│
-│  output) │  без инверсии)           │            │  pin)    │
+│  low at  │              │           │            │          │
+│  +12V)   │              └───────────┤            │          │
 └──────────┘                          │            └──────────┘
 ```
 
-Транзистор инвертирует: NRI active-low → NPN → HIGH на GPIO.
-HIGH на GPIO STM32 = монета обнаружена на линии.
+NRI G-13 активный-low (+12V standby, GND при монете).
+NPN инвертирует: GND → Collector HIGH (3.3V через pull-up).
+ESP32 видит HIGH = монета обнаружена.
 
-### Хопперы → STM32 (через NPN транзистор)
-
-```
-Hopper                NPN (BC547)                STM32
-┌──────────┐       ┌──────────────┐          ┌──────────┐
-│ Enable   ├───────┤ 10kΩ→Base   │          │          │
-│ (motor)  │       ├── Emitter→GND│          │ PB15/..  │
-│          │       └── Collector ─┤────── ───┤→ GPIO    │
-│ Sensor   ├─────────────────────────────────┤ PAxx     │
-│ (optical)│  (active-low через NPN)         │ (input)  │
-└──────────┘                                 └──────────┘
-```
-
-+12V питания хоппера → NPN ключ → управление от +3.3V логики STM32.
-
-### HD44780 → PCF8574 → STM32 I2C1
+### SIM800L (на плате LilyGo T-Call)
 
 ```
-HD44780              PCF8574 I2C Backpack          STM32
-┌──────────┐       ┌──────────────────┐         ┌──────────┐
-│ D4-D7    ├───────┤ P4-P7            │         │          │
-│ RS       ├───────┤ P0               │         │          │
-│ RW       ├───────┤ P1        SDA ──┤─────────┤ PB7      │
-│ EN       ├───────┤ P2        SCL ──┤─────────┤ PB6      │
-│ BL       ├───────┤ P3               │         │          │
-└──────────┘       └──────────────────┘         └──────────┘
+ESP32 GPIO26 (UART2 TX) ────→ SIM800L RXD
+ESP32 GPIO27 (UART2 RX) ←──── SIM800L TXD
+ESP32 GPIO4  (PWRKEY)   ────→ SIM800L PWRKEY (LOW pulse >1с)
+ESP32 GPIO5  (RST)      ────→ SIM800L RST (LOW = reset)
+ESP32 GPIO23 (POWER)    ────→ SIM800L POWER (HIGH = ON)
 ```
 
-PCF8574 pin mapping: P0=RS, P1=RW, P2=E, P3=Backlight, P4=D4, P5=D5, P6=D6, P7=D7
-
-I2C адрес: 0x27 (или 0x3F для альтернативного модуля)
-
-### SIM800L → STM32 USART1
+### I2C (два контроллера)
 
 ```
-SIM800L                                      STM32
-┌──────────┐                               ┌──────────┐
-│ TXD      ├────────────────────────────────┤ PA10     │
-│ RXD      ├────────────────────────────────┤ PA9      │
-│ PWRKEY   ├──── NPN транзистор ────────────┤ PA0      │
-│ STATUS   ├──── делитель 3.3V ─────────────┤ PA1      │
-│ DTR      ├────────────────────────────────┤ PA2      │
-│ VCC      │  3.4–4.2V (отдельный LDO!)     │          │
-│ GND      ├──── общая земля ──────────────┤ GND      │
-└──────────┘                               └──────────┘
+ESP32 GPIO21 (I2C0 SDA) ←→ PCF8574 (0x27) ←→ HD44780
+ESP32 GPIO22 (I2C0 SCL) ←→ IP5306 (0x75)
+ESP32 GPIO18 (I2C1 SDA) ←→ 24C08 (0x50) EEPROM
+ESP32 GPIO19 (I2C1 SCL) ←→ 24C08 (0x50) EEPROM
 ```
-
-**Важно:** SIM800L требует 3.4–4.2V и до 2A при передаче!
-Использовать отдельный LDO или DC-DC, не питать от 3.3V STM32.
-
-### iButton (DS1990A) → STM32
-
-```
-iButton                     STM32
-┌──────────┐             ┌──────────┐
-│ Data     ├──── 4.7kΩ ──┤ PA11     │
-│          │     pull-up   │          │
-│ GND      ├──────────────┤ GND      │
-└──────────┘             └──────────┘
-```
-
-1-Wire bit-bang: OpenDrain, pull-low для передачи, release + pull-up для чтения.
-
-### EEPROM 24C08 → STM32 I2C1
-
-```
-24C08                                       STM32
-┌──────────┐                               ┌──────────┐
-│ SDA      ├────────────────────────────────┤ PB7      │
-│ SCL      ├────────────────────────────────┤ PB6      │
-│ A0,A1,A2 ├──── GND (адрес 0x50)          │          │
-│ WP       ├──── GND (запись разрешена)     │          │
-│ VCC      ├──── +3.3V                      │          │
-│ GND      ├──── GND                        │          │
-└──────────┘                               └──────────┘
-```
-
-Общая шина I2C с PCF8574 (дисплей). Адреса не конфликтуют: 0x27 vs 0x50.
-
-### Кнопки и двери → STM32
-
-```
-Кнопки (active-low, internal pull-up)       STM32
-  PREV  ──── 10kΩ pull-up ──── PA3
-  NEXT  ──── 10kΩ pull-up ──── PA4
-  OK    ──── 10kΩ pull-up ──── PA5
-  CANCEL─── 10kΩ pull-up ──── PA6
-
-Двери (active-low, normally-open)
-  Дверь 1 ──── PA7
-  Дверь 2 ──── PA8
-```
-
-EXTI прерывания → debounce 50мс → Channel → задача обработки.
-
-## Программная архитектура
-
-### Embassy задачи
-
-Проект использует Embassy executor с 8 задачами:
-
-```
-┌──────────────────┐   COIN_CHANNEL    ┌──────────────────┐
-│  task_coin_       │ ───────────────→  │  task_vending    │
-│  acceptor        │                   │  (state machine)  │
-└──────────────────┘                   │                   │
-┌──────────────────┐  BUTTON_CHANNEL   │  ┌──────────────┐ │
-│  task_buttons    │ ───────────────→  │  │ AcceptCash   │ │
-└──────────────────┘                   │  │ PayoutItems  │ │
-┌──────────────────┐  IBUTTON_CHANNEL  │  │ PayoutRemindr│ │
-│  task_ibutton    │ ───────────────→  │  │ ProcessResid │ │
-└──────────────────┘                   │  └──────────────┘ │
-                                       │                   │
-┌──────────────────┐  HOPPER_CMD       │  HOPPER_EVENT     │
-│  task_vending    │ ──────────────→   │  ┌──────────────┐ │
-│  (выдача)        │                   │  │ task_hopper  │ │
-└──────────────────┘                   │  └──────────────┘ │
-                                       └──────────────────┘
-┌──────────────────┐  GSM_CMD          ┌──────────────────┐
-│  task_vending    │ ──────────────→   │  task_gsm       │
-│  (SMS/GPRS)      │                   │  (SIM800L)      │
-└──────────────────┘                   └──────────────────┘
-┌──────────────────┐  DISPLAY_SIGNAL   ┌──────────────────┐
-│  task_vending    │ ──────────────→   │  display_task    │
-│  (дисплей)        │                   │  (HD44780 I2C)  │
-└──────────────────┘                   └──────────────────┘
-┌──────────────────┐  PERSIST_SIGNAL   ┌──────────────────┐
-│  Все задачи      │ ──────────────→   │  task_state_    │
-│                   │                   │  persist        │
-└──────────────────┘                   └──────────────────┘
-```
-
-### Shared state
-
-Общее состояние — `Mutex<CriticalSectionRawMutex, RefCell<VendingState>>`:
-
-- **VendingState** — верхний уровень: data + settings + errors
-- **VendingStateData** — рабочее состояние (EEPROM 24C08): наличность, уровни, транзакции
-- **Settings** — конфигурация (Flash page 63): номиналы, ключи, телефоны
-- **Errors** — bitflags: ошибки монетоприёмника, хопперов, GSM, дверей
-
-### Vending state machine
-
-4 основных состояния:
-
-```
-AcceptCash ──(монета→хватит)──→ PayoutItems
-    ↑                              │
-    │                         (товар выдан)
-    │                              ↓
-ProcessResidual ←── PayoutReminder
-    │
-    └──(сброс)──→ AcceptCash
-```
-
-При ошибках → экран "НЕТ ОБСЛУЖИВАНИЯ" + SMS.
-
-### Протоколы
-
-| Протокол | Назначение | Реализация |
-|----------|-----------|------------|
-| GSM 07.10 CMUX | Мультиплексирование UART | `gsm/cmux.rs` — Basic Mode |
-| AT commands | Управление SIM800L | `gsm/at_channel.rs` — DLC1 |
-| PPP (embassy-net-ppp) | GPRS интернет | `gsm/ppp_channel.rs` — DLC2 |
-| DNS (embassy-net) | hostname → IP | `gsm/dns.rs` — кэш 4 записи, TTL 300с |
-| MQTT (rust-mqtt) | Телеметрия | `gsm/mqtt.rs` — QoS 0/1, keepalive 60с |
-| I2C | Дисплей + EEPROM | Embassy I2C (PB6/PB7) |
-| 1-Wire (one-wire-bus) | iButton DS1990A | `ibutton.rs` — crate, не bit-bang |
-
-## Как собрать
-
-### Требования
-
-- Rust nightly (embedded target)
-- `thumbv7m-none-eabi` target
-- `cargo-flash` или `st-flash` для прошивки
-- ST-Link V2 (или совместимый)
-
-### Сборка
-
-```bash
-# Добавить target (один раз)
-rustup target add thumbv7m-none-eabi
-
-# Release сборка
-cargo build --release
-
-# Результат: target/thumbv7m-none-eabi/release/bahilizator
-```
-
-### Прошивка
-
-```bash
-# Вариант 1: cargo-flash
-cargo flash --chip stm32f103c8t6 --release
-
-# Вариант 2: st-flash
-arm-none-eabi-objcopy -O binary target/thumbv7m-none-eabi/release/bahilizator \
-  target/thumbv7m-none-eabi/release/bahilizator.bin
-st-flash write target/thumbv7m-none-eabi/release/bahilizator.bin 0x08000000
-```
-
-### Отладка
-
-```bash
-# defmt лог через RTT (нужен probe-rs)
-cargo run --release --features defmt
-
-# Или openocd + gdb
-openocd -f interface/stlink.cfg -f target/stm32f1x.cfg
-arm-none-eabi-gdb target/thumbv7m-none-eabi/release/bahilizator
-```
-
-## Зависимости Embassy
-
-Все Embassy крейты — из git, не crates.io (требуемые фичи ещё не опубликованы):
-
-```toml
-embassy-stm32  = { git = "https://github.com/embassy-rs/embassy.git", features = ["stm32f103c8", "time-driver-tim2", "defmt"] }
-embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", features = ["executor-thread", "defmt", "platform-cortex-m"] }
-embassy-time    = { git = "https://github.com/embassy-rs/embassy.git" }
-embassy-sync    = { git = "https://github.com/embassy-rs/embassy.git" }
-embassy-futures = { git = "https://github.com/embassy-rs/embassy.git" }
-embassy-net-ppp  = { git = "https://github.com/embassy-rs/embassy.git" }
-embassy-net      = { git = "https://github.com/embassy-rs/embassy.git", features = ["defmt", "medium-ip", "proto-ipv4", "dns", "tcp", "udp", "dhcpv4"] }
-```
-
-### MQTT и 1-Wire
-
-```toml
-rust-mqtt       = { version = "0.5.1", default-features = false, features = ["v5", "defmt"] }
-one-wire-bus    = "0.1"
-```
-
-## Оригинальный проект
-
-Оригинальная C-прошивка для MSP430 (IAR Embedded Workbench):
-`~/Aledo/bahilizator_kwt_svn/`
-
-Содержит: `src/` (C файлы), `include/` (заголовки), `settings/`, `lnk/` (линкер),
-IAR project файлы (`.ewp`, `.eww`).
 
 ## Структура проекта
 
 ```
 bahilizator/
-├── Cargo.toml
-├── memory.x              # Линкер: 64K Flash, 20K RAM
 ├── src/
-│   ├── main.rs            # Embassy tasks + каналы + точка входа
-│   ├── lib.rs             # re-exports всех модулей
-│   ├── config.rs          # Пин-мап и константы
-│   ├── state.rs           # VendingState, Settings, Errors
-│   ├── event.rs           # Лог событий и транзакций
-│   ├── error.rs           # ErrorSet (bitflags) + типы ошибок
-│   ├── vending.rs         # State machine: Accept→Payout→Remind→Residual
-│   ├── coin_acceptor.rs   # NRI G-13 (6-канальный / пульсный)
-│   ├── hopper.rs           # Параметризованный драйвер хоппера
-│   ├── ui.rs              # HD44780 через PCF8574 I2C
-│   ├── buttons.rs         # Кнопки + двери → EXTI → Channel
-│   ├── ibutton.rs         # 1-Wire DS1990A (one-wire-bus crate)
-│   ├── flash.rs           # Flash page 63 — Settings (read/write)
-│   ├── nvram.rs           # EEPROM 24C08 — State + wear levelling
-│   ├── menu.rs            # Сервисное меню навигация
-│   ├── report.rs          # Генерация SMS отчётов
-│   └── gsm/
-│       ├── mod.rs          # GSM менеджер: питание, init, GPRS, MQTT
-│       ├── cmux.rs         # GSM 07.10 CMUX Basic Mode
-│       ├── at_channel.rs   # AT канал через DLC1
-│       ├── ppp_channel.rs  # embassy-net-ppp через DLC2
-│       ├── dns.rs          # DNS резолвер (embassy-net, кэш 4 записи)
-│       ├── mqtt.rs         # MQTT v5 клиент (rust-mqtt)
-│       ├── mqtt_topics.rs  # MQTT топики: settings, errors, event, state, accounting
-│       └── sms.rs          # SMS AT команды
-└── docs/
-    ├── ARCHITECTURE.md     # Детальная архитектура
-    ├── PORTING_NOTES.md    # Заметки по портированию
-    ├── PINOUT.md           # Полная распиновка
-    └── CMUX_PPP.md         # Протокол CMUX + PPP
+│   ├── main.rs            Embassy entry point, периферия, GPIO init
+│   ├── config.rs           Константы (пины, адреса, таймауты)
+│   ├── state.rs            VendingState, Settings, AppState
+│   ├── vending.rs          State machine (AcceptCash → PayoutItems → ...)
+│   ├── coin_acceptor.rs    NRI G-13.6000 poll (1мс, 6 каналов + BLOCK)
+│   ├── hopper.rs           Хопперы A/B (motor + sensor)
+│   ├── buttons.rs          Кнопки + двери (10мс poll)
+│   ├── gsm/
+│   │   ├── mod.rs           GSM менеджер (init, CMUX, power)
+│   │   ├── at_channel.rs    AT команды через CMUX DLC1
+│   │   ├── cmux.rs          GSM 07.10 Basic Mode mux
+│   │   ├── ppp_channel.rs  PPP через CMUX DLC2
+│   │   ├── sms.rs           SMS отправка/приём
+│   │   ├── dns.rs           DNS resolver (кэш 4 записи)
+│   │   ├── mqtt.rs          MQTT v5 клиент (rust-mqtt)
+│   │   └── mqtt_topics.rs  Топики и формат JSON
+│   ├── nvram.rs            EEPROM 24C08 (wear levelling, I2C1)
+│   ├── flash.rs            Settings → NVS (esp-storage)
+│   ├── ui.rs               HD44780 через PCF8574 (I2C0)
+│   ├── menu.rs              Навигация меню
+│   ├── ibutton.rs           1-Wire DS1990A (one-wire-bus)
+│   ├── event.rs             Event ring buffer + TransactionEntry
+│   ├── report.rs            SMS отчёты (state, errors, accounting)
+│   └── error.rs             Error bitflags (18 категорий)
+├── docs/
+│   ├── ARCHITECTURE.md     Архитектура и потоки данных
+│   ├── PINOUT.md           Распиновка ESP32 LilyGo T-Call
+│   ├── PORTING_NOTES.md    Заметки по портированию MSP430 → ESP32
+│   └── CMUX_PPP.md         CMUX/PPP протоколы
+├── Cargo.toml
+└── Makefile
 ```
+
+## Тестирование
+
+```bash
+# Unit-тесты (host)
+cargo test
+
+# Проверка сборки ESP32
+cargo +esp build --release -Zbuild-std=core,alloc
+
+# Clippy
+cargo +esp clippy --release -Zbuild-std=core,alloc -- -D warnings
+
+# Прошивка
+espflash flash --release -Zbuild-std=core,alloc --monitor /dev/ttyUSB0
+```
+
+## Ключевые решения
+
+1. **Embassy вместо RTIC** — async/await更适合 для GPRS/CMUX/MQTT
+2. **Два I2C** — раздельные шины для дисплея и EEPROM
+3. **UART2 async split** — TX и RX в разных задачах
+4. **CMUX** — мультиплексирование AT команд и PPP на одном UART
+5. **Wear levelling** — 4 сектора EEPROM по 256 байт, ротация при записи
+6. **No heap** — `heapless::String`, `heapless::Vec`, статические буферы
+7. **NPN инверсия** — монетоприёмник +12V → ESP32 3.3V через BC547
+8. **1-Wire заглушка** — на LilyGo T-Call нет свободного GPIO для iButton
 
 ## Лицензия
 
-Проприетарный. Оригинальная C-версия: Aledo SIA.
-Rust-порт: Automated Systems SIA.
+Проприетарное ПО. Оригинальная прошивка © Aledo / Bahilizator KWT.
+Rust порт — по договорённости.
