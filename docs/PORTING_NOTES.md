@@ -1,7 +1,11 @@
-# Заметки по портированию MSP430/C → STM32/Rust
+# Заметки по портированию MSP430/C → ESP32/Rust
 
 Документ описывает ключевые решения, маппинги и отличия при портировании
-Бахилизатора с MSP430F148/F2618 (IAR C) на STM32F103C8T6 (Rust/Embassy).
+Бахилизатора с MSP430F148/F2618 (IAR C) на ESP32 LilyGo T-Call (Rust/Embassy).
+
+**Оригинал:** MSP430 (IAR C) в `~/Aledo/bahilizator_kwt_svn`
+**Промежуточный:** STM32F103 Bluepill (Rust/Embassy) — `master` branch
+**Текущий:** ESP32 LilyGo T-Call (Rust/Embassy) — `esp32` branch
 
 ## Таблица маппинга C → Rust
 
