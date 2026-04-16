@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eagle SYSTEM "eagle.dtd">
+<eagle version="9.6.2">
+<drawing>
+<settings>
+<setting alwaysvectorfont="no"/>
+<setting verticaltext="up"/>
+</settings>
+<grid distance="0.127" unitdist="mm" unit="mm" style="lines" multiple="1" display="no" altdistance="0.0635" altunitdist="mm" altunit="mm"/>
+<layers>
+<layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
+<layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
+<layer number="17" name="Pads" color="2" fill="1" visible="yes" active="yes"/>
+<layer number="18" name="Vias" color="2" fill="1" visible="yes" active="yes"/>
+<layer number="19" name="Unrouted" color="6" fill="1" visible="yes" active="yes"/>
+<layer number="20" name="Dimension" color="15" fill="1" visible="yes" active="yes"/>
+<layer number="21" name="tPlace" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="22" name="bPlace" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="25" name="tNames" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="27" name="tValues" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="29" name="tStop" color="7" fill="3" visible="yes" active="yes"/>
+<layer number="30" name="bStop" color="7" fill="6" visible="yes" active="yes"/>
+<layer number="31" name="tCream" color="7" fill="4" visible="yes" active="yes"/>
+<layer number="32" name="bCream" color="7" fill="5" visible="yes" active="yes"/>
+<layer number="35" name="tGlue" color="7" fill="4" visible="yes" active="yes"/>
+<layer number="51" name="tDocu" color="7" fill="1" visible="yes" active="yes"/>
+</layers>
+<plain>
+<wire x1="0" y1="0" x2="100" y2="0" width="0.2" layer="20"/>
+<wire x1="100" y1="0" x2="100" y2="80" width="0.2" layer="20"/>
+<wire x1="100" y1="80" x2="0" y2="80" width="0.2" layer="20"/>
+<wire x1="0" y1="80" x2="0" y2="0" width="0.2" layer="20"/>
+<text x="2" y="77" size="2.54" layer="21" font="vector">Бахилизатор v2.0 — STM32F103C8T6</text>
+<text x="2" y="74" size="1.778" layer="21" font="vector">100mm × 80mm PCB</text>
+<text x="2" y="71" size="1.27" layer="21" font="vector">2-layer, 1oz copper</text>
+</plain>
+<libraries>
+<library name="stm32f103">
+<packages>
+<package name="LQFP48">
+<description>STM32F103C8T6 LQFP-48</description>
+<smd name="1" x="-4.2" y="2.75" dx="1.5" dy="0.3" layer="1"/>
+<smd name="2" x="-4.2" y="2.25" dx="1.5" dy="0.3" layer="1"/>
+<smd name="3" x="-4.2" y="1.75" dx="1.5" dy="0.3" layer="1"/>
+<smd name="4" x="-4.2" y="1.25" dx="1.5" dy="0.3" layer="1"/>
+<smd name="5" x="-4.2" y="0.75" dx="1.5" dy="0.3" layer="1"/>
+<smd name="6" x="-4.2" y="0.25" dx="1.5" dy="0.3" layer="1"/>
+<smd name="7" x="-4.2" y="-0.25" dx="1.5" dy="0.3" layer="1"/>
+<smd name="8" x="-4.2" y="-0.75" dx="1.5" dy="0.3" layer="1"/>
+<smd name="9" x="-4.2" y="-1.25" dx="1.5" dy="0.3" layer="1"/>
+<smd name="10" x="-4.2" y="-1.75" dx="1.5" dy="0.3" layer="1"/>
+<smd name="11" x="-4.2" y="-2.25" dx="1.5" dy="0.3" layer="1"/>
+<smd name="12" x="-4.2" y="-2.75" dx="1.5" dy="0.3" layer="1"/>
+<smd name="13" x="-2.75" y="-4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="14" x="-2.25" y="-4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="15" x="-1.75" y="-4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="16" x="-1.25" y="-4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="17" x="-0.75" y="-4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="18" x="-0.25" y="-4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="19" x="0.25" y="-4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="20" x="0.75" y="-4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="21" x="1.25" y="-4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="22" x="1.75" y="-4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="23" x="2.25" y="-4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="24" x="2.75" y="-4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="25" x="4.2" y="-2.75" dx="1.5" dy="0.3" layer="1"/>
+<smd name="26" x="4.2" y="-2.25" dx="1.5" dy="0.3" layer="1"/>
+<smd name="27" x="4.2" y="-1.75" dx="1.5" dy="0.3" layer="1"/>
+<smd name="28" x="4.2" y="-1.25" dx="1.5" dy="0.3" layer="1"/>
+<smd name="29" x="4.2" y="-0.75" dx="1.5" dy="0.3" layer="1"/>
+<smd name="30" x="4.2" y="-0.25" dx="1.5" dy="0.3" layer="1"/>
+<smd name="31" x="4.2" y="0.25" dx="1.5" dy="0.3" layer="1"/>
+<smd name="32" x="4.2" y="0.75" dx="1.5" dy="0.3" layer="1"/>
+<smd name="33" x="4.2" y="1.25" dx="1.5" dy="0.3" layer="1"/>
+<smd name="34" x="4.2" y="1.75" dx="1.5" dy="0.3" layer="1"/>
+<smd name="35" x="4.2" y="2.25" dx="1.5" dy="0.3" layer="1"/>
+<smd name="36" x="4.2" y="2.75" dx="1.5" dy="0.3" layer="1"/>
+<smd name="37" x="2.75" y="4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="38" x="2.25" y="4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="39" x="1.75" y="4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="40" x="1.25" y="4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="41" x="0.75" y="4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="42" x="0.25" y="4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="43" x="-0.25" y="4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="44" x="-0.75" y="4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="45" x="-1.25" y="4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="46" x="-1.75" y="4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="47" x="-2.25" y="4.2" dx="0.3" dy="1.5" layer="1"/>
+<smd name="48" x="-2.75" y="4.2" dx="0.3" dy="1.5" layer="1"/>
+<text x="-3" y="5" size="1.27" layer="25">&gt;NAME</text>
+<text x="-3" y="-6" size="1.27" layer="27">&gt;VALUE</text>
+</package>
+</packages>
+</library>
+</libraries>
+<elements>
+<element name="U1" library="stm32f103" package="LQFP48" value="STM32F103C8T6" x="50" y="40"/>
+</elements>
+<signals>
+<signal name="GND"/>
+<signal name="+3V3"/>
+<signal name="+5V"/>
+<signal name="+12V"/>
+</signals>
+</drawing>
+</eagle>
