@@ -277,11 +277,7 @@ async fn send_at_cmd(cmd: &str) -> Result<AtResponse, GsmError> {
         // Safety: UART_TX_BUF — статический буфер, доступ только из send_at_cmd (один поток)
         unsafe {
             let tx_ptr = core::ptr::addr_of_mut!(UART_TX_BUF) as *mut u8;
-            core::ptr::copy_nonoverlapping(
-                cmd_bytes.as_ptr(),
-                tx_ptr,
-                len,
-            );
+            core::ptr::copy_nonoverlapping(cmd_bytes.as_ptr(), tx_ptr, len);
         }
     }
 

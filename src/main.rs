@@ -26,8 +26,8 @@ use embassy_sync::{
 };
 use esp_hal::gpio::{Input, InputConfig, Level, Output, OutputConfig, Pull};
 use esp_hal::i2c::master::{Config as I2cConfig, I2c};
-use esp_hal::uart::{Config as UartConfig, Uart};
 use esp_hal::time::Rate;
+use esp_hal::uart::{Config as UartConfig, Uart};
 use static_cell::StaticCell;
 
 use bahilizator::{buttons, coin_acceptor, flash, gsm, hopper, ibutton, nvram, state, ui, vending};
@@ -180,43 +180,19 @@ async fn main(spawner: Spawner) {
     // PWRKEY = GPIO4: LOW pulse >1с включает/выключает модем
     // RST = GPIO5: LOW — hard reset
     // POWER = GPIO23: HIGH — подаёт питание на модем
-    let gsm_pwrkey = Output::new(
-        peripherals.GPIO4,
-        Level::High,
-        OutputConfig::default(),
-    );
-    let gsm_rst = Output::new(
-        peripherals.GPIO5,
-        Level::High,
-        OutputConfig::default(),
-    );
-    let gsm_power = Output::new(
-        peripherals.GPIO23,
-        Level::High,
-        OutputConfig::default(),
-    );
+    let gsm_pwrkey = Output::new(peripherals.GPIO4, Level::High, OutputConfig::default());
+    let gsm_rst = Output::new(peripherals.GPIO5, Level::High, OutputConfig::default());
+    let gsm_power = Output::new(peripherals.GPIO23, Level::High, OutputConfig::default());
     gsm::set_control_pins(gsm_pwrkey, gsm_rst, gsm_power);
 
     // ── GPIO выходы ──────────────────────────────────────────────────
     // Hopper A Enable — GPIO18
-    let _hopper_a_enable = Output::new(
-        peripherals.GPIO18,
-        Level::Low,
-        OutputConfig::default(),
-    );
+    let _hopper_a_enable = Output::new(peripherals.GPIO18, Level::Low, OutputConfig::default());
     // Hopper B Enable — GPIO19
-    let _hopper_b_enable = Output::new(
-        peripherals.GPIO19,
-        Level::Low,
-        OutputConfig::default(),
-    );
+    let _hopper_b_enable = Output::new(peripherals.GPIO19, Level::Low, OutputConfig::default());
 
     // LED — GPIO13 (User LED на T-Call v1.4)
-    let mut led = Output::new(
-        peripherals.GPIO13,
-        Level::Low,
-        OutputConfig::default(),
-    );
+    let mut led = Output::new(peripherals.GPIO13, Level::Low, OutputConfig::default());
 
     // ── GPIO входы ──────────────────────────────────────────────────
     // Coin channels (через NPN: HIGH = монета обнаружена)
