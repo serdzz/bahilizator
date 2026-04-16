@@ -1,15 +1,17 @@
-//! 1-Wire iButton драйвер (bit-bang async)
+//! 1-Wire iButton драйвер — на базе crate `one-wire-bus`
 //!
-//! Перенос из 1-wire.c — асинхронный bit-bang на GPIO
 //! DS1990A: Reset pulse → Read ROM (0x33) → 8 байт (family+serial+CRC)
 //!
-//! Тайминги (из оригинала на MSP430):
-//!   Reset: 480µs low → 70µs wait → read presence → 410µs
-//!   Write 1: 6µs low → release → 64µs
-//!   Write 0: 60µs low → release → 10µs
-//!   Read:    10µs low → release → 9µs wait → read → 55µs
+//! Использует `one_wire_bus::OneWire` для 1-Wire протокола
+//! (reset, read/write bit/byte, CRC проверка).
 //!
-//! CRC-8: полином x^8+x^5+x^4+1 (= 0x31, reversed 0x8C)
+//! Адаптер `EmbassyDelay` реализует `embedded_hal::blocking::delay::DelayUs`
+//! поверх `cortex_m::asm::delay()` — busy-wait с µs точностью.
+//! Это стандартный подход для 1-Wire на Cortex-M, т.к. тайминги
+//! критичны (6–480 µs) и async задержки недостаточно точны.
+//!
+//! Перенос из 1-wire.c: bit-bang заменён на one-wire-bus crate,
+//! но логика проверки ключей по whitelist сохранена.
 
 use embassy_sync::channel::Sender;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
@@ -18,11 +20,12 @@ use crate::state::{IBUTTON_LEN, Settings, VendingState};
 
 // ── 1-Wire команды ────────────────────────────────────────────────────────
 
+/// Read ROM — чтение 64-битного адреса единственного устройства на шине
+/// DS1990A iButton: family=0x01, serial(48bit), CRC8
+/// one-wire-bus crate не экспортирует эту константу — определяем сами
 const CMD_READ_ROM: u8 = 0x33;
-#[allow(dead_code)]
-const CMD_MATCH_ROM: u8 = 0x55;
-#[allow(dead_code)]
-const CMD_SKIP_ROM: u8 = 0xCC;
+
+use one_wire_bus::{OneWire, Address};
 
 // ── IbuttonEvent — событие от iButton ─────────────────────────────────────
 
@@ -34,235 +37,142 @@ pub struct IbuttonEvent {
     pub accepted: bool,
 }
 
+// ── EmbassyDelay — адаптер для one-wire-bus ──────────────────────────────
+//
+/// Реализация `embedded_hal::blocking::delay::DelayUs<u16>` через
+/// `cortex_m::asm::delay()` — busy-wait с µs точностью.
+///
+/// STM32F103C8T6 на 72 MHz: 1 µs ≈ 72 такта.
+/// `cortex_m::asm::delay(n)` выполняет n циклов (~3 такта каждый на Cortex-M3),
+/// поэтому для x µs: delay(x * 72 / 3) ≈ x * 24.
+///
+/// Внимание: при работе блокирует CPU — для 1-Wire это нормально,
+/// т.к. тайминги требуют µs точности (6–480 µs).
+/// Общее время чтения ROM: ~15 мс — приемлемо для 200 мс опроса.
+
+pub struct EmbassyDelay {
+    /// Тактовая частота CPU (MHz)
+    clock_mhz: u32,
+}
+
+impl EmbassyDelay {
+    /// Создать delay для заданной частоты (MHz)
+    ///
+    /// Для STM32F103C8T6 Bluepill: 72 MHz
+    pub fn new(clock_mhz: u32) -> Self {
+        Self { clock_mhz }
+    }
+}
+
+impl embedded_hal::blocking::delay::DelayUs<u16> for EmbassyDelay {
+    fn delay_us(&mut self, us: u16) {
+        // cortex_m::asm::delay(n) выполняет n итераций по ~3 такта
+        // На 72 MHz: 1 µs = 72 такта → n = 72/3 = 24 циклов на µs
+        let cycles_per_us = self.clock_mhz / 3;
+        let total_cycles = us as u32 * cycles_per_us;
+        cortex_m::asm::delay(total_cycles);
+    }
+}
+
 // ── IbuttonDriver — драйвер 1-Wire шины ─────────────────────────────────
 //
-/// Инкапсулирует GPIO пин и timing для bit-bang 1-Wire
-/// Пин конфигурируется как OpenDrain: output low для передачи,
-/// input (с pull-up) для чтения/освобождения шины
+/// Обёртка над `one_wire_bus::OneWire` для чтения iButton ключей.
+/// Пин PA11 конфигурируется как OutputOpenDrain — это позволяет
+/// и читать, и писать на 1-Wire шину.
 ///
-/// В оригинале (1-wire.c):
-///   ONE_WIRE_OUT = output mode
-///   ONE_WIRE_IN  = input mode (с pull-up)
-///   ONE_WIRE_SET_LO = установить low
-///   ONE_WIRE_GET_BIT = прочитать уровень
+/// embassy-stm32 `OutputOpenDrain` реализует `InputPin + OutputPin`
+/// из embedded-hal 0.2 — это именно то, что нужно для one-wire-bus.
+///
+/// В оригинале (1-wire.c): bit-bang на GPIO
+/// У нас: one-wire-bus crate + embassy-stm32 OutputOpenDrain
 
 pub struct IbuttonDriver {
-    /// Пин 1-Wire (PA11 на STM32F103)
-    /// В реальной интеграции: AnyPin или PA11<Output<OpenDrain>>
-    _pin_marker: (),
+    /// 1-Wire шина (one-wire-bus)
+    bus: OneWire<embassy_stm32::gpio::OutputOpenDrain<'static>>,
+    /// Delay адаптер для one-wire-bus
+    delay: EmbassyDelay,
 }
 
 impl IbuttonDriver {
-    /// Создать драйвер (заглушка — без реального пина)
-    pub fn new() -> Self {
-        Self { _pin_marker: () }
-    }
-
-    /// Инициализация шины: пин в input с pull-up, выход low
+    /// Создать драйвер из OutputOpenDrain пина
     ///
-    /// В оригинале: initOneWire()
-    ///   ONE_WIRE_REN &= ~ONE_WIRE_PIN;  // отключить pull-up/pull-down
-    ///   ONE_WIRE_SET_LO;                // установить low в регистре выхода
-    ///   ONE_WIRE_IN;                    // переключить в input (высокий импеданс)
-    pub async fn init(&mut self) {
-        // В реальном железе:
-        // let pin = PA11.into_floating_input();
-        // Или: PA11.into_output_open_drain()
-        //   .with_internal_pull_up()
-        //   .set_as_input();
-        self.release_bus().await;
+    /// Пин должен быть сконфигурирован как OutputOpenDrain:
+    /// ```ignore
+    /// let pin = p.PA11.into_output_open_drain(
+    ///     embassy_stm32::gpio::OutputType::OpenDrain,
+    ///     embassy_stm32::gpio::Pull::Up,
+    ///     embassy_stm32::gpio::Speed::Low,
+    /// );
+    /// let driver = IbuttonDriver::new(pin);
+    /// ```
+    pub fn new(pin: embassy_stm32::gpio::OutputOpenDrain<'static>) -> Self {
+        let delay = EmbassyDelay::new(72); // STM32F103C8T6: 72 MHz
+        // embassy-stm32 OutputOpenDrain имеет Error=Infallible,
+        // поэтому OneWire::new() не может вернуть ошибку
+        let bus = OneWire::new(pin).unwrap();
+
+        Self { bus, delay }
     }
 
-    // ── Reset pulse ──────────────────────────────────────────────────
-    //
+    /// Отправить reset pulse и проверить presence
+    /// Возвращает true если устройство на шине есть
+    ///
     /// В оригинале: oneWireReset()
-    ///   ONE_WIRE_OUT;       // output mode
-    ///   delay_mks(480);     // hold low 480µs
-    ///   ONE_WIRE_IN;        // release (input)
-    ///   delay_mks(70);      // wait 70µs
-    ///   present = ONE_WIRE_GET_BIT; // read presence
-    ///   delay_mks(410);     // wait 410µs
-    ///   return (present > 0);
-    ///
-    /// Возвращает true если устройство присутствует (presence pulse)
-
-    pub async fn reset_pulse(&mut self) -> bool {
-        // Pull bus low for 480µs
-        self.pull_low().await;
-        embassy_time::Timer::after_micros(480).await;
-
-        // Release bus
-        self.release_bus().await;
-
-        // Wait 70µs then read presence
-        embassy_time::Timer::after_micros(70).await;
-        let present = self.read_bus();
-
-        // Wait remaining 410µs
-        embassy_time::Timer::after_micros(410).await;
-
-        // В оригинале: return (present > 0)
-        // present=0 (bus low) = устройство есть
-        !present
+    ///   ONE_WIRE_OUT → 480µs low → ONE_WIRE_IN → 70µs → read → 410µs
+    pub fn reset(&mut self) -> bool {
+        self.bus.reset(&mut self.delay).unwrap_or(false)
     }
 
-    // ── Write bit ────────────────────────────────────────────────────
-    //
-    /// В оригинале: oneWireTxBit(bit)
-    ///   bit=1: OUT → 6µs → IN → 64µs
-    ///   bit=0: OUT → 60µs → IN → 10µs
-
-    pub async fn write_bit(&mut self, bit: u8) {
-        self.pull_low().await;
-
-        if bit != 0 {
-            // Write 1: short pulse
-            embassy_time::Timer::after_micros(6).await;
-            self.release_bus().await;
-            embassy_time::Timer::after_micros(64).await;
-        } else {
-            // Write 0: long pulse
-            embassy_time::Timer::after_micros(60).await;
-            self.release_bus().await;
-            embassy_time::Timer::after_micros(10).await;
-        }
-    }
-
-    // ── Read bit ─────────────────────────────────────────────────────
-    //
-    /// В оригинале: oneWireRxBit()
-    ///   ONE_WIRE_OUT;       // pull low
-    ///   delay_mks(10);      // 10µs (у оригинала, не 6µs — видимо с запасом)
-    ///   ONE_WIRE_IN;        // release
-    ///   delay_mks(9);       // sample point
-    ///   data = ONE_WIRE_GET_BIT;
-    ///   delay_mks(55);      // rest of time slot
-
-    pub async fn read_bit(&mut self) -> u8 {
-        self.pull_low().await;
-        embassy_time::Timer::after_micros(10).await;
-
-        self.release_bus().await;
-        embassy_time::Timer::after_micros(9).await;
-
-        let data = if self.read_bus() { 1 } else { 0 };
-
-        embassy_time::Timer::after_micros(55).await;
-
-        data
-    }
-
-    // ── Write byte ───────────────────────────────────────────────────
-    //
-    /// В оригинале: oneWirePutc(byte)
-    ///   LSB first: byte & 0x01 → byte >>= 1
-
-    pub async fn write_byte(&mut self, byte: u8) {
-        let mut b = byte;
-        for _ in 0..8 {
-            self.write_bit(b & 0x01).await;
-            b >>= 1;
-        }
-    }
-
-    // ── Read byte ────────────────────────────────────────────────────
-    //
-    /// В оригинале: oneWiteGetc() [sic — опечатка в оригинале]
-    ///   LSB first: bit << c → ret |= bit<<c
-
-    pub async fn read_byte(&mut self) -> u8 {
-        let mut result: u8 = 0;
-        for i in 0..8 {
-            result |= self.read_bit().await << i;
-        }
-        result
-    }
-
-    // ── Read ROM ──────────────────────────────────────────────────────
-    //
-    /// Полная операция чтения ключа:
+    /// Полная операция чтения ключа DS1990A:
     /// 1. Reset pulse
     /// 2. Read ROM command (0x33)
-    /// 3. Прочитать 8 байт
-    /// 4. Проверить CRC
+    /// 3. Прочитать 8 байт (family + serial + CRC)
+    /// 4. Проверить CRC через one_wire_bus::crc
     ///
-    /// Возвращает Some(key) если ключ прочитан и CRC верный
-
-    pub async fn read_rom(&mut self) -> Option<[u8; IBUTTON_LEN]> {
-        // Reset pulse
-        if !self.reset_pulse().await {
-            return None; // Нет устройства на шине
+    /// Возвращает Some(key) если ключ прочитан и CRC верный,
+    /// None — если нет устройства или CRC не совпал
+    pub fn read_rom(&mut self) -> Option<[u8; IBUTTON_LEN]> {
+        // Reset pulse — проверяем наличие устройства
+        let device_present = self.reset();
+        if !device_present {
+            return None;
         }
 
-        // Команда Read ROM
-        self.write_byte(CMD_READ_ROM).await;
+        // Команда Read ROM (0x33)
+        // Используется когда на шине ровно одно устройство —
+        // иначе нужно SEARCH_ROM + MATCH_ROM
+        self.bus.write_byte(CMD_READ_ROM, &mut self.delay).ok()?;
 
-        // Читаем 8 байт
+        // Читаем 8 байт: family(1) + serial(6) + CRC(1)
         let mut key = [0u8; IBUTTON_LEN];
-        for byte in key.iter_mut() {
-            *byte = self.read_byte().await;
-        }
+        self.bus.read_bytes(&mut key, &mut self.delay).ok()?;
 
-        // Проверяем CRC
-        if check_crc(&key) {
+        // Проверяем CRC: one_wire_bus::crc::crc8(data) вернёт 0
+        // если весь массив (включая CRC байт) корректен
+        if one_wire_bus::crc::crc8(&key) == 0 {
             Some(key)
         } else {
+            defmt::trace!("iButton CRC mismatch");
             None
         }
     }
 
-    // ── GPIO заглушки ────────────────────────────────────────────────
-    //
-    /// Эти методы заменяются на реальные GPIO операции при интеграции
-
-    /// Подтянуть шину к земле (output low)
-    async fn pull_low(&mut self) {
-        // В реальном железе:
-        // pin.set_low().ok();
-        // или для OpenDrain: pin.set_as_output()
-        let _ = self;
-    }
-
-    /// Освободить шину (input с pull-up)
-    async fn release_bus(&mut self) {
-        // В реальном железе:
-        // pin.set_as_input(); // OpenDrain: high-Z = released
-        let _ = self;
-    }
-
-    /// Прочитать уровень шины (true = high, false = low)
-    fn read_bus(&self) -> bool {
-        // В реальном железе:
-        // pin.is_high()
-        // Safety: заглушка — шина отпущена = high
-        true
-    }
-}
-
-// ── CRC-8 Dallas/Maxim ───────────────────────────────────────────────────
-//
-/// CRC-8 для iButton (DS1990A): полином x^8+x^5+x^4+1
-/// reflected polynomial = 0x8C
-/// В оригинале: _crc_ibutton_update()
-
-pub fn check_crc(key: &[u8; IBUTTON_LEN]) -> bool {
-    compute_crc(&key[..7]) == key[7]
-}
-
-/// Вычислить CRC-8 по Dallas/Maxim
-pub fn compute_crc(data: &[u8]) -> u8 {
-    let mut crc: u8 = 0;
-    for &byte in data {
-        crc ^= byte;
-        for _ in 0..8 {
-            if crc & 0x01 != 0 {
-                crc = (crc >> 1) ^ 0x8C;
-            } else {
-                crc >>= 1;
+    /// Поиск всех устройств на шине (SEARCH_ROM = 0xF0)
+    ///
+    /// Для DS1990A обычно одно устройство, но метод полезен
+    /// для диагностики. Возвращает до 4 адресов.
+    pub fn find_devices(&mut self) -> heapless::Vec<Address, 4> {
+        let mut found = heapless::Vec::new();
+        for result in self.bus.devices(false, &mut self.delay) {
+            match result {
+                Ok(addr) => {
+                    found.push(addr).ok();
+                }
+                Err(_) => break,
             }
         }
+        found
     }
-    crc
 }
 
 // ── Проверка ключа по whitelist ──────────────────────────────────────────
@@ -270,6 +180,9 @@ pub fn compute_crc(data: &[u8]) -> u8 {
 /// Сравнить прочитанный ROM с whitelist в Settings
 /// Settings.keys = [[IbuttonKey; 2]; 3] — до 6 ключей
 /// Возвращает уровень доступа (0=сервисный, 1=технический) или None
+///
+/// Без изменений по сравнению с оригиналом — логика whitelist
+/// не зависит от реализации 1-Wire протокола
 
 #[derive(Debug, Clone, Copy, defmt::Format, PartialEq)]
 pub enum KeyAccess {
@@ -303,25 +216,65 @@ pub fn check_key(settings: &Settings, key: &[u8; IBUTTON_LEN]) -> Option<KeyAcce
     None
 }
 
+// ── Преобразование Address → [u8; 8] ────────────────────────────────────
+//
+/// Конвертировать one_wire_bus::Address в массив 8 байт
+/// Address(u64) хранится в little-endian: family byte → serial → CRC
+
+pub fn address_to_bytes(addr: &Address) -> [u8; IBUTTON_LEN] {
+    addr.0.to_le_bytes()
+}
+
+// ── Обратная совместимость: CRC функции ──────────────────────────────────
+//
+/// Делегируем CRC вычисление в one_wire_bus::crc
+/// Оставляем для совместимости с другими модулями
+
+/// Вычислить CRC-8 по Dallas/Maxim (делегирует в one_wire_bus::crc::crc8)
+pub fn compute_crc(data: &[u8]) -> u8 {
+    one_wire_bus::crc::crc8(data)
+}
+
+/// Проверить CRC ключа iButton (8 байт: 7 данных + 1 CRC)
+pub fn check_crc(key: &[u8; IBUTTON_LEN]) -> bool {
+    one_wire_bus::crc::crc8(key) == 0
+}
+
 // ── Задача iButton ───────────────────────────────────────────────────────
 //
 /// Основная задача опроса iButton
 /// Опрашивает шину каждые 200мс, при обнаружении ключа —
 /// проверяет по whitelist и отправляет событие
+///
+/// Драйвер передаётся как Option — пока GPIO пины не подключены
+/// в main(), задача работает в режиме idle (без опроса шины).
+/// После подключения PA11:
+///   let pin = p.PA11.into_output_open_drain(...);
+///   let driver = IbuttonDriver::new(pin);
+///   spawner.spawn(task_ibutton(Some(driver), ...).unwrap());
 
 pub async fn run(
+    driver: Option<IbuttonDriver>,
     ibutton_tx: Sender<'static, CriticalSectionRawMutex, IbuttonEvent, 1>,
     state: &'static embassy_sync::mutex::Mutex<
-        embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex,
+        CriticalSectionRawMutex,
         core::cell::RefCell<VendingState>,
     >,
 ) {
-    let mut driver = IbuttonDriver::new();
-    driver.init().await;
+    // Если драйвер не передан — idle режим (опрос каждые 5с)
+    let mut driver = match driver {
+        Some(d) => d,
+        None => {
+            defmt::warn!("iButton: драйвер не инициализирован (нет пина PA11)");
+            loop {
+                embassy_time::Timer::after_secs(5).await;
+            }
+        }
+    };
 
     loop {
         // Шаг 1: Попытка чтения ключа
-        if let Some(key) = driver.read_rom().await {
+        if let Some(key) = driver.read_rom() {
             // Шаг 2: Проверка по whitelist
             let accepted = {
                 let guard = state.lock().await;
@@ -330,10 +283,9 @@ pub async fn run(
             };
 
             // Шаг 3: Отправить событие
-            let _ = ibutton_tx.try_send(IbuttonEvent {
-                key,
-                accepted,
-            });
+            let _ = ibutton_tx.try_send(IbuttonEvent { key, accepted });
+
+            defmt::debug!("iButton: ключ обнаружен, accepted={}", accepted);
         }
 
         // Опрос раз в 200мс

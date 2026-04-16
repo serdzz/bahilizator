@@ -100,3 +100,41 @@ pub enum PppError {
     NotConnected,
     WriteFailed,
 }
+
+// ── Ошибки DNS ────────────────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Copy, defmt::Format)]
+pub enum DnsError {
+    /// DNS запрос не удался
+    QueryFailed,
+    /// Хост не найден
+    HostNotFound,
+    /// Таймаут DNS запроса
+    Timeout,
+    /// Стек сети не готов
+    NetNotReady,
+}
+
+// ── Ошибки MQTT ───────────────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Copy, defmt::Format)]
+pub enum MqttError {
+    /// TCP соединение не установлено
+    TcpConnectFailed,
+    /// MQTT CONNECT не удался
+    ConnectFailed,
+    /// MQTT CONNACK с ошибкой
+    ConnackRejected(u8),
+    /// Ошибка публикации
+    PublishFailed,
+    /// Ошибка подписки
+    SubscribeFailed,
+    /// Сетевая ошибка
+    NetworkError,
+    /// Брокер отключил
+    Disconnected,
+    /// Таймаут
+    Timeout,
+    /// Буфер слишком мал
+    BufferTooSmall,
+}

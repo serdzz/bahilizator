@@ -18,6 +18,9 @@
 
 pub mod at_channel;
 pub mod cmux;
+pub mod dns;
+pub mod mqtt;
+pub mod mqtt_topics;
 pub mod ppp_channel;
 pub mod sms;
 
