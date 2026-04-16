@@ -33,9 +33,20 @@ Rust/Embassy порт прошивки вендингового аппарата
 ### Использование ресурсов
 
 ```
-Flash:  ~35 KB / 64 KB  (55%)
+Flash:  ~34 KB / 64 KB  (53%)
 SRAM:   ~4.8 KB / 20 KB (24%)
+Lines:  ~6700
 ```
+
+### Сетевой стек (GPRS)
+
+| Компонент | Crate | Назначение |
+|-----------|-------|------------|
+| PPP | embassy-net-ppp | GPRS интернет (DLC2) |
+| IP Stack | embassy-net | IPv4, DHCP, TCP, UDP, DNS |
+| DNS | embassy-net (dns) | hostname → IP, кэш 4 записи |
+| MQTT | rust-mqtt v5 | Телеметрия, ошибки, события |
+| 1-Wire | one-wire-bus | iButton DS1990A |
 
 ## Схемы подключения
 
@@ -221,9 +232,11 @@ ProcessResidual ←── PayoutReminder
 |----------|-----------|------------|
 | GSM 07.10 CMUX | Мультиплексирование UART | `gsm/cmux.rs` — Basic Mode |
 | AT commands | Управление SIM800L | `gsm/at_channel.rs` — DLC1 |
-| PPP (LCP/PAP/IPCP) | GPRS интернет | `gsm/ppp_channel.rs` — DLC2 |
+| PPP (embassy-net-ppp) | GPRS интернет | `gsm/ppp_channel.rs` — DLC2 |
+| DNS (embassy-net) | hostname → IP | `gsm/dns.rs` — кэш 4 записи, TTL 300с |
+| MQTT (rust-mqtt) | Телеметрия | `gsm/mqtt.rs` — QoS 0/1, keepalive 60с |
 | I2C | Дисплей + EEPROM | Embassy I2C (PB6/PB7) |
-| 1-Wire | iButton DS1990A | `ibutton.rs` — bit-bang async |
+| 1-Wire (one-wire-bus) | iButton DS1990A | `ibutton.rs` — crate, не bit-bang |
 
 ## Как собрать
 
@@ -279,6 +292,15 @@ embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", features
 embassy-time    = { git = "https://github.com/embassy-rs/embassy.git" }
 embassy-sync    = { git = "https://github.com/embassy-rs/embassy.git" }
 embassy-futures = { git = "https://github.com/embassy-rs/embassy.git" }
+embassy-net-ppp  = { git = "https://github.com/embassy-rs/embassy.git" }
+embassy-net      = { git = "https://github.com/embassy-rs/embassy.git", features = ["defmt", "medium-ip", "proto-ipv4", "dns", "tcp", "udp", "dhcpv4"] }
+```
+
+### MQTT и 1-Wire
+
+```toml
+rust-mqtt       = { version = "0.5.1", default-features = false, features = ["v5", "defmt"] }
+one-wire-bus    = "0.1"
 ```
 
 ## Оригинальный проект
@@ -307,16 +329,19 @@ bahilizator/
 │   ├── hopper.rs           # Параметризованный драйвер хоппера
 │   ├── ui.rs              # HD44780 через PCF8574 I2C
 │   ├── buttons.rs         # Кнопки + двери → EXTI → Channel
-│   ├── ibutton.rs         # 1-Wire DS1990A bit-bang
+│   ├── ibutton.rs         # 1-Wire DS1990A (one-wire-bus crate)
 │   ├── flash.rs           # Flash page 63 — Settings (read/write)
 │   ├── nvram.rs           # EEPROM 24C08 — State + wear levelling
 │   ├── menu.rs            # Сервисное меню навигация
 │   ├── report.rs          # Генерация SMS отчётов
 │   └── gsm/
-│       ├── mod.rs          # GSM менеджер: питание, init, GPRS
+│       ├── mod.rs          # GSM менеджер: питание, init, GPRS, MQTT
 │       ├── cmux.rs         # GSM 07.10 CMUX Basic Mode
 │       ├── at_channel.rs   # AT канал через DLC1
-│       ├── ppp_channel.rs  # PPP (LCP+PAP+IPCP) через DLC2
+│       ├── ppp_channel.rs  # embassy-net-ppp через DLC2
+│       ├── dns.rs          # DNS резолвер (embassy-net, кэш 4 записи)
+│       ├── mqtt.rs         # MQTT v5 клиент (rust-mqtt)
+│       ├── mqtt_topics.rs  # MQTT топики: settings, errors, event, state, accounting
 │       └── sms.rs          # SMS AT команды
 └── docs/
     ├── ARCHITECTURE.md     # Детальная архитектура

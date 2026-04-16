@@ -25,9 +25,9 @@
 | `LcdUpdate()` | `Hd44780I2c::refresh()` | Буфер + полное обновление |
 | `_flashWrite()` | `flash::save_settings()` | Direct register access (RM0008) |
 | `framWrite()` / `framRead()` | `nvram::save_state()` / `load_state()` | FRAM → EEPROM + wear levelling |
-| `oneWireReset()` | `IbuttonDriver::reset_pulse()` | async bit-bang |
-| `oneWireTxBit()` | `IbuttonDriver::write_bit()` | async timers вместо delay loops |
-| `oneWireRxBit()` | `IbuttonDriver::read_bit()` |  |
+| `oneWireReset()` | `OneWire::new()` + `search_next()` | one-wire-bus crate |
+| `oneWireTxBit()` | (inside one-wire-bus) | async timers вместо delay loops |
+| `oneWireRxBit()` | (inside one-wire-bus) |
 | `AddEmptyEvent()` | `EventRing::push()` | Ring buffer вместо FIFO shift |
 | `CloseTransaction()` | `event::close_transaction()` | FIFO сдвиг как в оригинале |
 | `CreateStateReport()` | `report::generate_report()` | heapless::String<160> |
@@ -112,8 +112,14 @@
 8. **CMUX декодер.** Побайтовый state machine для парсинга GSM 07.10 кадров.
    В оригинале — частичный парсинг в `gsmProcess()`.
 
-9. **PPP state machine.** Полная реализация LCP/PAP/IPCP вместо ad-hoc
-   обработки в оригинале.
+9. **PPP state machine → embassy-net-ppp.** Вместо ручной LCP/PAP/IPCP реализации —
+   embassy-net-ppp + embassy-net. Даёт TCP, UDP, DNS из коробки.
+
+10. **MQTT через rust-mqtt.** Телеметрия, ошибки, события — через MQTT v5.
+    Топики: settings, errors, event, state, accounting.
+
+11. **one-wire-bus вместо bit-bang.** Crate `one-wire-bus` для iButton вместо
+    ручного управления таймингами. CRC-8 внутри crate.
 
 ## Известные отличия от оригинала
 
@@ -181,7 +187,7 @@
 
 ### Косметическое
 
-- [ ] Устранить 44 warning'а компилятора
+- [x] Устранить warning'и компилятора (clippy clean, 0 warnings)
 - [ ] Добавить `.cargo/config.toml` с target по умолчанию
 - [ ] Добавить `Embed.toml` для probe-rs
 - [ ] CI: `cargo clippy` + `cargo build --release`

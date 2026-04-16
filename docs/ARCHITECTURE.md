@@ -268,19 +268,71 @@ AT+CIICR      → поднять соединение
 AT+CIFSR      → получить IP
 ```
 
-### PPP (DLC2)
+### PPP (embassy-net-ppp) — DLC2
 
-State machine PPP:
-```
-Dead → Establish → Authenticate → Network → Open
-  │      (LCP)       (PAP)        (IPCP)    (IP data)
-  │                                           │
-  └─── LCP Terminate-Req ←─────────────────────┘
+PPP через embassy-net-ppp — полная интеграция с Embassy сетевым стеком.
+После PPP подключения получаем `embassy_net::Stack` с:
+- IPv4 + DHCP клиент
+- TCP и UDP сокеты
+- DNS резолвер
+
+```rust
+// Инициализация
+let device = embassy_net_ppp::Runner::new(rx, tx);
+let config = embassy_net::Config::dhcpv4();
+let (stack, runner) = embassy_net::new(device, config);
+
+// Использование
+let mut socket = TcpSocket::new(stack, &mut rx_buf, &mut tx_buf);
+socket.connect(remote_addr, port).await;
 ```
 
-**LCP Configure-Request:** MRU=296, Auth=PAP, Magic-Number, ACCM=0
-**PAP:** пустой логин/пароль (SIM800L default)
-**IPCP:** IP-Address=0.0.0.0, Primary-DNS=0.0.0.0 (accept assigned)
+### DNS (embassy-net)
+
+DNS через embassy-net Stack (smoltcp внутри):
+
+```rust
+let ip = stack.dns_query("broker.example.com", DnsQueryType::A).await;
+```
+
+Кэш: 4 записи (hostname → [u8; 4]), TTL 300с.
+Fallback DNS: 8.8.8.8 / 8.8.4.4.
+
+### MQTT (rust-mqtt v5)
+
+MQTT v5 клиент поверх embassy-net TCP:
+
+```rust
+let transport = TcpTransport::new(stack, &mut rx_buf, &mut tx_buf);
+let client = Client::new(transport, "bahilizator-42", KeepAlive::from_secs(60));
+client.connect(broker_ip, 1883).await;
+client.publish("bahilizator/42/state", &payload, QoS::AtMostOnce).await;
+```
+
+Топики:
+| Топик | Период | Содержание |
+|-------|--------|------------|
+| `bahilizator/{id}/settings` | по изменению | Конфигурация JSON |
+| `bahilizator/{id}/errors` | сразу при ошибке | Флаги ошибок JSON |
+| `bahilizator/{id}/event` | batched 5с | События (CoinIn, ItemDispensed...) JSON |
+| `bahilizator/{id}/state` | каждые 5 мин | Текущее состояние JSON |
+| `bahilizator/{id}/accounting` | каждый час | Бухгалтерский учёт JSON |
+
+Keepalive: 60с. Reconnect: каждые 30с при потере.
+
+### 1-Wire (one-wire-bus crate)
+
+iButton через one-wire-bus вместо ручного bit-bang:
+
+```rust
+let mut onewire = OneWire::new(pin, false);
+let mut search = Search::new();
+while let Some(device) = onewire.search_next(&mut search, delay).ok() {
+    // device.address — ROM код DS1990A
+}
+```
+
+CRC-8 Dallas/Maxim проверяется внутри crate.
 
 ### I2C (PB6/PB7)
 
@@ -290,15 +342,11 @@ Dead → Establish → Authenticate → Network → Open
 
 I2C частота: 100 kHz (slow mode для совместимости с 24C08).
 
-### 1-Wire (PA11)
+### 1-Wire (PA11) — one-wire-bus crate
 
-Bit-bang async через Embassy timer:
-- Reset: 480µs low → 70µs wait → read presence → 410µs
-- Write 1: 6µs low → release → 64µs
-- Write 0: 60µs low → release → 10µs
-- Read: 10µs low → release → 9µs wait → sample → 55µs
-
-CRC-8 Dallas/Maxim: полином x⁸+x⁵+x⁴+1 (0x8C reflected).
+Используется crate `one-wire-bus` вместо ручного bit-bang.
+Тайминги и CRC-8 Dallas/Maxim обрабатываются внутри crate.
+Опрос каждые 200мс, whitelist ключей в Settings.
 
 ## Память
 

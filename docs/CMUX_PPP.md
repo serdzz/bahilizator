@@ -426,9 +426,12 @@ PPP_data (без HDLC framing):
 |------|-----------|
 | `src/gsm/cmux.rs` | Кодер/декодер CMUX кадров |
 | `src/gsm/at_channel.rs` | AT канал поверх DLC1 |
-| `src/gsm/ppp_channel.rs` | PPP state machine поверх DLC2 |
+| `src/gsm/ppp_channel.rs` | embassy-net-ppp + embassy-net (TCP/UDP/DNS) |
+| `src/gsm/dns.rs` | DNS резолвер с кэшем (embassy-net) |
+| `src/gsm/mqtt.rs` | MQTT v5 клиент (rust-mqtt) |
+| `src/gsm/mqtt_topics.rs` | MQTT топики (JSON) |
 | `src/gsm/sms.rs` | SMS AT команды |
-| `src/gsm/mod.rs` | GSM менеджер: питание, init, GPRS |
+| `src/gsm/mod.rs` | GSM менеджер: питание, init, GPRS, MQTT |
 
 ### Ключевые структуры
 
@@ -446,11 +449,22 @@ CmuxAtChannel::encode_at_cmd(cmd) → Vec<u8, 300>
 CmuxAtChannel::parse_response() → Option<AtResponse>
 CmuxAtChannel::parse_urc() → Option<Urc>
 
-// PPP канал
-PppChannel::connect() → Result<(), PppError>
-PppChannel::disconnect() → ()
-PppChannel::process_incoming(data) → Option<Vec<u8, 256>>
-PppChannel::send_ip_packet(packet) → Result<(), PppError>
+// PPP канал — embassy-net-ppp
+PppChannel::connect() → Result<embassy_net::Stack, PppError>
+// Stack даёт: TCP, UDP, DNS из коробки
+// TcpSocket::new(stack, &mut rx_buf, &mut tx_buf)
+// stack.dns_query(hostname, DnsQueryType::A)
+
+// DNS резолвер (embassy-net + свой кэш)
+DnsResolver::resolve(hostname) → Result<[u8; 4], DnsError>
+DnsResolver::update_cache(hostname, ip) → ()
+
+// MQTT клиент (rust-mqtt v5)
+MqttClient::connect(broker_ip, port) → Result<(), MqttError>
+MqttClient::publish(topic, payload, qos) → Result<(), MqttError>
+MqttClient::subscribe(topic) → Result<(), MqttError>
+MqttClient::ping() → Result<(), MqttError>
+MqttClient::disconnect() → ()
 ```
 
 ### Тестирование CMUX
