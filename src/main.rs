@@ -81,8 +81,10 @@ async fn task_gsm(
 }
 
 #[embassy_executor::task]
-async fn task_ibutton() {
-    ibutton::run(IBUTTON_CHANNEL.sender()).await;
+async fn task_ibutton(
+    state: &'static embassy_sync::mutex::Mutex<CriticalSectionRawMutex, core::cell::RefCell<state::VendingState>>,
+) {
+    ibutton::run(IBUTTON_CHANNEL.sender(), state).await;
 }
 
 #[embassy_executor::task]
@@ -119,7 +121,7 @@ async fn main(spawner: Spawner) {
     spawner.spawn(task_hopper().unwrap());
     spawner.spawn(task_buttons().unwrap());
     spawner.spawn(task_gsm(state).unwrap());
-    spawner.spawn(task_ibutton().unwrap());
+    spawner.spawn(task_ibutton(state).unwrap());
     spawner.spawn(task_state_persist(state).unwrap());
 
     defmt::info!("Все задачи запущены");
