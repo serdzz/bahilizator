@@ -1,0 +1,2369 @@
+(export 
+  (version "D")
+  (design
+    (source "bahilizator_skidl.py")
+    (date "04/16/2026 09:24 PM")
+    (tool "SKiDL (2.2.3)")
+    (sheet
+      (number 1)
+      (name "/")
+      (tstamps "/")
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source "bahilizator_skidl.py")
+        (comment
+          (number "1")
+          (value ""))
+        (comment
+          (number "2")
+          (value ""))
+        (comment
+          (number "3")
+          (value ""))
+        (comment
+          (number "4")
+          (value ""))
+        (comment
+          (number "5")
+          (value ""))
+        (comment
+          (number "6")
+          (value ""))
+        (comment
+          (number "7")
+          (value ""))
+        (comment
+          (number "8")
+          (value ""))
+        (comment
+          (number "9")
+          (value "")))))
+  (components
+    (comp
+      (ref "C1")
+      (value "100nF")
+      (description "Unpolarized capacitor, small symbol")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Unpolarized capacitor, small symbol")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "okWbEbzCCx")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:39"))
+      (libsource
+        (lib "Device")
+        (part "C_Small"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "71a5b5f3-8eb3-542e-aad7-759d6ab4f27f"))
+    (comp
+      (ref "C2")
+      (value "100nF")
+      (description "Unpolarized capacitor, small symbol")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Unpolarized capacitor, small symbol")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "wKV5R7pacL")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:39"))
+      (libsource
+        (lib "Device")
+        (part "C_Small"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "cec8cf1b-a265-596b-8520-f868ead8219c"))
+    (comp
+      (ref "C3")
+      (value "100nF")
+      (description "Unpolarized capacitor, small symbol")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Unpolarized capacitor, small symbol")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "EGCwRHJfC5")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:39"))
+      (libsource
+        (lib "Device")
+        (part "C_Small"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "75a8c625-adfd-5a18-8900-52e17c758b5f"))
+    (comp
+      (ref "C4")
+      (value "4.7uF")
+      (description "Unpolarized capacitor, small symbol")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Unpolarized capacitor, small symbol")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "7w0eQxwPTW")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:40"))
+      (libsource
+        (lib "Device")
+        (part "C_Small"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "33064c69-4c99-5800-9156-38ad81a42b9c"))
+    (comp
+      (ref "C5")
+      (value "100nF")
+      (description "Unpolarized capacitor, small symbol")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Unpolarized capacitor, small symbol")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "CKICfrRgoi")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:42"))
+      (libsource
+        (lib "Device")
+        (part "C_Small"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "9ce4f20d-d138-5cd3-8cea-5b3eaf9abc2b"))
+    (comp
+      (ref "C_OSC1")
+      (value "22pF")
+      (description "Unpolarized capacitor, small symbol")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Unpolarized capacitor, small symbol")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "aJfBpXsTy8")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:51"))
+      (libsource
+        (lib "Device")
+        (part "C_Small"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "c163fbbe-ce37-5a73-9876-a9811594d033"))
+    (comp
+      (ref "C_OSC2")
+      (value "22pF")
+      (description "Unpolarized capacitor, small symbol")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Unpolarized capacitor, small symbol")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "E5jLeR9dcC")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:52"))
+      (libsource
+        (lib "Device")
+        (part "C_Small"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "323e6b43-6ccd-57ce-a064-e821b21746c6"))
+    (comp
+      (ref "D_GREEN")
+      (value "GREEN")
+      (description "Light emitting diode")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Light emitting diode")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "6xIG1qrmWx")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:121"))
+      (libsource
+        (lib "Device")
+        (part "LED"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "0f21b2f5-a5ea-5c16-9451-9588219315b6"))
+    (comp
+      (ref "D_RED")
+      (value "RED")
+      (description "Light emitting diode")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Light emitting diode")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "bIjDmOvHIy")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:118"))
+      (libsource
+        (lib "Device")
+        (part "LED"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "74a01b9e-5e11-5482-855b-0e5b419236e4"))
+    (comp
+      (ref "J_GSM")
+      (value "SIM800L")
+      (description "Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "Acq6QeKhYm")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:132"))
+      (libsource
+        (lib "Connector_Generic")
+        (part "Conn_01x06"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "f7dbc1c5-0fca-53fb-8545-3df25bdb39d9"))
+    (comp
+      (ref "J_NRI")
+      (value "NRI_G13")
+      (description "Generic connector, single row, 01x08, script generated (kicad-library-utils/schlib/autogen/connector/)")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Generic connector, single row, 01x08, script generated (kicad-library-utils/schlib/autogen/connector/)")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "IEIoNhqNau")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:136"))
+      (libsource
+        (lib "Connector_Generic")
+        (part "Conn_01x08"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "7338c3a7-dcf2-52d6-be3d-b7b8cdd8f3b9"))
+    (comp
+      (ref "J_SWD")
+      (value "SWD")
+      (description "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "syJ51xm0Ii")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:128"))
+      (libsource
+        (lib "Connector_Generic")
+        (part "Conn_01x04"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "b31f7fcf-6f5a-5ba7-880f-b305dfaa7f60"))
+    (comp
+      (ref "L1")
+      (value "10uH")
+      (description "Inductor, small symbol")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Inductor, small symbol")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "4yaX_8znOP")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:43"))
+      (libsource
+        (lib "Device")
+        (part "L_Small"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "c4315932-76d2-567d-86cd-1c276ec48595"))
+    (comp
+      (ref "Q_COIN1")
+      (value "BC547")
+      (description "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
+        (field
+          (name "SKiDL Tag") "GPw0fodAJp")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:82"))
+      (libsource
+        (lib "Transistor_BJT")
+        (part "BC547"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "e0b3fc3e-5dc2-57a8-94b4-d526d3c479c4"))
+    (comp
+      (ref "Q_COIN2")
+      (value "BC547")
+      (description "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
+        (field
+          (name "SKiDL Tag") "vy4rG8E8Ng")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:82"))
+      (libsource
+        (lib "Transistor_BJT")
+        (part "BC547"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "7ba68786-5cbe-53f6-9bb5-c4cc7e3c15f8"))
+    (comp
+      (ref "Q_COIN3")
+      (value "BC547")
+      (description "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
+        (field
+          (name "SKiDL Tag") "H8We_3K8Zg")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:82"))
+      (libsource
+        (lib "Transistor_BJT")
+        (part "BC547"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "329f6347-4c51-5320-9aca-cd8913271f95"))
+    (comp
+      (ref "Q_COIN4")
+      (value "BC547")
+      (description "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
+        (field
+          (name "SKiDL Tag") "IApAzNKbAq")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:82"))
+      (libsource
+        (lib "Transistor_BJT")
+        (part "BC547"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "ec764438-ad98-5096-a523-8e85f7e4a2cd"))
+    (comp
+      (ref "Q_COIN5")
+      (value "BC547")
+      (description "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
+        (field
+          (name "SKiDL Tag") "x8Z5lbPIIP")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:82"))
+      (libsource
+        (lib "Transistor_BJT")
+        (part "BC547"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "6d7c2835-29c4-5d27-9b03-dbcefb346c97"))
+    (comp
+      (ref "Q_COIN6")
+      (value "BC547")
+      (description "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
+        (field
+          (name "SKiDL Tag") "uVUUwfOxhF")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:82"))
+      (libsource
+        (lib "Transistor_BJT")
+        (part "BC547"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "f15ae12f-cef9-5ae6-8e24-e33479ceae97"))
+    (comp
+      (ref "Q_HOPA")
+      (value "BC547")
+      (description "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
+        (field
+          (name "SKiDL Tag") "7x4CGrVdEv")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:90"))
+      (libsource
+        (lib "Transistor_BJT")
+        (part "BC547"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "9d631f4f-84a2-5474-86b1-1776304d431e"))
+    (comp
+      (ref "Q_HOPB")
+      (value "BC547")
+      (description "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
+        (field
+          (name "SKiDL Tag") "t_Va39HTb1")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:95"))
+      (libsource
+        (lib "Transistor_BJT")
+        (part "BC547"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "684560ef-f584-5860-b0bf-35de2a1a88b4"))
+    (comp
+      (ref "Q_PWRKEY")
+      (value "BC547")
+      (description "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
+        (field
+          (name "SKiDL Tag") "Ruwr_demGE")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:71"))
+      (libsource
+        (lib "Transistor_BJT")
+        (part "BC547"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "f1b073ae-3551-556d-b364-152cbce19faf"))
+    (comp
+      (ref "R_1WIRE")
+      (value "4.7k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "PQs61ksBiC")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:113"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "54a8ca1c-ebc2-5979-bb8e-ff7b736314e3"))
+    (comp
+      (ref "R_BOOT0")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "RQlPJGCV5v")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:47"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "4411ec78-4aeb-5a54-bd8e-de4e8886c3c0"))
+    (comp
+      (ref "R_BTN1")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "cdstZydNVf")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:103"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "8f7cb5c1-4743-542e-8727-1952bacd1b92"))
+    (comp
+      (ref "R_BTN2")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "MjQblupeOv")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:103"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "6567da50-201e-52fa-a980-5bda5262673e"))
+    (comp
+      (ref "R_BTN3")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "U0cI0thhjp")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:103"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "0fead0c0-01df-5f48-bdc3-3478b060ed07"))
+    (comp
+      (ref "R_BTN4")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "NUJPEB3foS")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:103"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "8d4a2d9d-9fe8-5728-9a2f-a6bdcab92b93"))
+    (comp
+      (ref "R_CB1")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "cnse8rhH6V")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:83"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "ab255203-1737-5083-ad00-526cbbfa9341"))
+    (comp
+      (ref "R_CB2")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "hvTVDdsxh1")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:83"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "5b86b485-8c38-5797-8722-c5c943f14641"))
+    (comp
+      (ref "R_CB3")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "tWMNyHO4xi")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:83"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "20971216-0e58-55c2-8186-1fa6c70b501e"))
+    (comp
+      (ref "R_CB4")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "0KlbWd8fKN")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:83"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "52693fdb-00bc-5236-a984-c5fd339546d4"))
+    (comp
+      (ref "R_CB5")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "eYLuCrONql")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:83"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "133908f8-1dff-5efb-888c-defabf91c8be"))
+    (comp
+      (ref "R_CB6")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "90cLcp7m6T")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:83"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "48d28256-2077-57ec-bc76-6c5dd529653f"))
+    (comp
+      (ref "R_CC1")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "k7vZBI4D2X")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:84"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "501375bf-dc81-5450-aa1c-2414674c251e"))
+    (comp
+      (ref "R_CC2")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "4YKIPHCj9V")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:84"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "5eaf6d16-c67a-5b46-acfa-64d8a85017f5"))
+    (comp
+      (ref "R_CC3")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "4oHPiz4pTe")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:84"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "ed592667-42c0-55ab-9603-bdbac7369e19"))
+    (comp
+      (ref "R_CC4")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "CDOewpNfoJ")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:84"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "e36e481c-beac-5240-9dec-839b6477a896"))
+    (comp
+      (ref "R_CC5")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "_k7PBIjekt")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:84"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "eac1795a-d798-5b9b-bd19-64af11943d25"))
+    (comp
+      (ref "R_CC6")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "ddf_ztz4xK")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:84"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "44a020b9-540b-5ae6-aa0e-36f28de6d2bf"))
+    (comp
+      (ref "R_DOOR1")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "HWvBNuma4Z")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:109"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "9bb044e5-2af2-5153-9cf6-45682dc6699b"))
+    (comp
+      (ref "R_DOOR2")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "NyvvEddgY9")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:109"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "c1dc0425-2438-5980-ad14-2c8877e6948d"))
+    (comp
+      (ref "R_HOPA_EN")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "zgM6GGSI6e")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:91"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "6251d462-8235-54de-96c4-8c3f6d4a9074"))
+    (comp
+      (ref "R_HOPB_EN")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "zYmuSd0pcc")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:96"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "6344ae52-4ac2-53a4-897c-925e27cbb629"))
+    (comp
+      (ref "R_LED_G")
+      (value "1k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "z9tjnag1gQ")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:120"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "3b9671c8-0951-5057-94e3-a97c3c7305f6"))
+    (comp
+      (ref "R_LED_R")
+      (value "1k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "Mo1XdDP71G")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:117"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "1901fc78-e8f3-5a3e-93ac-6b3c79261dfb"))
+    (comp
+      (ref "R_NRST")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "z41bHGvWOq")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:46"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "c5b71a46-c196-5e7b-8277-c13bd419e6c8"))
+    (comp
+      (ref "R_PWRKEY")
+      (value "10k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "2SqxSym4ID")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:72"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "ad3f8b0c-6fa2-5472-84bc-99a7b9ab54e9"))
+    (comp
+      (ref "R_SCL")
+      (value "4.7k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "SqVuO256gt")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:57"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "1530efd7-96a5-55fe-8c9c-80c6a73798ce"))
+    (comp
+      (ref "R_SDA")
+      (value "4.7k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "6iV3NX2aF1")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:57"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "fcc2541b-107c-588d-8608-094107e13336"))
+    (comp
+      (ref "R_STS1")
+      (value "1k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "om4w_TbWQo")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:75"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "7793959f-d980-5a11-9ebd-52bf834a6bee"))
+    (comp
+      (ref "R_STS2")
+      (value "2k")
+      (description "Resistor")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "P1EAp_eEAs")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:75"))
+      (libsource
+        (lib "Device")
+        (part "R"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "e05752a5-454a-5cc6-b291-da83fe365e4e"))
+    (comp
+      (ref "U1")
+      (value "STM32F103C8T6")
+      (description "STMicroelectronics Arm Cortex-M3 MCU, 64KB flash, 20KB RAM, 72 MHz, 2.0-3.6V, 37 GPIO, LQFP48")
+      (footprint "Package_QFP:LQFP-48_7x7mm_P0.5mm")
+      (fields
+        (field
+          (name "Description") "STMicroelectronics Arm Cortex-M3 MCU, 64KB flash, 20KB RAM, 72 MHz, 2.0-3.6V, 37 GPIO, LQFP48")
+        (field
+          (name "Footprint") "Package_QFP:LQFP-48_7x7mm_P0.5mm")
+        (field
+          (name "Datasheet") "https://www.st.com/resource/en/datasheet/stm32f103c8.pdf")
+        (field
+          (name "SKiDL Tag") "txQe00zwer")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:34"))
+      (libsource
+        (lib "MCU_ST_STM32F1")
+        (part "STM32F103C8Tx"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "8f68d15f-451a-565c-b9c9-292deed6a6ea"))
+    (comp
+      (ref "U2")
+      (value "PCF8574P")
+      (description "8-bit I/O Expander, I2C interface, interrupt output, fixed address bits 0b0100xxx, DIP-16")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "8-bit I/O Expander, I2C interface, interrupt output, fixed address bits 0b0100xxx, DIP-16")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet") "https://www.nxp.com/docs/en/data-sheet/PCF8574_PCF8574A.pdf")
+        (field
+          (name "SKiDL Tag") "2wRqSvQpBW")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:60"))
+      (libsource
+        (lib "Interface_Expansion")
+        (part "PCF8574P"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "874d90ac-b471-514c-83b6-cf9a690252de"))
+    (comp
+      (ref "U3")
+      (value "AT24C08")
+      (description "I2C Serial EEPROM, 2Kb (256x8) with Unique Serial Number, SO8")
+      (footprint "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+      (fields
+        (field
+          (name "Description") "I2C Serial EEPROM, 2Kb (256x8) with Unique Serial Number, SO8")
+        (field
+          (name "Footprint") "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+        (field
+          (name "Datasheet") "http://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-8815-SEEPROM-AT24CS01-02-Datasheet.pdf")
+        (field
+          (name "SKiDL Tag") "QeZtB3r25w")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:65"))
+      (libsource
+        (lib "Memory_EEPROM")
+        (part "AT24CS02-SSHM"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "ec211100-0f12-5f13-be3c-fb708a59f039"))
+    (comp
+      (ref "Y1")
+      (value "8MHz")
+      (description "Two pin crystal")
+      (footprint "")
+      (fields
+        (field
+          (name "Description") "Two pin crystal")
+        (field
+          (name "Footprint"))
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "Oiu5_mTq5T")
+        (field
+          (name "SKiDL Line") "bahilizator_skidl.py:50"))
+      (libsource
+        (lib "Device")
+        (part "Crystal"))
+      (sheetpath
+        (names "/")
+        (tstamps "/"))
+      (component_classes)
+      (tstamps "e8354119-614d-5ef8-bd54-52a9d4f082dc")))
+  (nets
+    (net
+      (code 1)
+      (name "+12V")
+      (class "Default")
+      (node
+        (ref "J_NRI")
+        (pin "2")
+        (pintype "PASSIVE")))
+    (net
+      (code 2)
+      (name "+5V")
+      (class "Default")
+      (node
+        (ref "U2")
+        (pin "16")
+        (pintype "POWER-IN")))
+    (net
+      (code 3)
+      (name "1WIRE_DATA")
+      (class "Default")
+      (node
+        (ref "R_1WIRE")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "32")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 4)
+      (name "BTN_CANCEL")
+      (class "Default")
+      (node
+        (ref "R_BTN4")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "16")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 5)
+      (name "BTN_NEXT")
+      (class "Default")
+      (node
+        (ref "R_BTN2")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "14")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 6)
+      (name "BTN_OK")
+      (class "Default")
+      (node
+        (ref "R_BTN3")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "15")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 7)
+      (name "BTN_PREV")
+      (class "Default")
+      (node
+        (ref "R_BTN1")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "13")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 8)
+      (name "COIN_BLOCK")
+      (class "Default")
+      (node
+        (ref "U1")
+        (pin "27")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 9)
+      (name "COIN_CH1")
+      (class "Default")
+      (node
+        (ref "Q_COIN1")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CC1")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "45")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 10)
+      (name "COIN_CH2")
+      (class "Default")
+      (node
+        (ref "Q_COIN2")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CC2")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "46")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 11)
+      (name "COIN_CH3")
+      (class "Default")
+      (node
+        (ref "Q_COIN3")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CC3")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "21")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 12)
+      (name "COIN_CH4")
+      (class "Default")
+      (node
+        (ref "Q_COIN4")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CC4")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "22")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 13)
+      (name "COIN_CH5")
+      (class "Default")
+      (node
+        (ref "Q_COIN5")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CC5")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "25")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 14)
+      (name "COIN_CH6")
+      (class "Default")
+      (node
+        (ref "Q_COIN6")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CC6")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "26")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 15)
+      (name "DOOR1")
+      (class "Default")
+      (node
+        (ref "R_DOOR1")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "17")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 16)
+      (name "DOOR2")
+      (class "Default")
+      (node
+        (ref "R_DOOR2")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "29")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 17)
+      (name "GND")
+      (class "Default")
+      (node
+        (ref "C1")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "C2")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "C3")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "C4")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "C5")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "C_OSC1")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "C_OSC2")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "D_GREEN")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "D_RED")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "J_GSM")
+        (pin "6")
+        (pintype "PASSIVE"))
+      (node
+        (ref "J_NRI")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "J_SWD")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "Q_COIN1")
+        (pin "3")
+        (pintype "PASSIVE"))
+      (node
+        (ref "Q_COIN2")
+        (pin "3")
+        (pintype "PASSIVE"))
+      (node
+        (ref "Q_COIN3")
+        (pin "3")
+        (pintype "PASSIVE"))
+      (node
+        (ref "Q_COIN4")
+        (pin "3")
+        (pintype "PASSIVE"))
+      (node
+        (ref "Q_COIN5")
+        (pin "3")
+        (pintype "PASSIVE"))
+      (node
+        (ref "Q_COIN6")
+        (pin "3")
+        (pintype "PASSIVE"))
+      (node
+        (ref "Q_HOPA")
+        (pin "3")
+        (pintype "PASSIVE"))
+      (node
+        (ref "Q_HOPB")
+        (pin "3")
+        (pintype "PASSIVE"))
+      (node
+        (ref "Q_PWRKEY")
+        (pin "3")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_BOOT0")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_STS2")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "23")
+        (pintype "POWER-IN"))
+      (node
+        (ref "U1")
+        (pin "35")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "47")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "8")
+        (pintype "POWER-IN"))
+      (node
+        (ref "U2")
+        (pin "1")
+        (pintype "INPUT"))
+      (node
+        (ref "U2")
+        (pin "2")
+        (pintype "INPUT"))
+      (node
+        (ref "U2")
+        (pin "3")
+        (pintype "INPUT"))
+      (node
+        (ref "U2")
+        (pin "8")
+        (pintype "POWER-IN"))
+      (node
+        (ref "U3")
+        (pin "1")
+        (pintype "INPUT"))
+      (node
+        (ref "U3")
+        (pin "2")
+        (pintype "INPUT"))
+      (node
+        (ref "U3")
+        (pin "3")
+        (pintype "INPUT"))
+      (node
+        (ref "U3")
+        (pin "4")
+        (pintype "POWER-IN"))
+      (node
+        (ref "U3")
+        (pin "7")
+        (pintype "INPUT")))
+    (net
+      (code 18)
+      (name "HOPPER_A_EN")
+      (class "Default")
+      (node
+        (ref "Q_HOPA")
+        (pin "1")
+        (pintype "PASSIVE")))
+    (net
+      (code 19)
+      (name "HOPPER_A_SENSOR")
+      (class "Default")
+      (node
+        (ref "U1")
+        (pin "38")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 20)
+      (name "HOPPER_B_EN")
+      (class "Default")
+      (node
+        (ref "Q_HOPB")
+        (pin "1")
+        (pintype "PASSIVE")))
+    (net
+      (code 21)
+      (name "HOPPER_B_SENSOR")
+      (class "Default")
+      (node
+        (ref "U1")
+        (pin "40")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 22)
+      (name "I2C1_SCL")
+      (class "Default")
+      (node
+        (ref "R_SCL")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "42")
+        (pintype "BIDIRECTIONAL"))
+      (node
+        (ref "U2")
+        (pin "14")
+        (pintype "INPUT"))
+      (node
+        (ref "U3")
+        (pin "6")
+        (pintype "INPUT")))
+    (net
+      (code 23)
+      (name "I2C1_SDA")
+      (class "Default")
+      (node
+        (ref "R_SDA")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "43")
+        (pintype "BIDIRECTIONAL"))
+      (node
+        (ref "U2")
+        (pin "15")
+        (pintype "BIDIRECTIONAL"))
+      (node
+        (ref "U3")
+        (pin "5")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 24)
+      (name "N$1")
+      (class "Default")
+      (node
+        (ref "R_NRST")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "7")
+        (pintype "INPUT")))
+    (net
+      (code 25)
+      (name "N$10")
+      (class "Default")
+      (node
+        (ref "Q_COIN3")
+        (pin "2")
+        (pintype "INPUT"))
+      (node
+        (ref "R_CB3")
+        (pin "2")
+        (pintype "PASSIVE")))
+    (net
+      (code 26)
+      (name "N$11")
+      (class "Default")
+      (node
+        (ref "Q_COIN4")
+        (pin "2")
+        (pintype "INPUT"))
+      (node
+        (ref "R_CB4")
+        (pin "2")
+        (pintype "PASSIVE")))
+    (net
+      (code 27)
+      (name "N$12")
+      (class "Default")
+      (node
+        (ref "Q_COIN5")
+        (pin "2")
+        (pintype "INPUT"))
+      (node
+        (ref "R_CB5")
+        (pin "2")
+        (pintype "PASSIVE")))
+    (net
+      (code 28)
+      (name "N$13")
+      (class "Default")
+      (node
+        (ref "Q_COIN6")
+        (pin "2")
+        (pintype "INPUT"))
+      (node
+        (ref "R_CB6")
+        (pin "2")
+        (pintype "PASSIVE")))
+    (net
+      (code 29)
+      (name "N$14")
+      (class "Default")
+      (node
+        (ref "R_HOPA_EN")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "28")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 30)
+      (name "N$15")
+      (class "Default")
+      (node
+        (ref "Q_HOPA")
+        (pin "2")
+        (pintype "INPUT"))
+      (node
+        (ref "R_HOPA_EN")
+        (pin "2")
+        (pintype "PASSIVE")))
+    (net
+      (code 31)
+      (name "N$16")
+      (class "Default")
+      (node
+        (ref "R_HOPB_EN")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "39")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 32)
+      (name "N$17")
+      (class "Default")
+      (node
+        (ref "Q_HOPB")
+        (pin "2")
+        (pintype "INPUT"))
+      (node
+        (ref "R_HOPB_EN")
+        (pin "2")
+        (pintype "PASSIVE")))
+    (net
+      (code 33)
+      (name "N$18")
+      (class "Default")
+      (node
+        (ref "R_LED_R")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "4")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 34)
+      (name "N$19")
+      (class "Default")
+      (node
+        (ref "D_RED")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_LED_R")
+        (pin "2")
+        (pintype "PASSIVE")))
+    (net
+      (code 35)
+      (name "N$2")
+      (class "Default")
+      (node
+        (ref "R_BOOT0")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "44")
+        (pintype "INPUT")))
+    (net
+      (code 36)
+      (name "N$20")
+      (class "Default")
+      (node
+        (ref "R_LED_G")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "18")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 37)
+      (name "N$21")
+      (class "Default")
+      (node
+        (ref "D_GREEN")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_LED_G")
+        (pin "2")
+        (pintype "PASSIVE")))
+    (net
+      (code 38)
+      (name "N$22")
+      (class "Default")
+      (node
+        (ref "J_SWD")
+        (pin "3")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "34")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 39)
+      (name "N$23")
+      (class "Default")
+      (node
+        (ref "J_SWD")
+        (pin "4")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "37")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 40)
+      (name "N$3")
+      (class "Default")
+      (node
+        (ref "C_OSC1")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "5")
+        (pintype "BIDIRECTIONAL"))
+      (node
+        (ref "Y1")
+        (pin "1")
+        (pintype "PASSIVE")))
+    (net
+      (code 41)
+      (name "N$4")
+      (class "Default")
+      (node
+        (ref "C_OSC2")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "6")
+        (pintype "BIDIRECTIONAL"))
+      (node
+        (ref "Y1")
+        (pin "2")
+        (pintype "PASSIVE")))
+    (net
+      (code 42)
+      (name "N$5")
+      (class "Default")
+      (node
+        (ref "R_PWRKEY")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "10")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 43)
+      (name "N$6")
+      (class "Default")
+      (node
+        (ref "Q_PWRKEY")
+        (pin "2")
+        (pintype "INPUT"))
+      (node
+        (ref "R_PWRKEY")
+        (pin "2")
+        (pintype "PASSIVE")))
+    (net
+      (code 44)
+      (name "N$7")
+      (class "Default")
+      (node
+        (ref "R_STS1")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_STS2")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "11")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 45)
+      (name "N$8")
+      (class "Default")
+      (node
+        (ref "Q_COIN1")
+        (pin "2")
+        (pintype "INPUT"))
+      (node
+        (ref "R_CB1")
+        (pin "2")
+        (pintype "PASSIVE")))
+    (net
+      (code 46)
+      (name "N$9")
+      (class "Default")
+      (node
+        (ref "Q_COIN2")
+        (pin "2")
+        (pintype "INPUT"))
+      (node
+        (ref "R_CB2")
+        (pin "2")
+        (pintype "PASSIVE")))
+    (net
+      (code 47)
+      (name "NRI_CH1")
+      (class "Default")
+      (node
+        (ref "J_NRI")
+        (pin "3")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CB1")
+        (pin "1")
+        (pintype "PASSIVE")))
+    (net
+      (code 48)
+      (name "NRI_CH2")
+      (class "Default")
+      (node
+        (ref "J_NRI")
+        (pin "4")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CB2")
+        (pin "1")
+        (pintype "PASSIVE")))
+    (net
+      (code 49)
+      (name "NRI_CH3")
+      (class "Default")
+      (node
+        (ref "J_NRI")
+        (pin "5")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CB3")
+        (pin "1")
+        (pintype "PASSIVE")))
+    (net
+      (code 50)
+      (name "NRI_CH4")
+      (class "Default")
+      (node
+        (ref "J_NRI")
+        (pin "6")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CB4")
+        (pin "1")
+        (pintype "PASSIVE")))
+    (net
+      (code 51)
+      (name "NRI_CH5")
+      (class "Default")
+      (node
+        (ref "J_NRI")
+        (pin "7")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CB5")
+        (pin "1")
+        (pintype "PASSIVE")))
+    (net
+      (code 52)
+      (name "NRI_CH6")
+      (class "Default")
+      (node
+        (ref "J_NRI")
+        (pin "8")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CB6")
+        (pin "1")
+        (pintype "PASSIVE")))
+    (net
+      (code 53)
+      (name "POWER_FAIL")
+      (class "Default")
+      (node
+        (ref "U1")
+        (pin "19")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 54)
+      (name "SIM800L_DTR")
+      (class "Default")
+      (node
+        (ref "J_GSM")
+        (pin "5")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "12")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 55)
+      (name "SIM800L_PWRKEY")
+      (class "Default")
+      (node
+        (ref "J_GSM")
+        (pin "3")
+        (pintype "PASSIVE"))
+      (node
+        (ref "Q_PWRKEY")
+        (pin "1")
+        (pintype "PASSIVE")))
+    (net
+      (code 56)
+      (name "SIM800L_STATUS")
+      (class "Default")
+      (node
+        (ref "J_GSM")
+        (pin "4")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_STS1")
+        (pin "1")
+        (pintype "PASSIVE")))
+    (net
+      (code 57)
+      (name "USART1_RX")
+      (class "Default")
+      (node
+        (ref "J_GSM")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "31")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 58)
+      (name "USART1_TX")
+      (class "Default")
+      (node
+        (ref "J_GSM")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "30")
+        (pintype "BIDIRECTIONAL")))
+    (net
+      (code 59)
+      (name "VDD")
+      (class "Default")
+      (node
+        (ref "C1")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "C2")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "C3")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "C4")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "J_SWD")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "L1")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_1WIRE")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_BTN1")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_BTN2")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_BTN3")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_BTN4")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CC1")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CC2")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CC3")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CC4")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CC5")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_CC6")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_DOOR1")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_DOOR2")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_NRST")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_SCL")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_SDA")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "1")
+        (pintype "POWER-IN"))
+      (node
+        (ref "U1")
+        (pin "24")
+        (pintype "POWER-IN"))
+      (node
+        (ref "U1")
+        (pin "36")
+        (pintype "POWER-IN"))
+      (node
+        (ref "U1")
+        (pin "48")
+        (pintype "POWER-IN"))
+      (node
+        (ref "U3")
+        (pin "8")
+        (pintype "POWER-IN")))
+    (net
+      (code 60)
+      (name "VDDA")
+      (class "Default")
+      (node
+        (ref "C5")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "L1")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "U1")
+        (pin "9")
+        (pintype "POWER-IN")))))

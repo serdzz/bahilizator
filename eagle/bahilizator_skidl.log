@@ -1,0 +1,174 @@
+WARNING: fp-lib-table file was not found. Component footprints are not available.
+WARNING: fp-lib-table file was not found. Component footprints are not available.
+WARNING: fp-lib-table file was not found. Component footprints are not available.
+WARNING: fp-lib-table file was not found. Component footprints are not available.
+ERROR: No footprint for C_Small/C1 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:39.
+ERROR: No footprint for C_Small/C2 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:39.
+ERROR: No footprint for C_Small/C3 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:39.
+ERROR: No footprint for C_Small/C4 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:40.
+ERROR: No footprint for C_Small/C5 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:42.
+ERROR: No footprint for L_Small/L1 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:43.
+ERROR: No footprint for R/R_NRST added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:46.
+ERROR: No footprint for R/R_BOOT0 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:47.
+ERROR: No footprint for Crystal/Y1 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:50.
+ERROR: No footprint for C_Small/C_OSC1 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:51.
+ERROR: No footprint for C_Small/C_OSC2 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:52.
+ERROR: No footprint for R/R_SCL added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:57.
+ERROR: No footprint for R/R_SDA added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:57.
+ERROR: No footprint for PCF8574P/U2 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:60.
+ERROR: No footprint for BC547/Q_PWRKEY added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:71.
+ERROR: No footprint for R/R_PWRKEY added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:72.
+ERROR: No footprint for R/R_STS1 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:75.
+ERROR: No footprint for R/R_STS2 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:75.
+ERROR: No footprint for BC547/Q_COIN1 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:82.
+ERROR: No footprint for R/R_CB1 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:83.
+ERROR: No footprint for R/R_CC1 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:84.
+ERROR: No footprint for BC547/Q_COIN2 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:82.
+ERROR: No footprint for R/R_CB2 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:83.
+ERROR: No footprint for R/R_CC2 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:84.
+ERROR: No footprint for BC547/Q_COIN3 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:82.
+ERROR: No footprint for R/R_CB3 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:83.
+ERROR: No footprint for R/R_CC3 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:84.
+ERROR: No footprint for BC547/Q_COIN4 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:82.
+ERROR: No footprint for R/R_CB4 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:83.
+ERROR: No footprint for R/R_CC4 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:84.
+ERROR: No footprint for BC547/Q_COIN5 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:82.
+ERROR: No footprint for R/R_CB5 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:83.
+ERROR: No footprint for R/R_CC5 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:84.
+ERROR: No footprint for BC547/Q_COIN6 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:82.
+ERROR: No footprint for R/R_CB6 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:83.
+ERROR: No footprint for R/R_CC6 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:84.
+ERROR: No footprint for BC547/Q_HOPA added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:90.
+ERROR: No footprint for R/R_HOPA_EN added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:91.
+ERROR: No footprint for BC547/Q_HOPB added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:95.
+ERROR: No footprint for R/R_HOPB_EN added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:96.
+ERROR: No footprint for R/R_BTN1 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:103.
+ERROR: No footprint for R/R_BTN2 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:103.
+ERROR: No footprint for R/R_BTN3 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:103.
+ERROR: No footprint for R/R_BTN4 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:103.
+ERROR: No footprint for R/R_DOOR1 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:109.
+ERROR: No footprint for R/R_DOOR2 added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:109.
+ERROR: No footprint for R/R_1WIRE added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:113.
+ERROR: No footprint for R/R_LED_R added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:117.
+ERROR: No footprint for LED/D_RED added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:118.
+ERROR: No footprint for R/R_LED_G added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:120.
+ERROR: No footprint for LED/D_GREEN added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:121.
+ERROR: No footprint for Conn_01x04/J_SWD added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:128.
+ERROR: No footprint for Conn_01x06/J_GSM added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:132.
+ERROR: No footprint for Conn_01x08/J_NRI added at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:136.
+WARNING: Missing tag on STM32F103C8Tx instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:34.
+WARNING: Random tag txQe00zwer generated for STM32F103C8Tx.
+WARNING: Missing tag on C_Small instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:39.
+WARNING: Random tag okWbEbzCCx generated for C_Small.
+WARNING: Missing tag on C_Small instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:39.
+WARNING: Random tag wKV5R7pacL generated for C_Small.
+WARNING: Missing tag on C_Small instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:39.
+WARNING: Random tag EGCwRHJfC5 generated for C_Small.
+WARNING: Missing tag on C_Small instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:40.
+WARNING: Random tag 7w0eQxwPTW generated for C_Small.
+WARNING: Missing tag on C_Small instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:42.
+WARNING: Random tag CKICfrRgoi generated for C_Small.
+WARNING: Missing tag on L_Small instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:43.
+WARNING: Random tag 4yaX_8znOP generated for L_Small.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:46.
+WARNING: Random tag z41bHGvWOq generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:47.
+WARNING: Random tag RQlPJGCV5v generated for R.
+WARNING: Missing tag on Crystal instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:50.
+WARNING: Random tag Oiu5_mTq5T generated for Crystal.
+WARNING: Missing tag on C_Small instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:51.
+WARNING: Random tag aJfBpXsTy8 generated for C_Small.
+WARNING: Missing tag on C_Small instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:52.
+WARNING: Random tag E5jLeR9dcC generated for C_Small.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:57.
+WARNING: Random tag SqVuO256gt generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:57.
+WARNING: Random tag 6iV3NX2aF1 generated for R.
+WARNING: Missing tag on PCF8574P instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:60.
+WARNING: Random tag 2wRqSvQpBW generated for PCF8574P.
+WARNING: Missing tag on AT24CS02-SSHM instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:65.
+WARNING: Random tag QeZtB3r25w generated for AT24CS02-SSHM.
+WARNING: Missing tag on BC547 instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:71.
+WARNING: Random tag Ruwr_demGE generated for BC547.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:72.
+WARNING: Random tag 2SqxSym4ID generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:75.
+WARNING: Random tag om4w_TbWQo generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:75.
+WARNING: Random tag P1EAp_eEAs generated for R.
+WARNING: Missing tag on BC547 instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:82.
+WARNING: Random tag GPw0fodAJp generated for BC547.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:83.
+WARNING: Random tag cnse8rhH6V generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:84.
+WARNING: Random tag k7vZBI4D2X generated for R.
+WARNING: Missing tag on BC547 instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:82.
+WARNING: Random tag vy4rG8E8Ng generated for BC547.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:83.
+WARNING: Random tag hvTVDdsxh1 generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:84.
+WARNING: Random tag 4YKIPHCj9V generated for R.
+WARNING: Missing tag on BC547 instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:82.
+WARNING: Random tag H8We_3K8Zg generated for BC547.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:83.
+WARNING: Random tag tWMNyHO4xi generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:84.
+WARNING: Random tag 4oHPiz4pTe generated for R.
+WARNING: Missing tag on BC547 instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:82.
+WARNING: Random tag IApAzNKbAq generated for BC547.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:83.
+WARNING: Random tag 0KlbWd8fKN generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:84.
+WARNING: Random tag CDOewpNfoJ generated for R.
+WARNING: Missing tag on BC547 instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:82.
+WARNING: Random tag x8Z5lbPIIP generated for BC547.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:83.
+WARNING: Random tag eYLuCrONql generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:84.
+WARNING: Random tag _k7PBIjekt generated for R.
+WARNING: Missing tag on BC547 instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:82.
+WARNING: Random tag uVUUwfOxhF generated for BC547.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:83.
+WARNING: Random tag 90cLcp7m6T generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:84.
+WARNING: Random tag ddf_ztz4xK generated for R.
+WARNING: Missing tag on BC547 instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:90.
+WARNING: Random tag 7x4CGrVdEv generated for BC547.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:91.
+WARNING: Random tag zgM6GGSI6e generated for R.
+WARNING: Missing tag on BC547 instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:95.
+WARNING: Random tag t_Va39HTb1 generated for BC547.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:96.
+WARNING: Random tag zYmuSd0pcc generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:103.
+WARNING: Random tag cdstZydNVf generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:103.
+WARNING: Random tag MjQblupeOv generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:103.
+WARNING: Random tag U0cI0thhjp generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:103.
+WARNING: Random tag NUJPEB3foS generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:109.
+WARNING: Random tag HWvBNuma4Z generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:109.
+WARNING: Random tag NyvvEddgY9 generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:113.
+WARNING: Random tag PQs61ksBiC generated for R.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:117.
+WARNING: Random tag Mo1XdDP71G generated for R.
+WARNING: Missing tag on LED instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:118.
+WARNING: Random tag bIjDmOvHIy generated for LED.
+WARNING: Missing tag on R instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:120.
+WARNING: Random tag z9tjnag1gQ generated for R.
+WARNING: Missing tag on LED instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:121.
+WARNING: Random tag 6xIG1qrmWx generated for LED.
+WARNING: Missing tag on Conn_01x04 instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:128.
+WARNING: Random tag syJ51xm0Ii generated for Conn_01x04.
+WARNING: Missing tag on Conn_01x06 instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:132.
+WARNING: Random tag Acq6QeKhYm generated for Conn_01x06.
+WARNING: Missing tag on Conn_01x08 instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:136.
+WARNING: Random tag IEIoNhqNau generated for Conn_01x08.
+WARNING: Missing tag on  instantiated at /Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/<frozen importlib._bootstrap>:491.
+INFO: 117 warnings found while generating netlist.
+INFO: 54 errors found while generating netlist.
+
