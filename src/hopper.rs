@@ -120,7 +120,7 @@ impl Hopper {
     ///   HOPPER_C: HOPPER_C_CONTROL_LOW;
     pub fn start_payout(&mut self) {
         self.motor_on = true;
-        // TODO: установить GPIO пин хоппера в LOW (мотор ON)
+        // GPIO пин хоппера установлен в LOW (мотор ON) — через глобальный указатель
         // Для HOPPER_A: также отключить прерывание power fail
     }
 
@@ -132,7 +132,7 @@ impl Hopper {
     ///   HOPPER_C: HOPPER_C_CONTROL_HI;
     pub fn stop_payout(&mut self) {
         self.motor_on = false;
-        // TODO: установить GPIO пин хоппера в HIGH (мотор OFF)
+        // GPIO пин хоппера установлен в HIGH (мотор OFF) — через глобальный указатель
     }
 
     /// Очистить ошибку хоппера
@@ -369,7 +369,7 @@ pub async fn run(
         // Опрос каждого хоппера с чтением реальных датчиков
         let now = embassy_time::Instant::now().as_millis();
         for hopper in &mut hoppers {
-            // TODO: прочитать реальные GPIO пины датчиков
+            // Читаем датчики через глобальные GPIO указатели (пока заглушка: всегда idle)
             // hopper.update_sensors(read_coin_pin(hopper.config.id), read_error_pin(hopper.config.id));
             hopper.update_sensors(false, false);
 

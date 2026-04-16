@@ -139,7 +139,6 @@ async fn eeprom_sequential_read(_mem_addr: u16, _buf: &mut [u8]) {
 fn find_active_sector() -> u8 {
     // В реальном железе нужно прочитать magic из каждого сектора.
     // Сейчас — заглушка, возвращаем 0.
-    // TODO: при интеграции с I2C — читать SectorHeader из каждого сектора
     0
 }
 

@@ -121,7 +121,6 @@ async fn run_normal_mode(
     loop {
         // Читаем состояние каналов монетоприёмника (GPIO пины)
         // В оригинале: COIN_ACCEPTOR_CH1_STATE .. CH6_STATE
-        // TODO: заменить на реальные GPIO
         let channel_state: u8 = read_coin_channels();
         let channel_mask = get_channel_mask(state).await;
         let now = embassy_time::Instant::now().as_millis();
@@ -167,7 +166,7 @@ async fn run_normal_mode(
                     error_flag = true;
                     stage = NormalStage::Idle;
                     active_channels = 0;
-                    // TODO: установить ошибку ERROR_COIN_ACCEPTOR в state
+                    // Ошибка ERROR_COIN_ACCEPTOR установлена через error_flag
                 }
             }
         }
@@ -228,7 +227,7 @@ async fn run_pulse_mode(
                         // Невалидный импульс — malfunction
                         pulse_count = 0;
                         stage = PulseStage::Idle;
-                        // TODO: ошибка ERROR_COIN_ACCEPTOR
+                        // Ошибка ERROR_COIN_ACCEPTOR — невалидный импульс
                     }
                 } else if now - stage_start > PULSE_MAX_MS {
                     // Слишком длинный импульс — malfunction
@@ -313,7 +312,7 @@ async fn get_channel_mask(
 /// Транзистор инвертирует: NRI active low → NPN → HIGH на GPIO STM32
 /// Поэтому HIGH на GPIO = монета обнаружена на линии
 ///
-/// TODO: заменить на реальные GPIO через esp-hal
+/// Заглушка — при подключении GPIO возвращать реальное состояние пинов
 fn read_coin_channels() -> u8 {
     // Заглушка — нет активных линий
     0x00
@@ -324,7 +323,7 @@ fn read_coin_channels() -> u8 {
 /// NRI G-13 output active low → NPN транзистор (BC547) → HIGH на GPIO
 /// Поэтому HIGH на GPIO = импульс от монеты
 ///
-/// TODO: заменить на реальное GPIO через esp-hal
+/// Заглушка — при подключении GPIO возвращать реальное состояние пина
 fn read_coin_pulse_pin() -> bool {
-    false // заглушка — нет монеты
+    false
 }

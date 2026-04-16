@@ -60,9 +60,10 @@ impl embedded_hal::blocking::delay::DelayUs<u16> for EspDelay {
 
 // ── EspHalPin — заглушка GPIO пина для one-wire-bus ──────────────────────
 //
-// TODO: Заменить на esp_hal::gpio::OutputOpenDrain<'static> из main.rs.
-// esp-hal OutputOpenDrain реализует embedded-hal 0.2 InputPin + OutputPin.
-// Сейчас — заглушка для компиляции.
+// esp-hal Flex реализует embedded-hal 0.2 InputPin + OutputPin через embedded-hal_compat.
+// На LilyGo T-Call нет свободного output-capable GPIO для 1-Wire (GPIO4 = PWRKEY).
+// Заглушка позволяет скомпилировать код, но 1-Wire не работает.
+// Для реального 1-Wire: использовать esp_hal::gpio::Flex на свободном output GPIO.
 
 pub struct EspHalPin;
 
@@ -102,10 +103,10 @@ impl IbuttonDriver {
     /// Создать драйвер. В реальном коде pin = esp_hal OutputOpenDrain.
     /// Сейчас — заглушка, используем EspHalPin.
     pub fn new(pin: EspHalPin) -> Self {
-        let bus = OneWire::new(pin).unwrap_or_else(|_| {
-            // TODO: реальный пин всегда инициализируется успешно
-            panic!("iButton: OneWire init failed");
-        });
+        // EspHalPin — заглушка, InputPin всегда возвращает High, OutputPin — no-op
+        // OneWire::new() может вернуть Err если шина зажата в Low.
+        // На заглушке EspHalPin.is_high() = true → шина свободна → new() успешен.
+        let bus = OneWire::new(pin).expect("iButton: OneWire init failed");
         Self {
             bus,
             delay: EspDelay::new(),

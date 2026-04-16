@@ -434,9 +434,10 @@ impl MenuNavigator {
     ///
     /// В реальной интеграции: запись в VendingState через Mutex
     fn apply_edit_value(&self, _state: &VendingState) {
-        // TODO: запись edit_value в соответствующее поле state
-        // через Mutex<CriticalSectionRawMutex, RefCell<VendingState>>
+        // Запись edit_value в соответствующее поле state через
+        // Mutex<CriticalSectionRawMutex, RefCell<VendingState>>
         // и установка флага PersistReason::SettingsChanged
+        // Текущая реализация: no-op, значение не сохраняется
     }
 
     /// Получить текст для отображения текущего пункта

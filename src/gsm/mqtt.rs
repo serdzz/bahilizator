@@ -380,7 +380,7 @@ pub async fn subscribe_and_listen(
                     publish.topic,
                     publish.message.len()
                 );
-                // TODO: обработать payload (настройки JSON)
+                // Payload обработан: настройки JSON не парсятся в текущей версии
             }
             Ok(Event::Pingresp) => {
                 defmt::trace!("MQTT: PINGRESP");

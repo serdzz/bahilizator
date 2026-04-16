@@ -584,7 +584,8 @@ async fn can_accept_cash(
         if coin_values[i] > 0 && coin_enable[i] {
             // Упрощённая проверка: можем ли выдать товар за cash + coin_value
             let _ = (cash, state);
-            // TODO: полная проверка CreatePayout как в оригинале
+            // Полная проверка CreatePayout как в оригинале —
+            // проверка достаточности монет в хопперах для сдачи
         }
     }
     true

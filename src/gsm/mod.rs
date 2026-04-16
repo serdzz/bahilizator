@@ -1,20 +1,14 @@
 //! GSM менеджер — инициализация, питание, CMUX, GPRS
 //!
-//! SIM800L модем через USART1. Режим CMUX для разделения
-//! AT команд (DLC1) и PPP данных (DLC2).
+//! SIM800L модем на LilyGo T-Call через UART2.
+//! Режим CMUX для разделения AT команд (DLC1) и PPP данных (DLC2).
 //!
-//! Перенос из gsm.c:
-//!   - gsmHardwarePowerUp/Down — управление питанием через PWRKEY
-//!   - initGSM_cmd — последовательность AT команд
-//!   - gsmProcess — парсинг ответов модема
-//!   - CMUX: AT+CMUX=0 → мультиплексирование каналов
-//!
-//! Жизненный цикл модема:
-//!   1. Power on: PWRKEY pulse (1с high → 3с low → проверка STATUS)
-//!   2. Init: ATE0 → CMGF=1 → CNMI → CSMP → CCLK?
-//!   3. CMUX: AT+CMUX=0,1,5,128,10,3,30,10,2 → SABM DLC0/1/2
-//!   4. Работа: AT команды через DLC1, PPP через DLC2
-//!   5. Power off: AT+CPOWD=1 или PWRKEY pulse
+//! LilyGo T-Call подключение:
+//!   UART2 TX (GPIO26) → SIM800L RXD
+//!   UART2 RX (GPIO27) ← SIM800L TXD
+//!   PWRKEY (GPIO4) — LOW pulse включает/выключает модем
+//!   RST (GPIO5) — LOW = hard reset
+//!   POWER (GPIO23) — HIGH = питание модема включено
 
 pub mod at_channel;
 pub mod cmux;
@@ -67,18 +61,13 @@ pub enum GsmInitStage {
 
 #[derive(Debug, Clone, Copy, defmt::Format)]
 pub enum GsmCommand {
-    /// Отправить SMS на телефон с индексом phone_idx
     SendSms {
         phone_idx: u8,
         kind: crate::state::MessageKind,
     },
-    /// Запросить время у модема
     GetTime,
-    /// Проверить GPRS подключение
     CheckGprs,
-    /// Включить модем
     PowerOn,
-    /// Выключить модем
     PowerDown,
 }
 
@@ -94,25 +83,15 @@ pub struct SmsEvent {
 
 #[derive(Debug)]
 pub struct GsmStatus {
-    /// Модем проинициализирован и готов
     pub ready: bool,
-    /// Call Ready получен
     pub call_ready: bool,
-    /// GPRS подключён
     pub gprs_attached: bool,
-    /// IP адрес (если GPRS подключён)
     pub ip_addr: Option<[u8; 4]>,
-    /// Этап инициализации
     pub init_stage: GsmInitStage,
-    /// Код последней ошибки CME
     pub cme_error: u16,
-    /// Код последней ошибки CMS
     pub cms_error: u16,
-    /// Отправка SMS в процессе
     pub sending_sms: bool,
-    /// SMS отправлен успешно
     pub sms_sent: bool,
-    /// ID последнего отправленного SMS
     pub last_sms_id: u16,
 }
 
@@ -135,117 +114,19 @@ impl Default for GsmStatus {
 
 // ── Таймауты ────────────────────────────────────────────────────────────
 
-/// Таймаут ожидания ответа от модема (мс)
 #[allow(dead_code)]
 const GSM_RESPONSE_TIMEOUT_MS: u64 = 5000;
-/// Таймаут ожидания Call Ready (с)
 #[allow(dead_code)]
 const GSM_CALL_READY_TIMEOUT_S: u64 = 15;
-/// Таймаут инициализации модема (с)
 #[allow(dead_code)]
 const GSM_INIT_TIMEOUT_S: u64 = 30;
-/// Задержка между AT командами (мс)
 const GSM_CMD_DELAY_MS: u64 = 200;
-/// Таймаут отправки SMS (с)
 #[allow(dead_code)]
 const GSM_SMS_TIMEOUT_S: u64 = 10;
-/// Интервал проверки GPRS (с)
 const GSM_GPRS_CHECK_INTERVAL_S: u64 = 60;
 
-// ── Управление питанием модема ──────────────────────────────────────────
+// ── Ответ на AT команду ──────────────────────────────────────────────────
 
-/// Включить модем SIM800L через PWRKEY
-///
-/// Последовательность (из даташита SIM800L):
-///   1. PWRKEY = HIGH (подтяжка)
-///   2. PWRKEY → LOW на 1с (минимум 100мс)
-///   3. PWRKEY → HIGH
-///   4. Ждём 3с
-///   5. Проверяем STATUS pin = HIGH
-///
-/// В оригинале: gsmHardwarePowerUp()
-async fn gsm_power_on() -> Result<(), GsmError> {
-    // Шаг 1: Проверяем STATUS — если уже включён, пропускаем
-    if gsm_check_status() {
-        return Ok(());
-    }
-
-    // Шаг 2: PWRKEY pulse
-    // В реальном железе:
-    // PWRKEY.set_high().ok();
-    // embassy_time::Timer::after_millis(100).await;
-    // PWRKEY.set_low().ok();
-    // embassy_time::Timer::after_secs(1).await;
-    // PWRKEY.set_high().ok();
-    // embassy_time::Timer::after_secs(3).await;
-
-    // Safety: заглушка — в интеграции заменяется на GPIO
-    embassy_time::Timer::after_secs(4).await;
-
-    // Шаг 3: Проверяем STATUS
-    if !gsm_check_status() {
-        // Пробуем ещё раз
-        embassy_time::Timer::after_secs(2).await;
-        if !gsm_check_status() {
-            return Err(GsmError::NoResponse);
-        }
-    }
-
-    Ok(())
-}
-
-/// Выключить модем SIM800L через PWRKEY
-///
-/// Последовательность:
-///   1. Отправить AT+CPOWD=1 (мягкое выключение)
-///   2. Если нет ответа — PWRKEY pulse
-///   3. STATUS → LOW
-///
-/// В оригинале: gsmHardwarePowerDown()
-async fn gsm_power_off() {
-    // Мягкое выключение через AT команду
-    // В реальном железе:
-    // uart.write(b"AT+CPOWD=1\r\n");
-    // embassy_time::Timer::after_secs(3).await;
-
-    // Если модем не ответил — hardware power down
-    if gsm_check_status() {
-        // PWRKEY pulse (как при включении)
-        embassy_time::Timer::after_secs(1).await;
-    }
-
-    // Safety: заглушка
-}
-
-/// Проверить STATUS pin модема
-///
-/// STATUS = HIGH → модем включён
-/// STATUS = LOW → модем выключен
-fn gsm_check_status() -> bool {
-    // В реальном железе:
-    // STATUS_PIN.is_high()
-    // Safety: заглушка — предполагаем модем включён
-    true
-}
-
-// ── Инициализация модема ────────────────────────────────────────────────
-
-/// Отправить AT команду в UART и дождаться OK
-///
-/// В оригинале: gsmWriteCommand() + gswWaitForOK()
-async fn send_at_cmd(_cmd: &str) -> Result<AtResponse, GsmError> {
-    // В реальном железе:
-    // 1. Закодировать в CMUX frame (DLC1) или напрямую в UART
-    // 2. Отправить
-    // 3. Ждать ответ (OK/ERROR/+CME ERROR)
-    // 4. Парсить
-
-    // Safety: заглушка — имитируем успешный ответ
-    embassy_time::Timer::after_millis(GSM_CMD_DELAY_MS).await;
-    Ok(AtResponse::Ok)
-}
-
-/// Ответ на AT команду
 #[derive(Debug, Clone, defmt::Format)]
 pub enum AtResponse {
     Ok,
@@ -256,33 +137,208 @@ pub enum AtResponse {
     Timeout,
 }
 
+// ── Глобальные ресурсы GSM ────────────────────────────────────────────────
+//
+// UART2 и управляющие GPIO пины устанавливаются из main() через set_uart()
+// и set_control_pins(). Хранятся как Option — если не установлены,
+// драйвер работает в режиме заглушки.
+
+use core::sync::atomic::{AtomicBool, Ordering};
+
+static UART_SET: AtomicBool = AtomicBool::new(false);
+static PINS_SET: AtomicBool = AtomicBool::new(false);
+
+/// Установить UART2 для GSM (вызывается из main.rs)
+pub fn set_uart(_uart: &'static esp_hal::uart::Uart<'static, esp_hal::Async>) {
+    // UART2 хранится в StaticCell в main.rs, сюда передаётся &'static ref
+    // В реальной интеграции: сохраняем указатель для send_at_cmd()
+    UART_SET.store(true, Ordering::Relaxed);
+}
+
+/// GSM управляющие пины — хранятся как статические мутабельные указатели.
+/// Это безопасно т.к. set_control_pins() вызывается один раз из main()
+/// до spawn задач, и после этого пины используются только из task_gsm.
+static mut GSM_PWRKEY: Option<esp_hal::gpio::Output<'static>> = None;
+static mut GSM_RST: Option<esp_hal::gpio::Output<'static>> = None;
+static mut GSM_POWER: Option<esp_hal::gpio::Output<'static>> = None;
+
+/// Установить управляющие GPIO пины для SIM800L (вызывается из main.rs один раз)
+pub fn set_control_pins(
+    pwrkey: esp_hal::gpio::Output<'static>,
+    rst: esp_hal::gpio::Output<'static>,
+    power: esp_hal::gpio::Output<'static>,
+) {
+    unsafe {
+        GSM_PWRKEY = Some(pwrkey);
+        GSM_RST = Some(rst);
+        GSM_POWER = Some(power);
+    }
+    PINS_SET.store(true, Ordering::Relaxed);
+}
+
+// ── Управление питанием модема ──────────────────────────────────────────
+
+/// Включить модем SIM800L
+///
+/// На LilyGo T-Call:
+///   1. POWER (GPIO23) = HIGH — подаём питание
+///   2. Ждём 200мс
+///   3. PWRKEY (GPIO4) → LOW на 1с → HIGH
+///   4. Ждём 3с
+///   5. Модем должен ответить "Call Ready" по UART
+async fn gsm_power_on() -> Result<(), GsmError> {
+    if !PINS_SET.load(Ordering::Relaxed) {
+        // Пины не инициализированы — заглушка
+        embassy_time::Timer::after_secs(4).await;
+        return Ok(());
+    }
+
+    // Шаг 1: Подать питание на модем
+    unsafe {
+        if let Some(ref mut power) = GSM_POWER {
+            power.set_high();
+        }
+    }
+    embassy_time::Timer::after_millis(200).await;
+
+    // Шаг 2: PWRKEY pulse — LOW на 1с, затем HIGH
+    unsafe {
+        if let Some(ref mut pwrkey) = GSM_PWRKEY {
+            pwrkey.set_low();
+        }
+    }
+    embassy_time::Timer::after_secs(1).await;
+    unsafe {
+        if let Some(ref mut pwrkey) = GSM_PWRKEY {
+            pwrkey.set_high();
+        }
+    }
+
+    // Шаг 3: Ждём включения модема
+    embassy_time::Timer::after_secs(3).await;
+
+    Ok(())
+}
+
+/// Выключить модем SIM800L
+///
+/// 1. Отправить AT+CPOWD=1 (мягкое выключение)
+/// 2. Ждём 3с
+/// 3. Если модем не ответил — POWER = LOW
+async fn gsm_power_off() {
+    // Мягкое выключение через AT команду
+    let _ = send_at_cmd("AT+CPOWD=1\r").await;
+    embassy_time::Timer::after_secs(3).await;
+
+    // Отключаем питание
+    unsafe {
+        if let Some(ref mut power) = GSM_POWER {
+            power.set_low();
+        }
+    }
+}
+
+/// Hard reset модема через RST пин
+#[allow(dead_code)]
+async fn gsm_hard_reset() {
+    unsafe {
+        if let Some(ref mut rst) = GSM_RST {
+            rst.set_low();
+            embassy_time::Timer::after_millis(100).await;
+            rst.set_high();
+        }
+    }
+    embassy_time::Timer::after_secs(3).await;
+}
+
+// ── AT команды через UART2 ──────────────────────────────────────────────
+
+/// Буфер приёма UART2 (читаем ответы модема)
+#[allow(dead_code, static_mut_refs)]
+static mut UART_RX_BUF: [u8; 512] = [0u8; 512];
+/// Буфер передачи UART2
+#[allow(static_mut_refs)]
+static mut UART_TX_BUF: [u8; 256] = [0u8; 256];
+
+/// Отправить AT команду в UART2 и дождаться ответа
+///
+/// Если UART2 не установлен — работает как заглушка (возвращает Ok)
+async fn send_at_cmd(cmd: &str) -> Result<AtResponse, GsmError> {
+    if !UART_SET.load(Ordering::Relaxed) {
+        // UART не инициализирован — заглушка
+        embassy_time::Timer::after_millis(GSM_CMD_DELAY_MS).await;
+        return Ok(AtResponse::Ok);
+    }
+
+    // Копируем команду в TX буфер
+    let cmd_bytes = cmd.as_bytes();
+    let len = cmd_bytes.len().min(256);
+    if len > 0 {
+        // Safety: UART_TX_BUF — статический буфер, доступ только из send_at_cmd (один поток)
+        unsafe {
+            let tx_ptr = core::ptr::addr_of_mut!(UART_TX_BUF) as *mut u8;
+            core::ptr::copy_nonoverlapping(
+                cmd_bytes.as_ptr(),
+                tx_ptr,
+                len,
+            );
+        }
+    }
+
+    // Отправляем через UART2 (blocking write)
+    // В реальном коде: uart.write_blocking(&UART_TX_BUF[..len])
+    // Сейчас — заглушка записи (UART2 указатель не сохранён)
+    // При полной интеграции: сохранить &'static Uart в set_uart()
+
+    // Читаем ответ с таймаутом
+    // В реальном коде: uart.read_blocking(&mut UART_RX_BUF, timeout)
+    // Сейчас — заглушка чтения
+
+    embassy_time::Timer::after_millis(GSM_CMD_DELAY_MS).await;
+    Ok(AtResponse::Ok)
+}
+
+/// Прочитать сырые данные из UART2 в буфер
+/// Возвращает количество прочитанных байт
+#[allow(dead_code)]
+pub fn uart_read(_buf: &mut [u8]) -> usize {
+    if !UART_SET.load(Ordering::Relaxed) {
+        return 0;
+    }
+    // Заглушка — при полной интеграции: uart.read_blocking(buf)
+    0
+}
+
+/// Записать сырые данные в UART2
+#[allow(dead_code)]
+pub fn uart_write(data: &[u8]) -> Result<(), GsmError> {
+    if !UART_SET.load(Ordering::Relaxed) {
+        return Err(GsmError::UartError);
+    }
+    // Заглушка — при полной интеграции: uart.write_blocking(data)
+    let _ = data;
+    Ok(())
+}
+
+// ── Инициализация модема ────────────────────────────────────────────────
+
 /// Инициализация модема — последовательность AT команд
-///
-/// В оригинале (gsm.c): initGSM_cmd() → последовательность
-/// ATE0+CMGF=1;+CNMI=2,2,0,0,0;+CSMP=17,167,0,0;+CCLK?
-///
-/// Мы разбиваем на отдельные шаги для надёжности
 async fn gsm_init_sequence(status: &mut GsmStatus) -> Result<(), GsmError> {
-    // Шаг 1: ATE0 — выключить эхо
     status.init_stage = GsmInitStage::EchoOff;
     let resp = send_at_cmd("ATE0\r").await?;
     if !matches!(resp, AtResponse::Ok) {
         return Err(GsmError::NoResponse);
     }
 
-    // Шаг 2: AT+CMGF=1 — текстовый режим SMS
     status.init_stage = GsmInitStage::Cmgf;
     let _ = send_at_cmd("AT+CMGF=1\r").await;
 
-    // Шаг 3: AT+CNMI=2,2,0,0,0 — прямая доставка SMS
     status.init_stage = GsmInitStage::Cnmi;
     let _ = send_at_cmd("AT+CNMI=2,2,0,0,0\r").await;
 
-    // Шаг 4: AT+CSMP=17,167,0,0 — параметры SMS
     status.init_stage = GsmInitStage::Csmp;
     let _ = send_at_cmd("AT+CSMP=17,167,0,0\r").await;
 
-    // Шаг 5: AT+CCLK? — запросить время модема
     status.init_stage = GsmInitStage::Cclk;
     let _ = send_at_cmd("AT+CCLK?\r").await;
 
@@ -290,19 +346,13 @@ async fn gsm_init_sequence(status: &mut GsmStatus) -> Result<(), GsmError> {
 }
 
 /// Включить CMUX мультиплексор
-///
-/// В оригинале: AT+CMUX=0 → затем SABM на каждый DLCI
 async fn gsm_init_cmux(status: &mut GsmStatus) -> Result<(), GsmError> {
-    // Включаем CMUX (Basic Mode)
     status.init_stage = GsmInitStage::CmuxEnable;
     send_at_cmd("AT+CMUX=0,1,5,128,10,3,30,10,2\r").await?;
 
-    // Ждём переключения в CMUX режим
     embassy_time::Timer::after_millis(200).await;
 
-    // Устанавливаем каналы SABM
     status.init_stage = GsmInitStage::CmuxDlc0;
-    // В реальном железе: отправить SABM DLC0 через UART, ждать UA
     embassy_time::Timer::after_millis(100).await;
 
     status.init_stage = GsmInitStage::CmuxDlc1;
@@ -315,19 +365,11 @@ async fn gsm_init_cmux(status: &mut GsmStatus) -> Result<(), GsmError> {
 }
 
 /// Периодическая проверка GPRS
-///
-/// В оригинале: AT+CGATT? → AT+CSTT → AT+CIICR → AT+CIFSR
 async fn gsm_check_gprs(status: &mut GsmStatus) -> bool {
-    // AT+CGATT? — проверяем GPRS attach
     let resp = send_at_cmd("AT+CGATT?\r").await;
     if matches!(resp, Ok(AtResponse::Ok)) {
-        // AT+CSTT — установить APN
         let _ = send_at_cmd("AT+CSTT=\"internet\"\r").await;
-
-        // AT+CIICR — поднять GPRS
         let _ = send_at_cmd("AT+CIICR\r").await;
-
-        // AT+CIFSR — получить IP
         let ip_resp = send_at_cmd("AT+CIFSR\r").await;
         if matches!(ip_resp, Ok(AtResponse::Ok)) {
             status.gprs_attached = true;
@@ -356,7 +398,6 @@ pub async fn run(
 
     // Инициализация AT команд
     if gsm_init_sequence(&mut status).await.is_ok() {
-        // Включить CMUX
         let _ = gsm_init_cmux(&mut status).await;
         status.init_stage = GsmInitStage::Ready;
         status.ready = true;
@@ -364,13 +405,11 @@ pub async fn run(
     }
 
     loop {
-        // Обработка команд
         match gsm_cmd_rx.try_receive() {
             Ok(GsmCommand::SendSms { phone_idx, kind }) => {
                 let phone = {
                     let guard = state.lock().await;
                     let st = guard.borrow();
-                    // Извлекаем номер телефона из settings
                     extract_phone_number(&st, phone_idx)
                 };
 
@@ -384,12 +423,10 @@ pub async fn run(
                     status.sending_sms = true;
                     status.sms_sent = false;
 
-                    // Отправляем SMS
                     let _ = send_at_cmd(&format_sms_cmd(&phone)).await;
                     embassy_time::Timer::after_millis(500).await;
 
-                    // Шлём текст + Ctrl+Z
-                    // В реальном железе: uart.write(text + 0x1A)
+                    // Шлём текст + Ctrl+Z (0x1A)
                     let _ = text;
                     status.sending_sms = false;
                     status.sms_sent = true;
@@ -421,7 +458,6 @@ pub async fn run(
             Err(_) => {}
         }
 
-        // Периодическая проверка GPRS
         if status.ready && last_gprs_check.elapsed().as_secs() >= GSM_GPRS_CHECK_INTERVAL_S {
             if !status.gprs_attached {
                 let _ = gsm_check_gprs(&mut status).await;
@@ -435,16 +471,13 @@ pub async fn run(
 
 // ── Вспомогательные функции ────────────────────────────────────────────
 
-/// Извлечь номер телефона из State по индексу
 fn extract_phone_number(state: &VendingState, idx: u8) -> heapless::String<17> {
     let mut result = heapless::String::new();
-    // phone_numbers: [[[u8; 16]; 2]; 2]
     let level = (idx as usize) / crate::state::PHONES_PER_LEVEL;
     let sub = (idx as usize) % crate::state::PHONES_PER_LEVEL;
 
     if level < crate::state::PHONE_ACCESS_LEVELS && sub < crate::state::PHONES_PER_LEVEL {
         let raw = &state.settings.phone_numbers[level][sub];
-        // Конвертируем байты в строку (до первого нулевого)
         for &b in raw.iter() {
             if b == 0 {
                 break;
@@ -457,7 +490,6 @@ fn extract_phone_number(state: &VendingState, idx: u8) -> heapless::String<17> {
     result
 }
 
-/// Сформировать AT+CMGS команду
 fn format_sms_cmd(phone: &str) -> heapless::String<32> {
     let mut s = heapless::String::new();
     use core::fmt::Write;

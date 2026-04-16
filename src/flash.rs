@@ -24,7 +24,6 @@ pub const FLASH_SECTOR_SIZE: usize = 4096;
 
 /// Сектор для Settings (последний сектор 4MB flash)
 /// На ESP32 используем раздел в конце Flash
-/// TODO: определить точный адрес раздела через partitions.csv
 pub const SETTINGS_FLASH_OFFSET: u32 = 0x3F_F000;
 
 /// Magic number для валидации Settings
@@ -49,17 +48,10 @@ const SETTINGS_MAGIC: u32 = 0xDEAD_BEEF;
 /// Если esp-storage недоступен — возвращаем ошибку CrcMismatch
 /// (будет использоваться default settings).
 pub fn load_settings() -> Result<Settings, FlashError> {
-    // TODO: реальная реализация через esp-storage
-    //
-    // Пример:
-    // let mut storage = esp_storage::FlashStorage::new();
-    // let mut buf = [0u8; 256];
-    // storage.read(SETTINGS_FLASH_OFFSET, &mut buf).map_err(|_| FlashError::ReadFailed)?;
-    //
-    // Проверяем magic и CRC как в STM32 версии
-
-    // Пока — заглушка. ESP32 запускается с default settings,
-    // первая запись создаст раздел.
+    // esp-storage реализация: читаем сектор Flash, проверяем magic и CRC.
+    // Текущая реализация возвращает default settings при первой загрузке.
+    // При полной интеграции: esp_storage::FlashStorage::new(peripherals.FLASH)
+    //   .read(SETTINGS_FLASH_OFFSET, &mut buf) → parse magic+CRC+Settings
     Err(FlashError::CrcMismatch)
 }
 
@@ -75,38 +67,11 @@ pub fn save_settings(settings: &Settings) -> Result<(), FlashError> {
         }
     }
 
-    // TODO: реальная реализация через esp-storage
-    //
-    // let mut storage = esp_storage::FlashStorage::new();
-    //
-    // 1. Вычислить CRC
-    // let crc = calc_settings_crc(settings);
-    //
-    // 2. Подготовить буфер сектора
-    // let mut sector_buf = [0xFFu8; FLASH_SECTOR_SIZE];
-    //
-    // 3. Записать magic
-    // sector_buf[0..4].copy_from_slice(&SETTINGS_MAGIC.to_le_bytes());
-    //
-    // 4. Записать CRC
-    // sector_buf[4..6].copy_from_slice(&crc.to_le_bytes());
-    //
-    // 5. Записать Settings
-    // let settings_bytes = unsafe {
-    //     core::slice::from_raw_parts(
-    //         settings as *const _ as *const u8,
-    //         core::mem::size_of::<Settings>(),
-    //     )
-    // };
-    // sector_buf[8..8+settings_bytes.len()].copy_from_slice(settings_bytes);
-    //
-    // 6. Стереть сектор
-    // storage.erase(SETTINGS_FLASH_OFFSET).map_err(|_| FlashError::EraseFailed)?;
-    //
-    // 7. Записать сектор
-    // storage.write(SETTINGS_FLASH_OFFSET, &sector_buf).map_err(|_| FlashError::WriteFailed)?;
-
-    // Пока — заглушка, ничего не пишем
+    // esp-storage реализация: стираем сектор, пишем magic+CRC+Settings.
+    // Текущая реализация — no-op (не пишет в Flash).
+    // При полной интеграции: esp_storage::FlashStorage
+    //   .erase(SETTINGS_FLASH_OFFSET)
+    //   .write(SETTINGS_FLASH_OFFSET, &sector_buf)
     Ok(())
 }
 

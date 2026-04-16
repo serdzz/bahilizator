@@ -6,6 +6,10 @@
 //! Инициализация 4-bit mode:
 //!   0x33 → 0x32 → 0x28 → 0x0C → 0x06 → 0x01
 //! Перенос из lcd.c (оригинальный MSP430 код) на Embassy async I2C
+//!
+//! Поддерживает два режима работы:
+//!   1. С реальным I2C (display_task_with_i2c) — запись через esp-hal I2C
+//!   2. Без I2C (display_task) — заглушка, драйвер работает но не пишет на шину
 
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::signal::Signal;
@@ -105,50 +109,65 @@ pub fn make_str_16(s: &str) -> String<16> {
 
 // ── Hd44780I2c — драйвер HD44780 через PCF8574 ──────────────────────────
 //
-// I2C пишется через callback-функцию, т.к. владение I2C периферией
-// принадлежит display_task. Это позволяет избежать generic-параметра.
+// Абстракция над I2C: пишет байт на шину через trait-подобный интерфейс.
+// Реальная запись — через замыкание, которое захватывает &mut I2C.
 
-pub struct Hd44780I2c {
-    /// I2C адрес PCF8574 (0x27 или 0x3F)
-    addr: u8,
-    /// Состояние подсветки
-    backlight: bool,
-    /// Буфер дисплея для refresh
-    buf: [[u8; config::LCD_COLS as usize]; config::LCD_ROWS as usize],
-    /// Функция записи байта в I2C (вызывается из async контекста)
-    i2c_write: fn(u8, u8),
+/// Trait для записи байта в I2C — позволяет использовать разные бэкенды
+pub trait I2cWriter {
+    /// Записать один байт по I2C адресу
+    fn write_byte(&mut self, addr: u8, data: u8);
 }
 
-impl Hd44780I2c {
-    /// Создать экземпляр драйвера
-    /// addr — I2C адрес PCF8574
-    /// i2c_write — функция записи: fn(address, data_byte)
-    pub fn new(addr: u8, i2c_write: fn(u8, u8)) -> Self {
+/// Заглушка I2C — ничего не пишет, но драйвер работает
+pub struct I2cNoop;
+
+impl I2cWriter for I2cNoop {
+    fn write_byte(&mut self, _addr: u8, _data: u8) {
+        // Заглушка — I2C не подключён
+    }
+}
+
+/// Реальный I2C через esp-hal — владеет I2C периферией
+pub struct I2cEspHal {
+    i2c: esp_hal::i2c::master::I2c<'static, esp_hal::Blocking>,
+}
+
+impl I2cEspHal {
+    pub fn new(i2c: esp_hal::i2c::master::I2c<'static, esp_hal::Blocking>) -> Self {
+        Self { i2c }
+    }
+}
+
+impl I2cWriter for I2cEspHal {
+    fn write_byte(&mut self, addr: u8, data: u8) {
+        self.i2c.write(addr, &[data]).ok();
+    }
+}
+
+// ── Hd44780I2c — параметризованный по I2C writer ────────────────────────
+
+pub struct Hd44780I2c<W: I2cWriter> {
+    addr: u8,
+    backlight: bool,
+    buf: [[u8; config::LCD_COLS as usize]; config::LCD_ROWS as usize],
+    writer: W,
+}
+
+impl<W: I2cWriter> Hd44780I2c<W> {
+    /// Создать экземпляр драйвера с любым I2C writer
+    pub fn new(addr: u8, writer: W) -> Self {
         Self {
             addr,
             backlight: true,
             buf: [[b' '; config::LCD_COLS as usize]; config::LCD_ROWS as usize],
-            i2c_write,
+            writer,
         }
     }
 
     /// Инициализация HD44780 — 4-bit mode через I2C PCF8574
-    ///
-    /// Последовательность по даташиту Hitachi HD44780U:
-    /// 1. Ждём >15мс после VCC >4.5V
-    /// 2. Отправляем 0x03 три раза (8-bit mode)
-    /// 3. Переключаемся в 4-bit: 0x02
-    /// 4. Настраиваем: 4-bit, 2 строки, 5x8
-    /// 5. Включаем дисплей
-    /// 6. Очищаем
-    /// 7. Режим ввода: инкремент, без сдвига
-    /// 8. Загружаем custom chars (латышские буквы)
     pub async fn init(&mut self) {
-        // Шаг 1: Ждём стабилизации питания
         embassy_time::Timer::after_millis(50).await;
 
-        // Шаг 2-3: Инициализация 4-bit mode (как в оригинальном lcd.c)
-        // Отправляем 0x03 три раза с задержками, потом 0x02
         self.write_nibble(0x03, false).await;
         embassy_time::Timer::after_millis(5).await;
         self.write_nibble(0x03, false).await;
@@ -156,52 +175,35 @@ impl Hd44780I2c {
         self.write_nibble(0x03, false).await;
         embassy_time::Timer::after_micros(150).await;
 
-        // Переход в 4-bit mode
         self.write_nibble(0x02, false).await;
         embassy_time::Timer::after_micros(150).await;
 
-        // Шаг 4: Function Set — 4-bit, 2 строки, 5x8 (команда 0x28)
-        // Оригинал: LcdWtiteInstruction(0x2A) для page=1, 0x28 для page=0
         self.write_cmd(0x28).await;
-
-        // Шаг 5: Display On, Cursor Off, Blink Off (0x0C)
         self.write_cmd(CMD_DISPLAY_CONTROL | DISPLAY_ON).await;
-
-        // Шаг 6: Clear Display (0x01)
         self.write_cmd(CMD_CLEAR_DISPLAY).await;
         embassy_time::Timer::after_millis(CLEAR_DELAY_MS).await;
-
-        // Шаг 7: Entry Mode Set — Increment, No Shift (0x06)
         self.write_cmd(CMD_ENTRY_MODE_SET | ENTRY_INCREMENT | ENTRY_SHIFT_OFF)
             .await;
 
-        // Шаг 8: Загрузить custom chars (латышские символы)
         self.load_custom_chars().await;
 
-        // Возврат домой
         self.write_cmd(CMD_RETURN_HOME).await;
         embassy_time::Timer::after_millis(HOME_DELAY_MS).await;
     }
 
     /// Записать nibble (4 бита) в HD44780 через PCF8574
-    ///
-    /// PCF8574 layout: [D7 D6 D5 D4 BL EN RW RS]
-    /// nibble — 4 бита данных (старший nibль команды/данных)
-    /// rs — true = данные (RS=1), false = команда (RS=0)
     async fn write_nibble(&mut self, nibble: u8, rs: bool) {
         let rs_bit = if rs { RS_BIT } else { 0x00 };
-        let rw_bit = 0; // Всегда запись: RW=0
+        let rw_bit = 0;
         let bl_bit = if self.backlight { BL_BIT } else { 0x00 };
-        let data_bits = (nibble & 0x0F) << 4; // D4-D7 на P4-P7
+        let data_bits = (nibble & 0x0F) << 4;
 
-        // Формируем байт для PCF8574: data_bits | RS | RW | BL | EN
         let byte_hi = data_bits | rs_bit | rw_bit | bl_bit | EN_BIT;
-        let byte_lo = data_bits | rs_bit | rw_bit | bl_bit; // EN=0
+        let byte_lo = data_bits | rs_bit | rw_bit | bl_bit;
 
-        // Строб E: HIGH → задержка → LOW
-        (self.i2c_write)(self.addr, byte_hi);
+        self.writer.write_byte(self.addr, byte_hi);
         embassy_time::Timer::after_micros(EN_PULSE_US).await;
-        (self.i2c_write)(self.addr, byte_lo);
+        self.writer.write_byte(self.addr, byte_lo);
         embassy_time::Timer::after_micros(EN_CYCLE_US).await;
     }
 
@@ -209,8 +211,6 @@ impl Hd44780I2c {
     pub async fn write_cmd(&mut self, cmd: u8) {
         self.write_nibble(cmd >> 4, false).await;
         self.write_nibble(cmd & 0x0F, false).await;
-        // Большинство команд выполняются за 37мкс, но Clear и Home — дольше
-        // Задержка для простых команд
         embassy_time::Timer::after_micros(CMD_DELAY_US).await;
     }
 
@@ -229,7 +229,6 @@ impl Hd44780I2c {
     }
 
     /// Установить курсор в позицию (x, y)
-    /// Строка 0 → DDRAM addr 0x00, строка 1 → DDRAM addr 0x40
     pub async fn set_cursor(&mut self, x: u8, y: u8) {
         let row_offset: [u8; 2] = [0x00, 0x40];
         let offset = row_offset[y as usize % config::LCD_ROWS as usize] + (x % config::LCD_COLS);
@@ -249,15 +248,12 @@ impl Hd44780I2c {
     }
 
     /// Установить custom-символ в CGRAM
-    /// location: 0-7 (8 доступных слотов)
-    /// char_map: 8 байт, каждый — одна строка 5 пикселей
     pub async fn set_custom_char(&mut self, location: u8, char_map: &[u8; 8]) {
         self.write_cmd(CMD_SET_CGRAM_ADDR | ((location & 0x07) << 3))
             .await;
         for &row in char_map {
             self.write_data(row).await;
         }
-        // Вернуть DDRAM адрес в 0 после записи CGRAM
         self.write_cmd(CMD_SET_DDRAM_ADDR).await;
     }
 
@@ -274,22 +270,16 @@ impl Hd44780I2c {
     /// Установить подсветку
     pub fn set_backlight(&mut self, on: bool) {
         self.backlight = on;
-        // Подсветка обновится при следующей записи в PCF8574
     }
 
-    /// Полное обновление дисплея из буфера (как LcdUpdate в оригинале)
-    ///
-    /// Переинициализирует дисплей и выводит содержимое буфера.
-    /// Используется при scroll-анимации.
+    /// Полное обновление дисплея из буфера
     pub async fn refresh(&mut self) {
-        // Выводим строку 0
         self.write_cmd(CMD_SET_DDRAM_ADDR).await;
         for x in 0..config::LCD_COLS as usize {
             let ch = self.buf[0][x];
             self.write_data(ch).await;
         }
 
-        // Выводим строку 1
         self.write_cmd(CMD_SET_DDRAM_ADDR | 0x40).await;
         for x in 0..config::LCD_COLS as usize {
             let ch = self.buf[1][x];
@@ -320,33 +310,16 @@ impl Hd44780I2c {
     }
 
     /// Загрузить custom-символы (латышские буквы)
-    ///
-    /// Перенос из оригинального lcd.c:
-    ///   slot 1 = ā (a с макроном)
-    ///   slot 2 = ņ (n с седилью)
-    ///   slot 3 = ī (i с макроном)
-    ///
-    /// Также добавлены символы из текущей версии:
-    ///   ē, ū, ķ, ļ, š
     async fn load_custom_chars(&mut self) {
-        // Оригинальные символы из lcd.c MSP430
         let chars: [[u8; 8]; 8] = [
-            // Слот 0: ā (a с макроном)
-            [0x02, 0x00, 0x0E, 0x11, 0x1F, 0x11, 0x11, 0x00],
-            // Слот 1: ē (e с макроном)
-            [0x02, 0x00, 0x0E, 0x11, 0x1F, 0x11, 0x11, 0x00],
-            // Слот 2: ī (i с макроном)
-            [0x02, 0x00, 0x0C, 0x04, 0x04, 0x04, 0x0E, 0x00],
-            // Слот 3: ū (u с макроном)
-            [0x02, 0x00, 0x0E, 0x11, 0x11, 0x11, 0x0E, 0x00],
-            // Слот 4: ķ (k с седилью)
-            [0x0C, 0x04, 0x0E, 0x12, 0x1F, 0x12, 0x12, 0x00],
-            // Слот 5: ļ (l с седилью)
-            [0x0C, 0x04, 0x1E, 0x10, 0x1C, 0x12, 0x1C, 0x00],
-            // Слот 6: ņ (n с седилью)
-            [0x00, 0x00, 0x16, 0x19, 0x11, 0x15, 0x15, 0x00],
-            // Слот 7: š (s с шапкой)
-            [0x04, 0x00, 0x1E, 0x20, 0x1C, 0x22, 0x1C, 0x00],
+            [0x02, 0x00, 0x0E, 0x11, 0x1F, 0x11, 0x11, 0x00], // ā
+            [0x02, 0x00, 0x0E, 0x11, 0x1F, 0x11, 0x11, 0x00], // ē
+            [0x02, 0x00, 0x0C, 0x04, 0x04, 0x04, 0x0E, 0x00], // ī
+            [0x02, 0x00, 0x0E, 0x11, 0x11, 0x11, 0x0E, 0x00], // ū
+            [0x0C, 0x04, 0x0E, 0x12, 0x1F, 0x12, 0x12, 0x00], // ķ
+            [0x0C, 0x04, 0x1E, 0x10, 0x1C, 0x12, 0x1C, 0x00], // ļ
+            [0x00, 0x00, 0x16, 0x19, 0x11, 0x15, 0x15, 0x00], // ņ
+            [0x04, 0x00, 0x1E, 0x20, 0x1C, 0x22, 0x1C, 0x00], // š
         ];
         for (i, char_data) in chars.iter().enumerate() {
             self.set_custom_char(i as u8, char_data).await;
@@ -354,20 +327,12 @@ impl Hd44780I2c {
     }
 }
 
-// ── display_task — задача вывода на дисплей ───────────────────────────────
-//
-/// Получает DisplayCommand через Signal и выводит на HD44780 через I2C
-///
-/// I2C пишется через функцию-замыкание, которая вызывается в async контексте
-/// display_task. Реальная запись в I2C — через esp-hal I2C::write().
-///
-/// Для компиляции без реальной I2C периферии используем заглушку i2c_write_stub.
+// ── display_task — с заглушкой I2C (без реальной периферии) ────────────
+
 pub async fn display_task(signal: &'static Signal<CriticalSectionRawMutex, DisplayCommand>) {
-    // Создаём драйвер с заглушкой I2C (заменить на реальную при интеграции)
-    let mut lcd = Hd44780I2c::new(config::LCD_I2C_ADDR, i2c_write_stub);
+    let mut lcd = Hd44780I2c::new(config::LCD_I2C_ADDR, I2cNoop);
     lcd.init().await;
 
-    // Показать приветствие
     lcd.set_cursor(0, 0).await;
     lcd.print("БАХИЛИЗАТОР").await;
     lcd.set_cursor(0, 1).await;
@@ -376,7 +341,6 @@ pub async fn display_task(signal: &'static Signal<CriticalSectionRawMutex, Displ
     lcd.clear().await;
 
     loop {
-        // Ждём команду с таймаутом (для scroll-обновлений)
         let cmd =
             embassy_futures::select::select(signal.wait(), embassy_time::Timer::after_millis(50))
                 .await;
@@ -385,15 +349,44 @@ pub async fn display_task(signal: &'static Signal<CriticalSectionRawMutex, Displ
             embassy_futures::select::Either::First(cmd) => {
                 process_display_command(&mut lcd, cmd).await;
             }
-            embassy_futures::select::Either::Second(_) => {
-                // Таймаут — ничего не делаем (можно добавить scroll)
+            embassy_futures::select::Either::Second(_) => {}
+        }
+    }
+}
+
+// ── display_task_with_i2c — с реальным esp-hal I2C ────────────────────
+
+pub async fn display_task_with_i2c(
+    signal: &'static Signal<CriticalSectionRawMutex, DisplayCommand>,
+    i2c: esp_hal::i2c::master::I2c<'static, esp_hal::Blocking>,
+) {
+    let writer = I2cEspHal::new(i2c);
+    let mut lcd = Hd44780I2c::new(config::LCD_I2C_ADDR, writer);
+    lcd.init().await;
+
+    lcd.set_cursor(0, 0).await;
+    lcd.print("БАХИЛИЗАТОР").await;
+    lcd.set_cursor(0, 1).await;
+    lcd.print("v2.0 LilyGo").await;
+    embassy_time::Timer::after_secs(2).await;
+    lcd.clear().await;
+
+    loop {
+        let cmd =
+            embassy_futures::select::select(signal.wait(), embassy_time::Timer::after_millis(50))
+                .await;
+
+        match cmd {
+            embassy_futures::select::Either::First(cmd) => {
+                process_display_command(&mut lcd, cmd).await;
             }
+            embassy_futures::select::Either::Second(_) => {}
         }
     }
 }
 
 /// Обработка команды дисплея
-async fn process_display_command(lcd: &mut Hd44780I2c, cmd: DisplayCommand) {
+async fn process_display_command<W: I2cWriter>(lcd: &mut Hd44780I2c<W>, cmd: DisplayCommand) {
     match cmd {
         DisplayCommand::Clear => {
             lcd.clear().await;
@@ -434,16 +427,4 @@ async fn process_display_command(lcd: &mut Hd44780I2c, cmd: DisplayCommand) {
             lcd.set_backlight(on);
         }
     }
-}
-
-/// Заглушка записи в I2C — заменяется реальной при интеграции с esp-hal
-///
-/// Safety: В реальной интеграции эта функция будет заменена на замыкание,
-/// захватывающее &'static mut I2C. Сейчас — просто заглушка для компиляции.
-fn i2c_write_stub(_addr: u8, _data: u8) {
-    // TODO: реальная запись через esp-hal I2C
-    // Пример интеграции:
-    // let i2c = unsafe { &mut *I2C_PTR };
-    // let buf = [data];
-    // block_on(i2c.write(addr, &buf)).ok();
 }
