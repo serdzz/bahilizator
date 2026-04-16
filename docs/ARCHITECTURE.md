@@ -1,6 +1,19 @@
-# Архитектура Бахилизатора v2.0
+# Архитектура Бахилизатора v2.0 (ESP32 / LilyGo T-Call)
 
-Детальное описание программной архитектуры Rust/Embassy порта.
+Детальное описание программной архитектуры Rust/Embassy порта для ESP32.
+
+## Целевая плата
+
+**LilyGo T-Call SIM800 v20190610**
+- ESP32 Xtensa LX6 dual-core, 520KB SRAM, 4MB Flash
+- SIM800L onboard (UART2, GPIO26/27)
+- IP5306 power management (I2C 0x75)
+- I2C0: дисплей (GPIO21/22), I2C1: EEPROM (GPIO18/19)
+
+**Ветка:** `esp32` | **Target:** `xtensa-esp32-none-elf`
+**HAL:** `esp-hal` v1.0 | **Framework:** Embassy async
+
+**Сборка:** `cargo +esp build --release -Zbuild-std=core,alloc`
 
 ## Карта Embassy задач
 
@@ -334,47 +347,44 @@ while let Some(device) = onewire.search_next(&mut search, delay).ok() {
 
 CRC-8 Dallas/Maxim проверяется внутри crate.
 
-### I2C (PB6/PB7)
+### I2C0 — Дисплей (GPIO21/GPIO22)
 
-Общая шина для двух устройств:
+I2C0 эксклюзивно для дисплея:
 - **PCF8574** (0x27) — HD44780 backpack, частые записи
-- **24C08** (0x50) — EEPROM, редкие записи
+- **IP5306** (0x75) — Power management IC
 
-I2C частота: 100 kHz (slow mode для совместимости с 24C08).
+Частота: 100 kHz. Передаётся по значению в `task_display`.
 
-### 1-Wire (PA11) — one-wire-bus crate
+### I2C1 — EEPROM (GPIO18/GPIO19)
 
-Используется crate `one-wire-bus` вместо ручного bit-bang.
-Тайминги и CRC-8 Dallas/Maxim обрабатываются внутри crate.
-Опрос каждые 200мс, whitelist ключей в Settings.
+I2C1 для персистентного хранения:
+- **24C08** (0x50) — EEPROM 1024 байт, wear-levelling
+
+Частота: 100 kHz. Через `StaticCell` + `nvram::set_i2c()`.
+
+**Разделение шин**: I2C0 (дисплей) и I2C1 (EEPROM) на разных I2C контроллерах.
+Устраняет конфликт владения и contention на шине.
+
+### 1-Wire — не подключён на LilyGo T-Call
+
+GPIO4 занят под SIM800L PWRKEY. Нет свободного output-capable GPIO
+для 1-Wire Open-Drain. EspHalPin — GPIO пин-заглушка, позволяет
+скомпилировать код, но 1-Wire не работает.
+
+Для реального iButton: освободить GPIO0, GPIO2 или GPIO32.
 
 ## Память
 
-### Flash layout
+### Flash (4MB, esp-storage)
 
-```
-0x0800_0000 ┌──────────────────────────┐
-            │                          │
-            │   Прошивка (~35 KB)      │
-            │   (text + rodata)        │
-            │                          │
-0x0800_FBFF ├──────────────────────────┤
-            │   Page 63 (1 KB)         │ ← SETTINGS_FLASH_ADDR
-0x0800_FC00 │   ┌──────────────────┐   │
-            │   │ magic 0xDEADBEEF │   │  [0..4]
-            │   │ CRC16            │   │  [4..6]
-            │   │ padding 0xFFFF   │   │  [6..8]
-            │   │ Settings struct  │   │  [8..8+N]
-            │   └──────────────────┘   │
-0x0800_FFFF └──────────────────────────┘
-```
+ESP32 4MB Flash разделён через partition table:
+- 0x0000–0x8000: bootloader
+- 0x8000–0x9000: partition table
+- 0x9000–0x3D000: приложение (~212KB)
+- 0x3D000–0x3F000: NVS (Non-Volatile Storage)
+- Другие разделы по partition table
 
-Запись Settings:
-1. Сравнить CRC — не писать если не изменился
-2. Unlock Flash (KEYR = 0x45670123, 0xCDEF89AB)
-3. Стереть page 63 (1 KB → 0xFF)
-4. Программировать half-words (16 бит)
-5. Lock Flash
+Settings хранятся в NVS (esp-storage) вместо Flash page.
 
 ### EEPROM 24C08 layout (Wear Levelling)
 
@@ -409,15 +419,16 @@ I2C частота: 100 kHz (slow mode для совместимости с 24C0
 ┌────────────────────────────────────────────┐
 │ .bss / .data                               │
 │   VendingState (~600B)                     │
-│   Hopper instances (2 × ~40B)              │
-│   IbuttonDriver (~8B)                      │
+│   UART2 TX/RX static refs                 │
+│   I2C1 static ref (EEPROM)                 │
 │   CmuxDecoder (~302B)                      │
 │   Statics (channels, signals, atoms)       │
 │   Task stacks (Embassy internal)           │
-│   defmt-rtt buffer                         │
+│   defmt-espflash buffer                    │
 │                                            │
 │ Heap: нет (no_std, heapless only)          │
-│ Итого: ~4.8 KB из 20 KB                   │
+│ ESP32: 520KB SRAM, используется ~194KB     │
+│ Flash: ~80KB из 4MB                        │
 └────────────────────────────────────────────┘
 ```
 

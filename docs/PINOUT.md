@@ -1,247 +1,186 @@
-# Распиновка STM32F103C8T6 Bluepill — Бахилизатор
+# Распиновка LilyGo T-Call SIM800 v20190610 — Бахилизатор ESP32
 
-Полная таблица назначения пинов для проекта Бахилизатор v2.0.
+Полная таблица назначения пинов для проекта Бахилизатор v2.0 (ESP32 branch).
 
-## Общая таблица
+## Плата: LilyGo T-Call SIM800 v20190610
 
-| Пин | Порт | AF | Назначение | Направление | Примечание |
-|-----|------|----|-----------|-------------|------------|
-| PA0 | GPIO | — | GSM PWRKEY | Output (PP) | NPN ключ, инверсия |
-| PA1 | GPIO | — | GSM STATUS | Input (PU) | Делитель 3.3V |
-| PA2 | GPIO | — | GSM DTR | Output (PP) | Управление сном |
-| PA3 | GPIO | — | Кнопка PREV | Input (PU) | Active-low, EXTI |
-| PA4 | GPIO | — | Кнопка NEXT | Input (PU) | Active-low, EXTI |
-| PA5 | GPIO | — | Кнопка OK | Input (PU) | Active-low, EXTI |
-| PA6 | GPIO | — | Кнопка CANCEL | Input (PU) | Active-low, EXTI |
-| PA7 | GPIO | — | Дверь 1 | Input (PU) | Active-low, EXTI |
-| PA8 | GPIO | — | Дверь 2 | Input (PU) | Active-low, EXTI |
-| PA9 | GPIO | AF1 | USART1 TX | AF Push-Pull | → SIM800L RXD |
-| PA10 | GPIO | AF1 | USART1 RX | Input (PU) | ← SIM800L TXD |
-| PA11 | GPIO | — | 1-Wire iButton | Output OD / Input | Bit-bang |
-| PB0 | GPIO | — | LED зелёный | Output (PP) | Активный высокий |
-| PB1 | GPIO | — | Power Fail | Input (PU) | Детектор питания |
-| PB6 | GPIO | AF4 | I2C1 SCL | AF Open-Drain | → PCF8574 + 24C08 |
-| PB7 | GPIO | AF4 | I2C1 SDA | AF Open-Drain | → PCF8574 + 24C08 |
-| PB8 | GPIO | — | Coin CH1 | Input (PU) | Через NPN инверсию |
-| PB9 | GPIO | — | Coin CH2 | Input (PU) | Через NPN инверсию |
-| PB10 | GPIO | — | Coin CH3 | Input (PU) | Через NPN инверсию |
-| PB11 | GPIO | — | Coin CH4 | Input (PU) | Через NPN инверсию |
-| PB12 | GPIO | — | Coin CH5 | Input (PU) | Через NPN инверсию |
-| PB13 | GPIO | — | Coin CH6 | Input (PU) | Через NPN инверсию |
-| PB14 | GPIO | — | Coin BLOCK | Output (PP) | Active HIGH, без инверсии |
-| PB15 | GPIO | — | Hopper A Enable | Output (PP) | LOW = мотор ON |
-| PC13 | GPIO | — | (свободен) | — | Bluepill LED, не используется |
-| PC14 | GPIO | — | (свободен) | — |  |
-| PC15 | GPIO | — | LED красный | Output (PP) | Активный высокий |
+- **МК**: ESP32 Xtensa LX6 dual-core, 520KB SRAM, 4MB Flash
+- **Модем**: SIM800L onboard (UART2)
+- **Питание**: IP5306 I2C power management (0x75)
+- **USB**: Micro-USB (CP2102 UART bridge)
 
-**PP** = Push-Pull, **PU** = Pull-Up, **OD** = Open-Drain
+## Общая таблица GPIO
+
+| GPIO | Направление | Назначение | Примечание |
+|------|------------|-----------|------------|
+| GPIO0 | Input (PD) | Coin CH2 | Strapping (boot mode), pull-down |
+| GPIO2 | Input (PU) | Кнопка CANCEL | Strapping (boot log), после boot — кнопка |
+| GPIO4 | Output | GSM PWRKEY | LOW pulse >1с включает модем |
+| GPIO5 | Output | GSM RST | LOW = hard reset модема |
+| GPIO12 | Input (PD) | Coin CH1 | Strapping MTDI, **внешний pull-down обязателен** |
+| GPIO13 | Output | LED | User LED на T-Call v1.4 |
+| GPIO14 | Input (PD) | Coin CH3 | — |
+| GPIO15 | Input (PD) | Coin CH4 | Strapping MTDO |
+| GPIO16 | Input (PD) | Coin CH5 | Не доступен при PSRAM |
+| GPIO17 | Input (PD) | Coin CH6 | Не доступен при PSRAM |
+| GPIO18 | I2C1 SDA | EEPROM 24C08 | SDA для I2C1 |
+| GPIO19 | I2C1 SCL | EEPROM 24C08 | SCL для I2C1 |
+| GPIO21 | I2C0 SDA | HD44780 (PCF8574) | SDA для I2C0 |
+| GPIO22 | I2C0 SCL | HD44780 (PCF8574) | SCL для I2C0 |
+| GPIO23 | Output | GSM POWER | HIGH = питание модема ON |
+| GPIO25 | Output | Hopper B Enable | LOW = мотор ON |
+| GPIO26 | UART2 TX | → SIM800L RXD | TX модема |
+| GPIO27 | UART2 RX | ← SIM800L TXD | RX модема |
+| GPIO32 | Output | Hopper A Enable | LOW = мотор ON |
+| GPIO33 | Input (PU) | Кнопка NEXT | — |
+| GPIO34 | Input (PU) | Hopper A Sensor | Input-only, нет pull-up (внешний) |
+| GPIO35 | Input (PU) | Hopper B Sensor | Input-only, нет internal pull-up |
+| GPIO36 | Input (PU) | Кнопка PREV | Input-only (VP) |
+| GPIO39 | Input (PU) | Кнопка OK | Input-only (VN) |
+
+**PD** = Pull-Down, **PU** = Pull-Up
 
 ## Группировка по подсистемам
 
-### I2C (дисплей + EEPROM)
+### I2C0 — Дисплей (SDA=GPIO21, SCL=GPIO22)
 
-| Пин | Назначение | Устройство | Адрес |
-|-----|-----------|-----------|-------|
-| PB6 | I2C1 SCL | Общая шина | — |
-| PB7 | I2C1 SDA | Общая шина | — |
+| Устройство | I2C адрес | Описание |
+|-----------|----------|----------|
+| PCF8574 | 0x27 | HD44780 I2C backpack |
+| IP5306 | 0x75 | Power management IC |
 
-Устройства на шине:
-- PCF8574 (0x27) — HD44780 I2C backpack
-- 24C08 (0x50) — EEPROM для VendingStateData
+Частота: 100 kHz. I2C0 передаётся по значению в `task_display`.
 
-Частота: 100 kHz. Pull-up резисторы 4.7kΩ на SDA/SCL к +3.3V.
+### I2C1 — EEPROM (SDA=GPIO18, SCL=GPIO19)
 
-### UART (GSM)
+| Устройство | I2C адрес | Описание |
+|-----------|----------|----------|
+| 24C08 | 0x50 | EEPROM 1024 байт, wear-levelling |
 
-| Пин | AF | Назначение | Направление |
-|-----|----|-----------|-------------|
-| PA9 | USART1_TX | → SIM800L RXD | Output |
-| PA10 | USART1_RX | ← SIM800L TXD | Input |
+Частота: 100 kHz. I2C1 через `StaticCell` + `nvram::set_i2c()`.
 
-Скорость: 115200 8N1. Cross-connect: STM32 TX → SIM800L RX, STM32 RX ← SIM800L TX.
+**Почему два I2C**: Разделение шин — дисплей и EEPROM на разных I2C
+контроллерах (I2C0 и I2C1). Устраняет конфликт владения и повышает
+надёжность (no bus contention).
+
+### UART2 — SIM800L (TX=GPIO26, RX=GPIO27)
+
+| Параметр | Значение |
+|---------|---------|
+| Скорость | 115200 8N1 |
+| TX | GPIO26 → SIM800L RXD |
+| RX | GPIO27 ← SIM800L TXD |
+
+UART2 split на `UartTx`/`UartRx` через `gsm::set_uart()`.
+Асинхронный режим (`.into_async()`) для Embassy.
 
 ### GSM управление
 
-| Пин | Назначение | Направление | Примечание |
-|-----|-----------|-------------|------------|
-| PA0 | PWRKEY | Output (PP) | NPN транзистор, инверсия |
-| PA1 | STATUS | Input (PU) | HIGH = модем включён |
-| PA2 | DTR | Output (PP) | HIGH = модем активен |
+| GPIO | Назначение | Активный уровень | Описание |
+|------|-----------|----------------|---------|
+| GPIO4 | PWRKEY | LOW pulse >1с | Включает/выключает модем |
+| GPIO5 | RST | LOW | Hard reset модема |
+| GPIO23 | POWER | HIGH | Питание модема ON |
 
-**PWRKEY** — NPN транзистор (BC547):
-```
-STM32 PA0 ──→ 10kΩ ──→ Base
-                     Emitter → GND
-                     Collector → SIM800L PWRKEY
-                     (SIM800L PWRKEY имеет внутренний pull-up)
-```
+### Монетоприёмник NRI G-13.6000
 
-**STATUS** — делитель напряжения (SIM800L STATUS = 2.8V):
-```
-SIM800L STATUS ──→ 1kΩ ──┬─→ STM32 PA1
-                          │
-                         2kΩ
-                          │
-                         GND
-```
+| GPIO | Назначение | Направление | Примечание |
+|------|-----------|------------|-----------|
+| GPIO12 | Coin CH1 | Input (PD) | Strapping MTDI, внешний pull-down |
+| GPIO0 | Coin CH2 | Input (PD) | Strapping boot, после boot — вход |
+| GPIO14 | Coin CH3 | Input (PD) | — |
+| GPIO15 | Coin CH4 | Input (PD) | Strapping MTDO |
+| GPIO16 | Coin CH5 | Input (PD) | Нет при PSRAM |
+| GPIO17 | Coin CH6 | Input (PD) | Нет при PSRAM |
 
-### Монетоприёмник NRI G-13
+**NPN инверсия**: NRI G-13 активный-low (+12V) → NPN BC547 → HIGH на GPIO.
 
-| Пин | Назначение | Направление | Примечание |
-|-----|-----------|-------------|------------|
-| PB8 | Coin CH1 | Input (PU) | Через NPN, инверсия |
-| PB9 | Coin CH2 | Input (PU) | Через NPN, инверсия |
-| PB10 | Coin CH3 | Input (PU) | Через NPN, инверсии |
-| PB11 | Coin CH4 | Input (PU) | Через NPN, инверсия |
-| PB12 | Coin CH5 | Input (PU) | Через NPN, инверсия |
-| PB13 | Coin CH6 | Input (PU) | Через NPN, инверсия |
-| PB14 | Coin BLOCK | Output (PP) | Active HIGH, прямое управление |
-
-**NPN инверсия** (для PB8–PB13):
 ```
-NRI output (active low) ──→ 10kΩ → Base
-                            NPN (BC547)
+NRI output (active low) ──→ 10kΩ → Base (BC547)
                             Emitter → GND
-                            Collector → STM32 GPIO + 10kΩ pull-up → +3.3V
+                            Collector → ESP32 GPIO + 10kΩ pull-up → +3.3V
 ```
-
-Логика: NRI low → NPN открыт → Collector = HIGH на GPIO → "монета на линии"
-
-**Coin BLOCK** (PB14): прямое управление, без NPN.
-HIGH на PB14 = блокировка монетоприёмника (NRI pin 6).
 
 ### Хопперы
 
-| Пин | Назначение | Направление | Примечание |
-|-----|-----------|-------------|------------|
-| PB15 | Hopper A Enable | Output (PP) | LOW = мотор ON |
-| PAxx | Hopper A Sensor | Input (PU) | TODO: назначить пин |
-| PBxx | Hopper B Enable | Output (PP) | TODO: назначить пин |
-| PAxx | Hopper B Sensor | Input (PU) | TODO: назначить пин |
-
-**Управление мотором** — NPN транзистор:
-```
-STM32 GPIO ──→ 10kΩ → Base
-                     NPN (BC547)
-                     Emitter → GND
-                     Collector → Hopper Motor (+12V через мотор)
-```
-
-**Сенсор** — оптический датчик хоппера, active-low через NPN:
-```
-Hopper sensor ──→ NPN → STM32 GPIO + pull-up
-```
-
-**Примечание:** Точные пины сенсоров и Enable хоппера B — TODO, зависят от
-конкретной схемы подключения.
+| GPIO | Назначение | Направление | Примечание |
+|------|-----------|------------|-----------|
+| GPIO32 | Hopper A Enable | Output | LOW = мотор ON |
+| GPIO25 | Hopper B Enable | Output | LOW = мотор ON |
+| GPIO34 | Hopper A Sensor | Input | Input-only, внешний pull-up |
+| GPIO35 | Hopper B Sensor | Input | Input-only, внешний pull-up |
 
 ### Кнопки
 
-| Пин | Назначение | Направление | Примечание |
-|-----|-----------|-------------|------------|
-| PA3 | PREV ("<") | Input (PU) | Active-low, EXTI |
-| PA4 | NEXT (">") | Input (PU) | Active-low, EXTI |
-| PA5 | OK | Input (PU) | Active-low, EXTI |
-| PA6 | CANCEL | Input (PU) | Active-low, EXTI |
+| GPIO | Назначение | Направление | Примечание |
+|------|-----------|------------|-----------|
+| GPIO36 | PREV ("<") | Input (PU) | Input-only |
+| GPIO33 | NEXT (">") | Input (PU) | — |
+| GPIO39 | OK | Input (PU) | Input-only |
+| GPIO2 | CANCEL | Input (PU) | Strapping, после boot — кнопка |
 
-Все кнопки — между пином и GND. Внутренний pull-up = не нажата (HIGH).
-Нажата = LOW. EXTI по falling edge.
-
-Debounce: 50мс программный в `buttons::run()`.
-
-### Двери
-
-| Пин | Назначение | Направление | Примечание |
-|-----|-----------|-------------|------------|
-| PA7 | Дверь 1 | Input (PU) | Active-low, EXTI |
-| PA8 | Дверь 2 | Input (PU) | Active-low, EXTI |
-
-Датчик двери = геркон / микропереключатель.
-Закрыта = HIGH (pull-up). Открыта = LOW.
-EXTI по обоим фронтам (открытие + закрытие).
-
-### 1-Wire iButton
-
-| Пин | Назначание | Направление | Примечание |
-|-----|-----------|-------------|------------|
-| PA11 | 1-Wire Data | Output OD / Input | Bit-bang |
-
-```
-PA11 ──── 4.7kΩ ──── +3.3V (pull-up)
-  │
-  └──── Data DS1990A iButton
-         │
-        GND
-```
-
-PA11 конфигурируется динамически:
-- **Передача:** Output Open-Drain, LOW = pull bus low
-- **Чтение:** Input с pull-up = released bus
-
-Тайминги: reset 480µs, write-1 = 6µs, write-0 = 60µs, read = 10µs+9µs sample.
+Все кнопки — между пином и GND. Внутренний pull-up = HIGH (не нажата).
 
 ### LED
 
-| Пин | Назначение | Направление | Примечание |
-|-----|-----------|-------------|------------|
-| PC15 | LED красный | Output (PP) | Ошибка |
-| PB0 | LED зелёный | Output (PP) | Норма |
+| GPIO | Назначение | Направление |
+|------|-----------|------------|
+| GPIO13 | User LED | Output |
 
-### Power Fail
+### iButton 1-Wire
 
-| Пин | Назначание | Направление | Примечание |
-|-----|-----------|-------------|------------|
-| PB1 | Power Fail | Input (PU) | LOW = питание падает |
+**Не подключён на LilyGo T-Call** — GPIO4 занят под SIM800L PWRKEY.
+Нет свободного output-capable GPIO для 1-Wire Open-Drain.
 
-Подключение: компаратор или делитель от основного питания.
-При падении ниже порога → PB1 = LOW → аварийное сохранение в EEPROM.
+Если нужен iButton — варианты:
+1. Освободить GPIO0 (Coin CH2) — но это strapping pin
+2. Убрать один Coin channel
+3. Использовать GPIO32 (Hopper A Enable) если хоппер не нужен
 
-## Примечания по питанию
+## ESP32 Strapping Pins
 
-### Уровни напряжения
+| GPIO | Функция при boot | Ограничение |
+|------|-----------------|------------|
+| GPIO0 | Boot mode (HIGH = SPI boot) | Внешний pull-up 10kΩ |
+| GPIO2 | Boot log enable (LOW = silent) | Нужен LOW при boot |
+| GPIO5 | SDIO timing (HIGH = 3.3V) | — |
+| GPIO12 | Voltage (HIGH = 1.8V, LOW = 3.3V) | **Внешний pull-down обязателен** |
+| GPIO15 | Boot message enable (HIGH = verbose) | — |
+
+**Критично**: GPIO12 без внешнего pull-down может вызвать boot при 1.8V вместо 3.3V — ESP32 не загрузится.
+
+## Input-Only GPIO
+
+На ESP32 пины GPIO34–39 — только вход, без internal pull-up/pull-down:
+
+| GPIO | Назначение | Внешний pull |
+|------|-----------|-------------|
+| GPIO34 | Hopper A Sensor | Внешний 10kΩ pull-up |
+| GPIO35 | Hopper B Sensor | Внешний 10kΩ pull-up |
+| GPIO36 | Кнопка PREV | Внешний 10kΩ pull-up |
+| GPIO39 | Кнопка OK | Внешний 10kΩ pull-up |
+
+## Нераспределённые / недоступные GPIO
+
+| GPIO | Статус | Причина |
+|------|--------|---------|
+| GPIO1 | Занят | UART0 TX (console) |
+| GPIO3 | Занят | UART0 RX (console) |
+| GPIO4 | Занят | SIM800L PWRKEY |
+| GPIO6–11 | Недоступны | Внутренняя Flash |
+| GPIO16 | Условно свободен | Занят при PSRAM |
+| GPIO17 | Условно свободен | Занят при PSRAM |
+
+## Питание
 
 | Узел | Напряжение | Источник |
 |------|-----------|----------|
-| STM32 VDD | +3.3V | LDO (AMS1117-3.3) от +12V |
-| HD44780 VCC | +5V | Отдельный LDO или от USB |
-| SIM800L VCC | 3.4–4.2V | Отдельный LDO (до 2A!) |
-| NRI G-13 | +12V DC | От основного БП |
-| Хопперы | +12V DC | От основного БП |
-| 24C08 VCC | +3.3V | От STM32 питания |
+| ESP32 VDD | 3.3V | IP5306 Buck/Boost |
+| SIM800L VCC | 3.4–4.2V | IP5306 VBatt (до 2A!) |
+| HD44780 VCC | 5V | IP5306 Boost |
+| NRI G-13 | +12V DC | Внешний БП |
+| Хопперы | +12V DC | Внешний БП |
+| 24C08 VCC | 3.3V | От ESP32 |
 
-### Ключевые моменты
-
-1. **+12V → NPN → +3.3V.** Все внешние сигналы (NRI, хопперы) идут через
-   NPN транзисторы. Транзистор работает как ключ: управление от +3.3V логики,
-   нагрузка на +12V стороне.
-
-2. **SIM800L — отдельное питание.** Модем требует 3.4–4.2V и пиковый ток
-   до 2A при передаче. Питать от 3.3V STM32 — **нельзя**.
-   Использовать отдельный LDO/DC-DC с байпасным конденсатором 1000µF.
-
-3. **I2C pull-up.** SDA/SCL требуют внешние pull-up 4.7kΩ к +3.3V.
-   Внутренние pull-up STM32 недостаточны для I2C.
-
-4. **1-Wire pull-up.** PA11 требует 4.7kΩ pull-up к +3.3V.
-   Для длинных линий (>10м) — уменьшить до 2.2kΩ.
-
-5. **Общая земля.** Все GND (STM32, SIM800L, NRI, хопперы, дисплей) —
-   соединены вместе.
-
-## Нераспределённые пины
-
-Следующие пины STM32F103C8T6 свободны:
-
-| Пин | Примечание |
-|-----|-----------|
-| PA12 | Свободен (USB D+ на Bluepill) |
-| PA15 | Свободен (JTDI, может потребоваться release) |
-| PB3 | Свободен (JTDO, может потребоваться release) |
-| PB4 | Свободен (NTRST, может потребоваться release) |
-| PB5 | Свободен |
-| PC13 | Bluepill LED (не используется в проекте) |
-| PC14 | Свободен |
-
-**Внимание:** PA15, PB3, PB4 — JTAG пины. При использовании SWD (2 провода)
-эти пины доступны как GPIO, но нужно отпустить их через AFIO remap:
-`RCC.APB2ENR.modify(|_, w| w.afioen().set_bit()); AFIO.MAPR.modify(|_, w| w.swj_cfg().jtag_disable());`
+IP5306 управляет питанием: заряжает LiPo 3.7V, обеспечивает 5V/3.3V/4.2V.
+I2C адрес 0x75 (I2C0 шина).
