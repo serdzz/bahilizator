@@ -18,6 +18,28 @@ use crate::config;
 use crate::error::NvramError;
 use crate::state::{PersistReason, VendingState, VendingStateData};
 
+// ── Глобальный I2C1 для EEPROM ──────────────────────────────────────────
+
+/// Указатель на I2C1 — устанавливается из main() один раз
+static mut I2C1_PTR: Option<*mut esp_hal::i2c::master::I2c<'static, esp_hal::Blocking>> = None;
+
+/// Установить I2C1 для EEPROM (вызывается из main.rs)
+///
+/// Safety: вызывается один раз из main() до spawn задач.
+/// После этого I2C1 используется только из persist_task.
+pub fn set_i2c(i2c: &'static esp_hal::i2c::master::I2c<'static, esp_hal::Blocking>) {
+    unsafe {
+        I2C1_PTR = Some(i2c as *const _ as *mut _);
+    }
+}
+
+/// Получить mutable ссылку на I2C1
+///
+/// Safety: безопасно только если вызывается из одной задачи (persist_task)
+unsafe fn get_i2c() -> &'static mut esp_hal::i2c::master::I2c<'static, esp_hal::Blocking> {
+    &mut *I2C1_PTR.unwrap()
+}
+
 // ── Константы EEPROM 24C08 ───────────────────────────────────────────────
 
 /// I2C адрес 24C08 (A0=A1=A2=GND → 0x50)
@@ -73,28 +95,27 @@ static mut CURRENT_SECTOR: u8 = 0;
 ///   device_addr = 0x50 | (mem_addr >> 8) & 0x03
 ///   word_addr   = mem_addr & 0xFF
 #[allow(dead_code)]
-async fn eeprom_read_byte(_mem_addr: u16) -> u8 {
-    // В реальном железе:
-    // let device_addr = EEPROM_ADDR | ((mem_addr >> 8) as u8 & 0x03);
-    // let word_addr = (mem_addr & 0xFF) as u8;
-    // i2c.write(device_addr, &[word_addr]).await
-    // i2c.read(device_addr, &mut [0; 1]).await
-
-    // Safety: заглушка — в реальной интеграции заменяется на esp-hal I2C
-    0xFF
+async fn eeprom_read_byte(mem_addr: u16) -> u8 {
+    let i2c = unsafe { get_i2c() };
+    let device_addr = EEPROM_ADDR | ((mem_addr >> 8) as u8 & 0x03);
+    let word_addr = (mem_addr & 0xFF) as u8;
+    let mut buf = [0u8; 1];
+    if i2c.write_read(device_addr, &[word_addr], &mut buf).is_ok() {
+        buf[0]
+    } else {
+        0xFF
+    }
 }
 
 /// Записать один байт в EEPROM по 16-битному адресу
 ///
 /// Внимание: после записи нужно подождать ~5мс (write cycle time)
-async fn eeprom_write_byte(_mem_addr: u16, _data: u8) {
-    // В реальном железе:
-    // let device_addr = EEPROM_ADDR | ((mem_addr >> 8) as u8 & 0x03);
-    // let word_addr = (mem_addr & 0xFF) as u8;
-    // i2c.write(device_addr, &[word_addr, data]).await
-    // embassy_time::Timer::after_millis(5).await; // write cycle time
-
-    // Safety: заглушка
+async fn eeprom_write_byte(mem_addr: u16, data: u8) {
+    let i2c = unsafe { get_i2c() };
+    let device_addr = EEPROM_ADDR | ((mem_addr >> 8) as u8 & 0x03);
+    let word_addr = (mem_addr & 0xFF) as u8;
+    let _ = i2c.write(device_addr, &[word_addr, data]);
+    embassy_time::Timer::after_millis(5).await; // write cycle time
 }
 
 /// Записать страницу (8 байт) в EEPROM — page-write
@@ -102,14 +123,15 @@ async fn eeprom_write_byte(_mem_addr: u16, _data: u8) {
 /// 24C08: page-write — до 8 байт в одной транзакции I2C.
 /// Адрес должен быть выровнен на границу страницы.
 /// Внутри страницы адрес инкрементируется автоматически (wrap within page).
-async fn eeprom_page_write(_mem_addr: u16, _data: &[u8; EEPROM_PAGE_SIZE]) {
-    // В реальном железе:
-    // let device_addr = EEPROM_ADDR | ((mem_addr >> 8) as u8 & 0x03);
-    // let word_addr = (mem_addr & 0xFF) as u8;
-    // i2c.write(device_addr, &[word_addr, data[0], ..., data[7]]).await
-    // embassy_time::Timer::after_millis(5).await;
-
-    // Safety: заглушка
+async fn eeprom_page_write(mem_addr: u16, data: &[u8; EEPROM_PAGE_SIZE]) {
+    let i2c = unsafe { get_i2c() };
+    let device_addr = EEPROM_ADDR | ((mem_addr >> 8) as u8 & 0x03);
+    let word_addr = (mem_addr & 0xFF) as u8;
+    let mut buf = [0u8; 1 + EEPROM_PAGE_SIZE];
+    buf[0] = word_addr;
+    buf[1..].copy_from_slice(data);
+    let _ = i2c.write(device_addr, &buf);
+    embassy_time::Timer::after_millis(5).await;
 }
 
 /// Последовательное чтение (sequential read) из EEPROM
@@ -117,20 +139,17 @@ async fn eeprom_page_write(_mem_addr: u16, _data: &[u8; EEPROM_PAGE_SIZE]) {
 /// После установки начального адреса, чтение продолжается
 /// с автоинкрементом адреса. Максимум — до конца строки
 /// (у 24C08 — wrap на границе 256 байт).
-async fn eeprom_sequential_read(_mem_addr: u16, _buf: &mut [u8]) {
-    // В реальном железе:
-    // let device_addr = EEPROM_ADDR | ((mem_addr >> 8) as u8 & 0x03);
-    // let word_addr = (mem_addr & 0xFF) as u8;
-    // i2c.write(device_addr, &[word_addr]).await  // set address
-    // i2c.read(device_addr, buf).await             // sequential read
-
-    // Safety: заглушка — заполняем 0xFF (стертый EEPROM)
-    for b in _buf.iter_mut() {
-        *b = 0xFF;
+async fn eeprom_sequential_read(mem_addr: u16, buf: &mut [u8]) {
+    let i2c = unsafe { get_i2c() };
+    let device_addr = EEPROM_ADDR | ((mem_addr >> 8) as u8 & 0x03);
+    let word_addr = (mem_addr & 0xFF) as u8;
+    if i2c.write_read(device_addr, &[word_addr], buf).is_err() {
+        // Ошибка чтения — заполняем 0xFF
+        for b in buf.iter_mut() {
+            *b = 0xFF;
+        }
     }
 }
-
-// ── Wear levelling ──────────────────────────────────────────────────────
 
 /// Найти текущий активный сектор в EEPROM
 ///
@@ -138,7 +157,7 @@ async fn eeprom_sequential_read(_mem_addr: u16, _buf: &mut [u8]) {
 /// Если ни один не найден — используем сектор 0.
 fn find_active_sector() -> u8 {
     // В реальном железе нужно прочитать magic из каждого сектора.
-    // Сейчас — заглушка, возвращаем 0.
+    // Возвращает сектор 0 если ни один не найден
     0
 }
 

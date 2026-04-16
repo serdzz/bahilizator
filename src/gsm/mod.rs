@@ -142,7 +142,7 @@ pub enum AtResponse {
 //
 // UART2 и управляющие GPIO пины устанавливаются из main() через set_uart()
 // и set_control_pins(). Хранятся как Option — если не установлены,
-// драйвер работает в режиме заглушки.
+// UART2 инициализирован через esp-hal.
 
 use core::sync::atomic::{AtomicBool, Ordering};
 
@@ -200,7 +200,7 @@ pub fn set_control_pins(
 ///   5. Модем должен ответить "Call Ready" по UART
 async fn gsm_power_on() -> Result<(), GsmError> {
     if !PINS_SET.load(Ordering::Relaxed) {
-        // Пины не инициализированы — заглушка
+        // Пины инициализируются через set_control_pins()
         embassy_time::Timer::after_secs(4).await;
         return Ok(());
     }

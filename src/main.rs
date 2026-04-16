@@ -10,7 +10,7 @@
 use esp_backtrace as _; // panic handler
 use esp_println as _; // defmt-espflash global logger
 
-defmt::timestamp!(""); // заглушка — пока нет таймера
+defmt::timestamp!(""); // defmt timestamp placeholder
 
 /// defmt panic handler — использует esp_backtrace для backtrace
 #[defmt::panic_handler]

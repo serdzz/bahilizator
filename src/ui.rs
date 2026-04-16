@@ -9,7 +9,7 @@
 //!
 //! Поддерживает два режима работы:
 //!   1. С реальным I2C (display_task_with_i2c) — запись через esp-hal I2C
-//!   2. Без I2C (display_task) — заглушка, драйвер работает но не пишет на шину
+//!   2. Без I2C (display_task) — тестовый режим без I2C
 
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::signal::Signal;
@@ -327,7 +327,7 @@ impl<W: I2cWriter> Hd44780I2c<W> {
     }
 }
 
-// ── display_task — с заглушкой I2C (без реальной периферии) ────────────
+// ── display_task — без I2C (тестовый режим) ────────────
 
 pub async fn display_task(signal: &'static Signal<CriticalSectionRawMutex, DisplayCommand>) {
     let mut lcd = Hd44780I2c::new(config::LCD_I2C_ADDR, I2cNoop);

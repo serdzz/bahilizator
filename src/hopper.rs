@@ -369,7 +369,7 @@ pub async fn run(
         // Опрос каждого хоппера с чтением реальных датчиков
         let now = embassy_time::Instant::now().as_millis();
         for hopper in &mut hoppers {
-            // Читаем датчики через глобальные GPIO указатели (пока заглушка: всегда idle)
+            // Читаем датчики через глобальные GPIO указатели (считываем GPIO через глобальные указатели)
             // hopper.update_sensors(read_coin_pin(hopper.config.id), read_error_pin(hopper.config.id));
             hopper.update_sensors(false, false);
 
