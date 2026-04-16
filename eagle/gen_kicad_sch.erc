@@ -1,0 +1,37 @@
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 8/GND of PCF8574P/U2.
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 4/GND of AT24CS02-SSHM/U3.
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 23/VSS of STM32F103C8Tx/U1.
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 8/VSSA of STM32F103C8Tx/U1.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 40/PB4 of STM32F103C8Tx/U1) attached to net HOPPER_B_SENSOR.
+ERC WARNING: Only one pin (POWER-IN pin 16/VDD of PCF8574P/U2) attached to net +5V.
+ERC WARNING: No drivers for net +5V.
+ERC WARNING: Insufficient drive current on net +5V for pin POWER-IN pin 16/VDD of PCF8574P/U2.
+ERC WARNING: Insufficient drive current on net VDD for pin POWER-IN pin 48/VDD of STM32F103C8Tx/U1.
+ERC WARNING: Insufficient drive current on net VDD for pin POWER-IN pin 24/VDD of STM32F103C8Tx/U1.
+ERC WARNING: Insufficient drive current on net VDD for pin POWER-IN pin 1/VBAT of STM32F103C8Tx/U1.
+ERC WARNING: Insufficient drive current on net VDD for pin POWER-IN pin 8/VCC of AT24CS02-SSHM/U3.
+ERC WARNING: Insufficient drive current on net VDD for pin POWER-IN pin 36/VDD of STM32F103C8Tx/U1.
+ERC WARNING: Only one pin (PASSIVE pin 1/C of BC547/Q_HOPA) attached to net HOPPER_A_EN.
+ERC WARNING: Only one pin (PASSIVE pin 2/Pin_2 of Conn_01x08/J_NRI) attached to net +12V.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 38/PA15 of STM32F103C8Tx/U1) attached to net HOPPER_A_SENSOR.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 27/PB14 of STM32F103C8Tx/U1) attached to net COIN_BLOCK.
+ERC WARNING: Only one pin (PASSIVE pin 1/C of BC547/Q_HOPB) attached to net HOPPER_B_EN.
+ERC WARNING: Only one pin (BIDIRECTIONAL pin 19/PB1 of STM32F103C8Tx/U1) attached to net POWER_FAIL.
+ERC WARNING: Insufficient drive current on net VDDA for pin POWER-IN pin 9/VDDA of STM32F103C8Tx/U1.
+ERC WARNING: Unconnected pin: BIDIRECTIONAL pin 2/PC13 of STM32F103C8Tx/U1.
+ERC WARNING: Unconnected pin: BIDIRECTIONAL pin 3/PC14 of STM32F103C8Tx/U1.
+ERC WARNING: Unconnected pin: BIDIRECTIONAL pin 20/PB2 of STM32F103C8Tx/U1.
+ERC WARNING: Unconnected pin: BIDIRECTIONAL pin 33/PA12 of STM32F103C8Tx/U1.
+ERC WARNING: Unconnected pin: BIDIRECTIONAL pin 41/PB5 of STM32F103C8Tx/U1.
+ERC WARNING: Unconnected pin: BIDIRECTIONAL pin 4/P0 of PCF8574P/U2.
+ERC WARNING: Unconnected pin: BIDIRECTIONAL pin 5/P1 of PCF8574P/U2.
+ERC WARNING: Unconnected pin: BIDIRECTIONAL pin 6/P2 of PCF8574P/U2.
+ERC WARNING: Unconnected pin: BIDIRECTIONAL pin 7/P3 of PCF8574P/U2.
+ERC WARNING: Unconnected pin: BIDIRECTIONAL pin 9/P4 of PCF8574P/U2.
+ERC WARNING: Unconnected pin: BIDIRECTIONAL pin 10/P5 of PCF8574P/U2.
+ERC WARNING: Unconnected pin: BIDIRECTIONAL pin 11/P6 of PCF8574P/U2.
+ERC WARNING: Unconnected pin: BIDIRECTIONAL pin 12/P7 of PCF8574P/U2.
+ERC WARNING: Unconnected pin: OPEN-COLLECTOR pin 13/~{INT} of PCF8574P/U2.
+ERC INFO: 34 warnings found while running ERC.
+ERC INFO: 0 errors found while running ERC.
+
