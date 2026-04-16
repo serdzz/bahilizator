@@ -38,9 +38,24 @@ pub const GSM_STATUS_PIN: &str = "PA1";
 /// DTR — PA2
 pub const GSM_DTR_PIN: &str = "PA2";
 
-// ── Монетоприёмник ────────────────────────────────────────────────────────
+// ── Монетоприёмник NRI G-13.6000 ──────────────────────────────────────────
+// Питание: +12V DC (pin 1=GND, pin 2=+12V)
+// Выходы: 6 линий, active low (pin 3-4, 7-10)
+// Подключение через NPN транзистор (BC547/2N2222):
+//   NRI output → 10kΩ → Base, Emitter → GND,
+//   Collector → STM32 GPIO + pull-up 10kΩ → +3.3V
+// Транзистор инвертирует: NRI low → GPIO HIGH (монета обнаружена)
 
 pub const COIN_CHANNEL_COUNT: usize = 6;
+/// Coin channel GPIO pins (PB8-PB13, через NPN транзистор)
+pub const COIN_CH1_PIN: &str = "PB8";
+pub const COIN_CH2_PIN: &str = "PB9";
+pub const COIN_CH3_PIN: &str = "PB10";
+pub const COIN_CH4_PIN: &str = "PB11";
+pub const COIN_CH5_PIN: &str = "PB12";
+pub const COIN_CH6_PIN: &str = "PB13";
+/// Total blocking pin (NRI pin 6, active HIGH — без инверсии)
+pub const COIN_BLOCK_PIN: &str = "PB14";
 
 // ── Хопперы ──────────────────────────────────────────────────────────────
 

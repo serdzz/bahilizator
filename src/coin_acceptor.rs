@@ -313,19 +313,21 @@ async fn get_channel_mask(
 /// 0 = низкий уровень (монета проходит)
 ///
 /// В оригинале (MSP430): COIN_ACCEPTOR_CH1_STATE .. CH6_STATE
-/// TODO: заменить на реальные GPIO чтение через embassy-stm32
+/// Транзистор инвертирует: NRI active low → NPN → HIGH на GPIO STM32
+/// Поэтому HIGH на GPIO = монета обнаружена на линии
+///
+/// TODO: заменить на реальные GPIO через embassy-stm32
 fn read_coin_channels() -> u8 {
-    // Заглушка — все каналы в высоком уровне (нет монет)
-    0x3F // все 6 битов = 1
+    // Заглушка — нет активных линий
+    0x00
 }
 
 /// Прочитать состояние пина монетоприёмника (pulse mode)
 ///
-/// true = низкий уровень (монета проходит)
-/// false = высокий уровень (нет монеты)
+/// NRI G-13 output active low → NPN транзистор (BC547) → HIGH на GPIO
+/// Поэтому HIGH на GPIO = импульс от монеты
 ///
-/// В оригинале (MSP430): COIN_ACCEPTOR_ANY_CH_LO_STATE != COIN_ACCEPTOR_CH_LO_MASK
-/// TODO: заменить на реальное GPIO чтение
+/// TODO: заменить на реальное GPIO через embassy-stm32
 fn read_coin_pulse_pin() -> bool {
     false // заглушка — нет монеты
 }
