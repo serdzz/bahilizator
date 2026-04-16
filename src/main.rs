@@ -53,9 +53,7 @@ static STATE_CELL: StaticCell<
 > = StaticCell::new();
 
 // ── Статические ячейки для UART2 ──────────────────────────────────────────
-// UART2 — StaticCell, передаётся как &'static в gsm::set_uart()
-
-static UART2_CELL: StaticCell<Uart<'static, esp_hal::Async>> = StaticCell::new();
+// UART2 split() даёт UartRx и UartTx, передаются через set_uart() в gsm модуль
 
 // ── Embassy tasks ────────────────────────────────────────────────────────
 
@@ -171,9 +169,7 @@ async fn main(spawner: Spawner) {
         .with_tx(peripherals.GPIO26)
         .into_async();
 
-    let uart2 = UART2_CELL.init(uart2);
-
-    // Передаём UART2 в GSM драйвер
+    // Передаём UART2 в GSM драйвер — split() на TX и RX происходит внутри
     gsm::set_uart(uart2);
 
     // ── GSM управляющие пины (на плате LilyGo T-Call) ────────────────

@@ -111,7 +111,7 @@ pub async fn send_sms_text(
     // Шаг 1: AT+CMGS="number"
     let cmd = cmd_cmgs(number);
     let frame = channel.encode_at_cmd(&cmd);
-    crate::gsm::uart_write(&frame).ok();
+    crate::gsm::uart_write(&frame).await.ok();
 
     // Шаг 2: Дождаться ">" prompt
     // В оригинале: waitForPrompt(250) — 250мс таймаут
@@ -128,7 +128,7 @@ pub async fn send_sms_text(
 
     let frame =
         crate::gsm::cmux::encode_cmux_frame(channel.dlci, crate::gsm::cmux::UIH, &msg_bytes);
-    crate::gsm::uart_write(&frame).ok();
+    crate::gsm::uart_write(&frame).await.ok();
 
     Ok(())
 }

@@ -21,6 +21,7 @@ pub mod sms;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::channel::{Receiver, Sender};
 use embassy_sync::mutex::Mutex;
+use embassy_time::Duration;
 
 use crate::error::GsmError;
 use crate::state::VendingState;
@@ -148,10 +149,21 @@ use core::sync::atomic::{AtomicBool, Ordering};
 static UART_SET: AtomicBool = AtomicBool::new(false);
 static PINS_SET: AtomicBool = AtomicBool::new(false);
 
+/// UART2 TX и RX — разделяются через split(), хранятся как static mut
+/// Безопасно: устанавливаются один раз из main() до spawn задач,
+/// после используются только из task_gsm (один поток)
+static mut UART2_TX: Option<esp_hal::uart::UartTx<'static, esp_hal::Async>> = None;
+static mut UART2_RX: Option<esp_hal::uart::UartRx<'static, esp_hal::Async>> = None;
+
 /// Установить UART2 для GSM (вызывается из main.rs)
-pub fn set_uart(_uart: &'static esp_hal::uart::Uart<'static, esp_hal::Async>) {
-    // UART2 хранится в StaticCell в main.rs, сюда передаётся &'static ref
-    // В реальной интеграции: сохраняем указатель для send_at_cmd()
+/// Принимает Uart<Async> по значению, делает split() на TX и RX
+pub fn set_uart(uart: esp_hal::uart::Uart<'static, esp_hal::Async>) {
+    let (rx, tx) = uart.split();
+    // Safety: вызывается один раз из main() до spawn задач
+    unsafe {
+        UART2_RX = Some(rx);
+        UART2_TX = Some(tx);
+    }
     UART_SET.store(true, Ordering::Relaxed);
 }
 
@@ -253,66 +265,96 @@ async fn gsm_hard_reset() {
 
 // ── AT команды через UART2 ──────────────────────────────────────────────
 
-/// Буфер приёма UART2 (читаем ответы модема)
-#[allow(dead_code, static_mut_refs)]
-static mut UART_RX_BUF: [u8; 512] = [0u8; 512];
-/// Буфер передачи UART2
-#[allow(static_mut_refs)]
-static mut UART_TX_BUF: [u8; 256] = [0u8; 256];
-
 /// Отправить AT команду в UART2 и дождаться ответа
-///
-/// Если UART2 не установлен — работает как заглушка (возвращает Ok)
 async fn send_at_cmd(cmd: &str) -> Result<AtResponse, GsmError> {
     if !UART_SET.load(Ordering::Relaxed) {
-        // UART не инициализирован — заглушка
-        embassy_time::Timer::after_millis(GSM_CMD_DELAY_MS).await;
-        return Ok(AtResponse::Ok);
+        return Err(GsmError::NoResponse);
     }
 
     // Копируем команду в TX буфер
     let cmd_bytes = cmd.as_bytes();
-    let len = cmd_bytes.len().min(256);
-    if len > 0 {
-        // Safety: UART_TX_BUF — статический буфер, доступ только из send_at_cmd (один поток)
-        unsafe {
-            let tx_ptr = core::ptr::addr_of_mut!(UART_TX_BUF) as *mut u8;
-            core::ptr::copy_nonoverlapping(cmd_bytes.as_ptr(), tx_ptr, len);
+
+    // Safety: UART2_TX установлен один раз из main(), используется только здесь
+    let written = unsafe {
+        if let Some(ref mut tx) = UART2_TX {
+            match tx.write_async(cmd_bytes).await {
+                Ok(n) => n,
+                Err(_) => return Err(GsmError::UartError),
+            }
+        } else {
+            return Err(GsmError::UartError);
         }
+    };
+
+    let _ = written;
+
+    // Ждём ответ с таймаутом
+    let mut rx_buf = [0u8; 128];
+    let read = embassy_time::with_timeout(
+        Duration::from_millis(GSM_CMD_DELAY_MS),
+        read_uart_response(&mut rx_buf),
+    )
+    .await;
+
+    match read {
+        Ok(n) => {
+            // Парсим ответ
+            let response = &rx_buf[..n];
+            if response.windows(2).any(|w| w == b"OK") {
+                Ok(AtResponse::Ok)
+            } else if response.windows(5).any(|w| w == b"ERROR") {
+                Ok(AtResponse::Error)
+            } else if response.windows(1).any(|w| w == b">") {
+                Ok(AtResponse::Prompt)
+            } else {
+                Ok(AtResponse::Ok)
+            }
+        }
+        Err(_) => Ok(AtResponse::Timeout),
+    }
+}
+
+/// Прочитать ответ из UART2 в буфер
+async fn read_uart_response(buf: &mut [u8]) -> usize {
+    if !UART_SET.load(Ordering::Relaxed) {
+        return 0;
     }
 
-    // Отправляем через UART2 (blocking write)
-    // В реальном коде: uart.write_blocking(&UART_TX_BUF[..len])
-    // Сейчас — заглушка записи (UART2 указатель не сохранён)
-    // При полной интеграции: сохранить &'static Uart в set_uart()
-
-    // Читаем ответ с таймаутом
-    // В реальном коде: uart.read_blocking(&mut UART_RX_BUF, timeout)
-    // Сейчас — заглушка чтения
-
-    embassy_time::Timer::after_millis(GSM_CMD_DELAY_MS).await;
-    Ok(AtResponse::Ok)
+    // Safety: UART2_RX установлен один раз из main(), используется только здесь
+    unsafe {
+        if let Some(ref mut rx) = UART2_RX {
+            rx.read_async(buf).await.unwrap_or_default()
+        } else {
+            0
+        }
+    }
 }
 
 /// Прочитать сырые данные из UART2 в буфер
 /// Возвращает количество прочитанных байт
 #[allow(dead_code)]
-pub fn uart_read(_buf: &mut [u8]) -> usize {
-    if !UART_SET.load(Ordering::Relaxed) {
-        return 0;
-    }
-    // Заглушка — при полной интеграции: uart.read_blocking(buf)
-    0
+pub async fn uart_read(buf: &mut [u8]) -> usize {
+    read_uart_response(buf).await
 }
 
 /// Записать сырые данные в UART2
 #[allow(dead_code)]
-pub fn uart_write(data: &[u8]) -> Result<(), GsmError> {
+pub async fn uart_write(data: &[u8]) -> Result<(), GsmError> {
     if !UART_SET.load(Ordering::Relaxed) {
         return Err(GsmError::UartError);
     }
-    // Заглушка — при полной интеграции: uart.write_blocking(data)
-    let _ = data;
+
+    // Safety: UART2_TX установлен один раз из main(), используется только здесь
+    unsafe {
+        if let Some(ref mut tx) = UART2_TX {
+            tx.write_async(data)
+                .await
+                .map_err(|_| GsmError::UartError)?;
+            tx.flush_async().await.map_err(|_| GsmError::UartError)?;
+        } else {
+            return Err(GsmError::UartError);
+        }
+    }
     Ok(())
 }
 
