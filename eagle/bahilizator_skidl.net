@@ -2,7 +2,7 @@
   (version "D")
   (design
     (source "bahilizator_skidl.py")
-    (date "04/16/2026 09:24 PM")
+    (date "04/16/2026 09:40 PM")
     (tool "SKiDL (2.2.3)")
     (sheet
       (number 1)
@@ -55,7 +55,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "okWbEbzCCx")
+          (name "SKiDL Tag") "EJ2dkOfxb5")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:39"))
       (libsource
@@ -65,7 +65,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "71a5b5f3-8eb3-542e-aad7-759d6ab4f27f"))
+      (tstamps "394050c2-a097-5d6b-bc3f-d1b2b4c70e94"))
     (comp
       (ref "C2")
       (value "100nF")
@@ -79,7 +79,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "wKV5R7pacL")
+          (name "SKiDL Tag") "E3GztqJTMD")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:39"))
       (libsource
@@ -89,7 +89,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "cec8cf1b-a265-596b-8520-f868ead8219c"))
+      (tstamps "40b5566a-142f-57e5-badf-33ff3865ff85"))
     (comp
       (ref "C3")
       (value "100nF")
@@ -103,7 +103,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "EGCwRHJfC5")
+          (name "SKiDL Tag") "cphsFVPXdr")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:39"))
       (libsource
@@ -113,7 +113,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "75a8c625-adfd-5a18-8900-52e17c758b5f"))
+      (tstamps "0bc99658-2c55-5399-a165-4ce238355712"))
     (comp
       (ref "C4")
       (value "4.7uF")
@@ -127,7 +127,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "7w0eQxwPTW")
+          (name "SKiDL Tag") "7Dzr4OQgqH")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:40"))
       (libsource
@@ -137,7 +137,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "33064c69-4c99-5800-9156-38ad81a42b9c"))
+      (tstamps "36934837-e234-59a3-a12b-2ab72e146bd9"))
     (comp
       (ref "C5")
       (value "100nF")
@@ -151,7 +151,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "CKICfrRgoi")
+          (name "SKiDL Tag") "DD80FOpvMy")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:42"))
       (libsource
@@ -161,7 +161,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "9ce4f20d-d138-5cd3-8cea-5b3eaf9abc2b"))
+      (tstamps "c5fe1bbb-7e5f-5d47-8051-3d54a2546a42"))
     (comp
       (ref "C_OSC1")
       (value "22pF")
@@ -175,7 +175,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "aJfBpXsTy8")
+          (name "SKiDL Tag") "tLu4IhIIH5")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:51"))
       (libsource
@@ -185,7 +185,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "c163fbbe-ce37-5a73-9876-a9811594d033"))
+      (tstamps "8803cb38-7892-57d2-a490-2530fe47301a"))
     (comp
       (ref "C_OSC2")
       (value "22pF")
@@ -199,7 +199,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "E5jLeR9dcC")
+          (name "SKiDL Tag") "L4EGa4AFQz")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:52"))
       (libsource
@@ -209,7 +209,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "323e6b43-6ccd-57ce-a064-e821b21746c6"))
+      (tstamps "af2da9c4-c2bf-55e8-a592-372c46212ffe"))
     (comp
       (ref "D_GREEN")
       (value "GREEN")
@@ -223,7 +223,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "6xIG1qrmWx")
+          (name "SKiDL Tag") "zjs8v7DLto")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:121"))
       (libsource
@@ -233,7 +233,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "0f21b2f5-a5ea-5c16-9451-9588219315b6"))
+      (tstamps "b0b9f970-9022-57a0-a0de-853ad062f9e3"))
     (comp
       (ref "D_RED")
       (value "RED")
@@ -247,7 +247,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "bIjDmOvHIy")
+          (name "SKiDL Tag") "kueuMvMSkV")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:118"))
       (libsource
@@ -257,7 +257,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "74a01b9e-5e11-5482-855b-0e5b419236e4"))
+      (tstamps "a786404b-1fbf-5cd1-b994-180e71501cef"))
     (comp
       (ref "J_GSM")
       (value "SIM800L")
@@ -271,7 +271,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "Acq6QeKhYm")
+          (name "SKiDL Tag") "n06qrCU6RD")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:132"))
       (libsource
@@ -281,7 +281,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "f7dbc1c5-0fca-53fb-8545-3df25bdb39d9"))
+      (tstamps "4d9e63bc-0bd7-5202-9123-329ffb716599"))
     (comp
       (ref "J_NRI")
       (value "NRI_G13")
@@ -295,7 +295,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "IEIoNhqNau")
+          (name "SKiDL Tag") "hgMS2eXUro")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:136"))
       (libsource
@@ -305,7 +305,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "7338c3a7-dcf2-52d6-be3d-b7b8cdd8f3b9"))
+      (tstamps "666297d4-658c-5a6c-9f81-ae0c9c0f580b"))
     (comp
       (ref "J_SWD")
       (value "SWD")
@@ -319,7 +319,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "syJ51xm0Ii")
+          (name "SKiDL Tag") "FKSLHvJnxh")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:128"))
       (libsource
@@ -329,7 +329,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "b31f7fcf-6f5a-5ba7-880f-b305dfaa7f60"))
+      (tstamps "438f220b-651a-5d63-9af8-f437ca7925e9"))
     (comp
       (ref "L1")
       (value "10uH")
@@ -343,7 +343,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "4yaX_8znOP")
+          (name "SKiDL Tag") "c85A8IV1xQ")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:43"))
       (libsource
@@ -353,7 +353,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "c4315932-76d2-567d-86cd-1c276ec48595"))
+      (tstamps "e071a97d-3b2b-5c38-85ad-2f349015e34e"))
     (comp
       (ref "Q_COIN1")
       (value "BC547")
@@ -367,7 +367,7 @@
         (field
           (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
         (field
-          (name "SKiDL Tag") "GPw0fodAJp")
+          (name "SKiDL Tag") "0fMIuYqglo")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:82"))
       (libsource
@@ -377,7 +377,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "e0b3fc3e-5dc2-57a8-94b4-d526d3c479c4"))
+      (tstamps "bbf681d8-e1af-5a40-9f7a-dece68f09e61"))
     (comp
       (ref "Q_COIN2")
       (value "BC547")
@@ -391,7 +391,7 @@
         (field
           (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
         (field
-          (name "SKiDL Tag") "vy4rG8E8Ng")
+          (name "SKiDL Tag") "peEmb4WTJK")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:82"))
       (libsource
@@ -401,7 +401,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "7ba68786-5cbe-53f6-9bb5-c4cc7e3c15f8"))
+      (tstamps "7d43f0fa-f72c-5d8e-a635-54c4acacb1b4"))
     (comp
       (ref "Q_COIN3")
       (value "BC547")
@@ -415,7 +415,7 @@
         (field
           (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
         (field
-          (name "SKiDL Tag") "H8We_3K8Zg")
+          (name "SKiDL Tag") "mdCsuRVeGl")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:82"))
       (libsource
@@ -425,7 +425,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "329f6347-4c51-5320-9aca-cd8913271f95"))
+      (tstamps "d3c7ccc6-f08f-501c-b226-d2c60402e3c6"))
     (comp
       (ref "Q_COIN4")
       (value "BC547")
@@ -439,7 +439,7 @@
         (field
           (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
         (field
-          (name "SKiDL Tag") "IApAzNKbAq")
+          (name "SKiDL Tag") "YDGQv0krLr")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:82"))
       (libsource
@@ -449,7 +449,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "ec764438-ad98-5096-a523-8e85f7e4a2cd"))
+      (tstamps "b78cac86-2fca-575a-8cd8-78082373e9e4"))
     (comp
       (ref "Q_COIN5")
       (value "BC547")
@@ -463,7 +463,7 @@
         (field
           (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
         (field
-          (name "SKiDL Tag") "x8Z5lbPIIP")
+          (name "SKiDL Tag") "CnaQWuYTan")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:82"))
       (libsource
@@ -473,7 +473,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "6d7c2835-29c4-5d27-9b03-dbcefb346c97"))
+      (tstamps "a03a0f9e-f795-511e-bffc-6376fa0a52f3"))
     (comp
       (ref "Q_COIN6")
       (value "BC547")
@@ -487,7 +487,7 @@
         (field
           (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
         (field
-          (name "SKiDL Tag") "uVUUwfOxhF")
+          (name "SKiDL Tag") "hVGli2UYXg")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:82"))
       (libsource
@@ -497,7 +497,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "f15ae12f-cef9-5ae6-8e24-e33479ceae97"))
+      (tstamps "b73df833-0f89-5d7e-b4c9-1da90d28a160"))
     (comp
       (ref "Q_HOPA")
       (value "BC547")
@@ -511,7 +511,7 @@
         (field
           (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
         (field
-          (name "SKiDL Tag") "7x4CGrVdEv")
+          (name "SKiDL Tag") "I7Lk8myGm4")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:90"))
       (libsource
@@ -521,7 +521,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "9d631f4f-84a2-5474-86b1-1776304d431e"))
+      (tstamps "4786d026-8e58-5994-bdbd-148bc8e9223e"))
     (comp
       (ref "Q_HOPB")
       (value "BC547")
@@ -535,7 +535,7 @@
         (field
           (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
         (field
-          (name "SKiDL Tag") "t_Va39HTb1")
+          (name "SKiDL Tag") "cnS3p_36GY")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:95"))
       (libsource
@@ -545,7 +545,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "684560ef-f584-5860-b0bf-35de2a1a88b4"))
+      (tstamps "5ccba8dd-1c74-5682-bc30-8a1390ef7751"))
     (comp
       (ref "Q_PWRKEY")
       (value "BC547")
@@ -559,7 +559,7 @@
         (field
           (name "Datasheet") "https://www.onsemi.com/pub/Collateral/BC550-D.pdf")
         (field
-          (name "SKiDL Tag") "Ruwr_demGE")
+          (name "SKiDL Tag") "iL7TCXMVJr")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:71"))
       (libsource
@@ -569,7 +569,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "f1b073ae-3551-556d-b364-152cbce19faf"))
+      (tstamps "1427b382-0948-5c66-b2ed-9572d5cbce6a"))
     (comp
       (ref "R_1WIRE")
       (value "4.7k")
@@ -583,7 +583,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "PQs61ksBiC")
+          (name "SKiDL Tag") "DdiNaZs0Bk")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:113"))
       (libsource
@@ -593,7 +593,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "54a8ca1c-ebc2-5979-bb8e-ff7b736314e3"))
+      (tstamps "b181a023-96f5-572b-b420-df615bd1b8dc"))
     (comp
       (ref "R_BOOT0")
       (value "10k")
@@ -607,7 +607,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "RQlPJGCV5v")
+          (name "SKiDL Tag") "9MtmRiWCL1")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:47"))
       (libsource
@@ -617,7 +617,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "4411ec78-4aeb-5a54-bd8e-de4e8886c3c0"))
+      (tstamps "bf6d0e64-31b3-5d1e-8757-4364392f174f"))
     (comp
       (ref "R_BTN1")
       (value "10k")
@@ -631,7 +631,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "cdstZydNVf")
+          (name "SKiDL Tag") "1UFjs937VY")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:103"))
       (libsource
@@ -641,7 +641,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "8f7cb5c1-4743-542e-8727-1952bacd1b92"))
+      (tstamps "6b882ee2-8d83-5212-8a97-4457c59260fb"))
     (comp
       (ref "R_BTN2")
       (value "10k")
@@ -655,7 +655,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "MjQblupeOv")
+          (name "SKiDL Tag") "78MYpdluY7")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:103"))
       (libsource
@@ -665,7 +665,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "6567da50-201e-52fa-a980-5bda5262673e"))
+      (tstamps "7942d1ee-9b6c-5953-b960-61b19a0dfcdf"))
     (comp
       (ref "R_BTN3")
       (value "10k")
@@ -679,7 +679,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "U0cI0thhjp")
+          (name "SKiDL Tag") "QUUNQfJ1ar")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:103"))
       (libsource
@@ -689,7 +689,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "0fead0c0-01df-5f48-bdc3-3478b060ed07"))
+      (tstamps "8c6c13b2-0885-5b73-8acb-2a211af8526a"))
     (comp
       (ref "R_BTN4")
       (value "10k")
@@ -703,7 +703,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "NUJPEB3foS")
+          (name "SKiDL Tag") "zkhUKTf5qb")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:103"))
       (libsource
@@ -713,7 +713,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "8d4a2d9d-9fe8-5728-9a2f-a6bdcab92b93"))
+      (tstamps "d22225c8-a00d-56ad-be60-3aa9601ffcf0"))
     (comp
       (ref "R_CB1")
       (value "10k")
@@ -727,7 +727,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "cnse8rhH6V")
+          (name "SKiDL Tag") "pHyGVpRDoQ")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:83"))
       (libsource
@@ -737,7 +737,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "ab255203-1737-5083-ad00-526cbbfa9341"))
+      (tstamps "b79a9258-5b6c-5aeb-9449-1d870107e8fb"))
     (comp
       (ref "R_CB2")
       (value "10k")
@@ -751,7 +751,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "hvTVDdsxh1")
+          (name "SKiDL Tag") "OOeWawJMAU")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:83"))
       (libsource
@@ -761,7 +761,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "5b86b485-8c38-5797-8722-c5c943f14641"))
+      (tstamps "2de5243d-604c-5a57-9372-ffe4d537e5fa"))
     (comp
       (ref "R_CB3")
       (value "10k")
@@ -775,7 +775,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "tWMNyHO4xi")
+          (name "SKiDL Tag") "QhkhZNG8qv")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:83"))
       (libsource
@@ -785,7 +785,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "20971216-0e58-55c2-8186-1fa6c70b501e"))
+      (tstamps "cb899aad-8777-5d04-97a9-bed636afd52a"))
     (comp
       (ref "R_CB4")
       (value "10k")
@@ -799,7 +799,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "0KlbWd8fKN")
+          (name "SKiDL Tag") "OPotraYlje")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:83"))
       (libsource
@@ -809,7 +809,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "52693fdb-00bc-5236-a984-c5fd339546d4"))
+      (tstamps "3f37de03-d91a-53e5-924a-f5a1fedd9103"))
     (comp
       (ref "R_CB5")
       (value "10k")
@@ -823,7 +823,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "eYLuCrONql")
+          (name "SKiDL Tag") "Ha1Yrw7SNK")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:83"))
       (libsource
@@ -833,7 +833,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "133908f8-1dff-5efb-888c-defabf91c8be"))
+      (tstamps "46d5af31-6e14-505e-bb18-ad5be0d92889"))
     (comp
       (ref "R_CB6")
       (value "10k")
@@ -847,7 +847,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "90cLcp7m6T")
+          (name "SKiDL Tag") "CBiJKnfNy_")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:83"))
       (libsource
@@ -857,7 +857,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "48d28256-2077-57ec-bc76-6c5dd529653f"))
+      (tstamps "14d152b6-ae4b-58d0-a410-4df1665aa227"))
     (comp
       (ref "R_CC1")
       (value "10k")
@@ -871,7 +871,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "k7vZBI4D2X")
+          (name "SKiDL Tag") "IkdSXK9Otu")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:84"))
       (libsource
@@ -881,7 +881,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "501375bf-dc81-5450-aa1c-2414674c251e"))
+      (tstamps "885794a5-7fd7-54d4-a167-a9932089b9fb"))
     (comp
       (ref "R_CC2")
       (value "10k")
@@ -895,7 +895,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "4YKIPHCj9V")
+          (name "SKiDL Tag") "Th1Y7LNDk5")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:84"))
       (libsource
@@ -905,7 +905,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "5eaf6d16-c67a-5b46-acfa-64d8a85017f5"))
+      (tstamps "97fbcd67-2a22-5daa-93f5-b5049d41f948"))
     (comp
       (ref "R_CC3")
       (value "10k")
@@ -919,7 +919,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "4oHPiz4pTe")
+          (name "SKiDL Tag") "OMHPTd6j1C")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:84"))
       (libsource
@@ -929,7 +929,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "ed592667-42c0-55ab-9603-bdbac7369e19"))
+      (tstamps "d957ad52-b6df-5738-89c7-58f2c6cb18ac"))
     (comp
       (ref "R_CC4")
       (value "10k")
@@ -943,7 +943,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "CDOewpNfoJ")
+          (name "SKiDL Tag") "eucRIDxrQm")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:84"))
       (libsource
@@ -953,7 +953,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "e36e481c-beac-5240-9dec-839b6477a896"))
+      (tstamps "4df41f10-8a4f-57c3-bbe7-7a87ae025bb7"))
     (comp
       (ref "R_CC5")
       (value "10k")
@@ -967,7 +967,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "_k7PBIjekt")
+          (name "SKiDL Tag") "qtkgz10EcC")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:84"))
       (libsource
@@ -977,7 +977,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "eac1795a-d798-5b9b-bd19-64af11943d25"))
+      (tstamps "98ba5569-97af-58a0-b62a-aed8d7d91d59"))
     (comp
       (ref "R_CC6")
       (value "10k")
@@ -991,7 +991,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "ddf_ztz4xK")
+          (name "SKiDL Tag") "WBMuzKNOUM")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:84"))
       (libsource
@@ -1001,7 +1001,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "44a020b9-540b-5ae6-aa0e-36f28de6d2bf"))
+      (tstamps "0b8cb53e-62e7-5082-80c8-3648187660b4"))
     (comp
       (ref "R_DOOR1")
       (value "10k")
@@ -1015,7 +1015,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "HWvBNuma4Z")
+          (name "SKiDL Tag") "uAWzYJyDLY")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:109"))
       (libsource
@@ -1025,7 +1025,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "9bb044e5-2af2-5153-9cf6-45682dc6699b"))
+      (tstamps "defaced5-1a93-581d-9c99-83698033e07d"))
     (comp
       (ref "R_DOOR2")
       (value "10k")
@@ -1039,7 +1039,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "NyvvEddgY9")
+          (name "SKiDL Tag") "ar6yQXDDCz")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:109"))
       (libsource
@@ -1049,7 +1049,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "c1dc0425-2438-5980-ad14-2c8877e6948d"))
+      (tstamps "7529df29-35f7-5f14-b66d-16634ccd289e"))
     (comp
       (ref "R_HOPA_EN")
       (value "10k")
@@ -1063,7 +1063,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "zgM6GGSI6e")
+          (name "SKiDL Tag") "khl1qU6vnH")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:91"))
       (libsource
@@ -1073,7 +1073,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "6251d462-8235-54de-96c4-8c3f6d4a9074"))
+      (tstamps "280fee92-3358-5bcb-97ff-5663ec5d320d"))
     (comp
       (ref "R_HOPB_EN")
       (value "10k")
@@ -1087,7 +1087,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "zYmuSd0pcc")
+          (name "SKiDL Tag") "7vnUSE7UC9")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:96"))
       (libsource
@@ -1097,7 +1097,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "6344ae52-4ac2-53a4-897c-925e27cbb629"))
+      (tstamps "89340079-ba9f-5d2a-97fa-36391b1b31d7"))
     (comp
       (ref "R_LED_G")
       (value "1k")
@@ -1111,7 +1111,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "z9tjnag1gQ")
+          (name "SKiDL Tag") "6qllBdTdvh")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:120"))
       (libsource
@@ -1121,7 +1121,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "3b9671c8-0951-5057-94e3-a97c3c7305f6"))
+      (tstamps "0355ddb2-bed1-5978-8769-44bd4b6926d2"))
     (comp
       (ref "R_LED_R")
       (value "1k")
@@ -1135,7 +1135,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "Mo1XdDP71G")
+          (name "SKiDL Tag") "z6St71Oyrj")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:117"))
       (libsource
@@ -1145,7 +1145,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "1901fc78-e8f3-5a3e-93ac-6b3c79261dfb"))
+      (tstamps "53e980c6-09ca-5a10-9c2e-fa7b6a74d18f"))
     (comp
       (ref "R_NRST")
       (value "10k")
@@ -1159,7 +1159,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "z41bHGvWOq")
+          (name "SKiDL Tag") "W4vikNV6r0")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:46"))
       (libsource
@@ -1169,7 +1169,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "c5b71a46-c196-5e7b-8277-c13bd419e6c8"))
+      (tstamps "f51d8bb3-e593-5d4a-944b-82178f1ac439"))
     (comp
       (ref "R_PWRKEY")
       (value "10k")
@@ -1183,7 +1183,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "2SqxSym4ID")
+          (name "SKiDL Tag") "j4iQ5KLKgW")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:72"))
       (libsource
@@ -1193,7 +1193,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "ad3f8b0c-6fa2-5472-84bc-99a7b9ab54e9"))
+      (tstamps "e14ae8ee-2be8-5e1c-938b-df27eafde5e3"))
     (comp
       (ref "R_SCL")
       (value "4.7k")
@@ -1207,7 +1207,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "SqVuO256gt")
+          (name "SKiDL Tag") "TbhM58KU0T")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:57"))
       (libsource
@@ -1217,7 +1217,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "1530efd7-96a5-55fe-8c9c-80c6a73798ce"))
+      (tstamps "e728777a-8e77-5d6c-b4da-48d5d5b80b89"))
     (comp
       (ref "R_SDA")
       (value "4.7k")
@@ -1231,7 +1231,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "6iV3NX2aF1")
+          (name "SKiDL Tag") "Q0opUesDAK")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:57"))
       (libsource
@@ -1241,7 +1241,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "fcc2541b-107c-588d-8608-094107e13336"))
+      (tstamps "87465416-997c-5d0a-9ade-5ff387d39b9a"))
     (comp
       (ref "R_STS1")
       (value "1k")
@@ -1255,7 +1255,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "om4w_TbWQo")
+          (name "SKiDL Tag") "B_XOLDPY0i")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:75"))
       (libsource
@@ -1265,7 +1265,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "7793959f-d980-5a11-9ebd-52bf834a6bee"))
+      (tstamps "8a734e84-eea8-5a94-b7fe-9133f201d4e3"))
     (comp
       (ref "R_STS2")
       (value "2k")
@@ -1279,7 +1279,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "P1EAp_eEAs")
+          (name "SKiDL Tag") "_gPGhraJoH")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:75"))
       (libsource
@@ -1289,7 +1289,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "e05752a5-454a-5cc6-b291-da83fe365e4e"))
+      (tstamps "303d1a9c-2d83-5b13-aa8e-bb25e5969629"))
     (comp
       (ref "U1")
       (value "STM32F103C8T6")
@@ -1303,7 +1303,7 @@
         (field
           (name "Datasheet") "https://www.st.com/resource/en/datasheet/stm32f103c8.pdf")
         (field
-          (name "SKiDL Tag") "txQe00zwer")
+          (name "SKiDL Tag") "Q2FZURzKjl")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:34"))
       (libsource
@@ -1313,7 +1313,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "8f68d15f-451a-565c-b9c9-292deed6a6ea"))
+      (tstamps "d8ba06e9-fa98-5d76-9584-4d926108ef29"))
     (comp
       (ref "U2")
       (value "PCF8574P")
@@ -1327,7 +1327,7 @@
         (field
           (name "Datasheet") "https://www.nxp.com/docs/en/data-sheet/PCF8574_PCF8574A.pdf")
         (field
-          (name "SKiDL Tag") "2wRqSvQpBW")
+          (name "SKiDL Tag") "mbSxYs1p9u")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:60"))
       (libsource
@@ -1337,7 +1337,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "874d90ac-b471-514c-83b6-cf9a690252de"))
+      (tstamps "cee5249b-61d6-5c94-af5a-dd2a8fc9c224"))
     (comp
       (ref "U3")
       (value "AT24C08")
@@ -1351,7 +1351,7 @@
         (field
           (name "Datasheet") "http://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-8815-SEEPROM-AT24CS01-02-Datasheet.pdf")
         (field
-          (name "SKiDL Tag") "QeZtB3r25w")
+          (name "SKiDL Tag") "c4IFVvxP7G")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:65"))
       (libsource
@@ -1361,7 +1361,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "ec211100-0f12-5f13-be3c-fb708a59f039"))
+      (tstamps "d78951b0-17cd-5b48-bd6d-950f69e047e2"))
     (comp
       (ref "Y1")
       (value "8MHz")
@@ -1375,7 +1375,7 @@
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "Oiu5_mTq5T")
+          (name "SKiDL Tag") "djfH4ErE17")
         (field
           (name "SKiDL Line") "bahilizator_skidl.py:50"))
       (libsource
@@ -1385,7 +1385,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "e8354119-614d-5ef8-bd54-52a9d4f082dc")))
+      (tstamps "9a95af37-c014-5402-8808-43297cb665db")))
   (nets
     (net
       (code 1)

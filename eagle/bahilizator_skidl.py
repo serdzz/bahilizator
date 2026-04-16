@@ -140,4 +140,5 @@ for i in range(6): coin_nets[i] += j_nri[i+3]
 # ── Generate ──────────────────────────────────────────────────
 ERC()
 generate_netlist()
+generate_schematic(filepath='.', top_name='bahilizator')
 print(f"Components: {len(default_circuit.parts)}, Nets: {len(default_circuit.nets)}")
