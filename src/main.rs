@@ -52,6 +52,10 @@ static STATE_CELL: StaticCell<
     embassy_sync::mutex::Mutex<CriticalSectionRawMutex, core::cell::RefCell<state::VendingState>>,
 > = StaticCell::new();
 
+// ── Статические ячейки для I2C1 (EEPROM) ────────────────────────────────
+static I2C1_CELL: StaticCell<esp_hal::i2c::master::I2c<'static, esp_hal::Blocking>> =
+    StaticCell::new();
+
 // ── Статические ячейки для UART2 ──────────────────────────────────────────
 // UART2 split() даёт UartRx и UartTx, передаются через set_uart() в gsm модуль
 
@@ -149,8 +153,7 @@ async fn main(spawner: Spawner) {
     // ══════════════════════════════════════════════════════════════════
     let peripherals = esp_hal::init(esp_hal::Config::default());
 
-    // ── I2C — SDA=GPIO21, SCL=GPIO22 ────────────────────────────────
-    // Общая шина: IP5306 (0x75), PCF8574 LCD (0x27), EEPROM 24C08 (0x50)
+    // ── I2C0 — Дисплей (SDA=GPIO21, SCL=GPIO22) ────────────────────
     let i2c = I2c::new(
         peripherals.I2C0,
         I2cConfig::default().with_frequency(Rate::from_khz(100)),
@@ -159,8 +162,16 @@ async fn main(spawner: Spawner) {
     .with_sda(peripherals.GPIO21)
     .with_scl(peripherals.GPIO22);
 
-    // I2C передаётся по значению в task_display — единственный владелец
-    // EEPROM/NVRAM доступ через I2C — отдельная интеграция
+    // ── I2C1 — EEPROM 24C08 (SDA=GPIO18, SCL=GPIO19) ────────────────
+    let i2c1 = I2c::new(
+        peripherals.I2C1,
+        I2cConfig::default().with_frequency(Rate::from_khz(100)),
+    )
+    .expect("I2C1 init failed")
+    .with_sda(peripherals.GPIO18)
+    .with_scl(peripherals.GPIO19);
+    let i2c1_ref = I2C1_CELL.init(i2c1);
+    nvram::set_i2c(i2c1_ref);
 
     // ── UART2 — SIM800L (GPIO26 TX, GPIO27 RX) ─────────────────────
     let uart2 = Uart::new(peripherals.UART2, UartConfig::default())
@@ -182,10 +193,10 @@ async fn main(spawner: Spawner) {
     gsm::set_control_pins(gsm_pwrkey, gsm_rst, gsm_power);
 
     // ── GPIO выходы ──────────────────────────────────────────────────
-    // Hopper A Enable — GPIO18
-    let _hopper_a_enable = Output::new(peripherals.GPIO18, Level::Low, OutputConfig::default());
-    // Hopper B Enable — GPIO19
-    let _hopper_b_enable = Output::new(peripherals.GPIO19, Level::Low, OutputConfig::default());
+    // Hopper A Enable — GPIO32
+    let _hopper_a_enable = Output::new(peripherals.GPIO32, Level::Low, OutputConfig::default());
+    // Hopper B Enable — GPIO25
+    let _hopper_b_enable = Output::new(peripherals.GPIO25, Level::Low, OutputConfig::default());
 
     // LED — GPIO13 (User LED на T-Call v1.4)
     let mut led = Output::new(peripherals.GPIO13, Level::Low, OutputConfig::default());
@@ -222,24 +233,24 @@ async fn main(spawner: Spawner) {
         InputConfig::default().with_pull(Pull::Down),
     );
 
-    // Hopper A Sensor — GPIO25
+    // Hopper A Sensor — GPIO34 (input-only)
     let _hopper_a_sensor = Input::new(
-        peripherals.GPIO25,
-        InputConfig::default().with_pull(Pull::Up),
-    );
-    // Hopper B Sensor — GPIO34 (input-only)
-    let _hopper_b_sensor = Input::new(
         peripherals.GPIO34,
         InputConfig::default().with_pull(Pull::Up),
     );
-
-    // Buttons (input-only: GPIO35,36,39 + GPIO2)
-    let _btn_prev = Input::new(
+    // Hopper B Sensor — GPIO35 (input-only)
+    let _hopper_b_sensor = Input::new(
         peripherals.GPIO35,
         InputConfig::default().with_pull(Pull::Up),
     );
-    let _btn_next = Input::new(
+
+    // Buttons (input-only: GPIO36, GPIO39 + GPIO2, GPIO33)
+    let _btn_prev = Input::new(
         peripherals.GPIO36,
+        InputConfig::default().with_pull(Pull::Up),
+    );
+    let _btn_next = Input::new(
+        peripherals.GPIO33,
         InputConfig::default().with_pull(Pull::Up),
     );
     let _btn_ok = Input::new(
@@ -251,11 +262,9 @@ async fn main(spawner: Spawner) {
         InputConfig::default().with_pull(Pull::Up),
     );
 
-    // Door 1 — GPIO32 (на v1.4 занят под MODEM DTR; на v1.3 свободен)
-    let _door1 = Input::new(
-        peripherals.GPIO32,
-        InputConfig::default().with_pull(Pull::Up),
-    );
+    // Door 1 — нет свободного input-only GPIO на LilyGo T-Call
+    // GPIO34/35/36/39 заняты сенсорами хопперов и кнопками
+    // Если нужна дверь — перенести сенсоры на обычные GPIO через NPN
 
     // ── iButton 1-Wire ──────────────────────────────────────────────
     // На LilyGo T-Call GPIO4 занят под SIM800L PWRKEY.

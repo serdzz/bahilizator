@@ -171,7 +171,9 @@ async fn accept_cash(
         // Проверка кнопок
         if let Ok(event) = button_rx.try_receive() {
             match event {
-                ButtonEvent::Pressed(Button::Ok) => { { /* сервисное меню — не реализовано */ } }
+                ButtonEvent::Pressed(Button::Ok) => {
+                    { /* сервисное меню — не реализовано */ }
+                }
                 ButtonEvent::DoorChanged { door, opened } => {
                     process_door_event(state, door, opened, gsm_tx).await;
                 }
