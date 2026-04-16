@@ -359,7 +359,7 @@ impl Hd44780I2c {
 /// Получает DisplayCommand через Signal и выводит на HD44780 через I2C
 ///
 /// I2C пишется через функцию-замыкание, которая вызывается в async контексте
-/// display_task. Реальная запись в I2C — через embassy-stm32 I2C::write().
+/// display_task. Реальная запись в I2C — через esp-hal I2C::write().
 ///
 /// Для компиляции без реальной I2C периферии используем заглушку i2c_write_stub.
 pub async fn display_task(signal: &'static Signal<CriticalSectionRawMutex, DisplayCommand>) {
@@ -436,12 +436,12 @@ async fn process_display_command(lcd: &mut Hd44780I2c, cmd: DisplayCommand) {
     }
 }
 
-/// Заглушка записи в I2C — заменяется реальной при интеграции с embassy-stm32
+/// Заглушка записи в I2C — заменяется реальной при интеграции с esp-hal
 ///
 /// Safety: В реальной интеграции эта функция будет заменена на замыкание,
 /// захватывающее &'static mut I2C. Сейчас — просто заглушка для компиляции.
 fn i2c_write_stub(_addr: u8, _data: u8) {
-    // TODO: реальная запись через embassy-stm32 I2C
+    // TODO: реальная запись через esp-hal I2C
     // Пример интеграции:
     // let i2c = unsafe { &mut *I2C_PTR };
     // let buf = [data];

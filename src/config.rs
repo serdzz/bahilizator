@@ -1,16 +1,30 @@
-//! Конфигурация пинов и констант — перенос из config.h
+//! Конфигурация пинов и констант — ESP32 DevKit V1 (DOIT)
 //!
-//! Пин-мап для STM32F103C8T6 Bluepill
-//! Пины указаны как строки для документации; реальное использование — через embassy-stm32 PAC
+//! ESP32 Xtensa LX6 dual-core, 520KB SRAM, 4MB Flash
+//! 30-pin DevKit: GPIO 0-39 (не все доступны)
+//!
+//! Пин-мап:
+//!   I2C SDA  = GPIO21, SCL = GPIO22
+//!   UART0 (USB) = GPIO1 TX, GPIO3 RX — debug/лог
+//!   UART2 (GSM) = GPIO17 TX, GPIO16 RX — SIM800L
+//!   Coin CH1-6 = GPIO13-18 (через NPN)
+//!   Coin BLOCK  = GPIO19
+//!   Hopper A Enable = GPIO25, Sensor = GPIO26
+//!   Hopper B Enable = GPIO27, Sensor = GPIO14
+//!   Buttons = GPIO32-35 (input-only pins!)
+//!   Doors = GPIO36, GPIO39 (input-only!)
+//!   iButton 1-Wire = GPIO4
+//!   GSM PWRKEY = GPIO5, STATUS = GPIO33 (input-only)
+//!   LED = GPIO2 (встроенный синий на DevKit)
 
 #![allow(dead_code)]
 
 // ── I2C (дисплей + EEPROM) ────────────────────────────────────────────────
 
-/// I2C1 SDA — PB7
-pub const I2C_SDA_PIN: &str = "PB7";
-/// I2C1 SCL — PB6
-pub const I2C_SCL_PIN: &str = "PB6";
+/// I2C SDA — GPIO21
+pub const I2C_SDA_PIN: u8 = 21;
+/// I2C SCL — GPIO22
+pub const I2C_SCL_PIN: u8 = 22;
 pub const I2C_FREQ_HZ: u32 = 100_000; // 100 kHz
 
 // ── Дисплей HD44780 через PCF8574 ────────────────────────────────────────
@@ -24,38 +38,37 @@ pub const LCD_ROWS: u8 = 2;
 pub const EEPROM_I2C_ADDR: u8 = 0x50;
 pub const EEPROM_PAGE_SIZE: usize = 8;
 
-// ── GSM SIM800L (USART1) ────────────────────────────────────────────────
+// ── GSM SIM800L (UART2) ────────────────────────────────────────────────
 
-/// USART1 TX — PA9
-pub const GSM_UART_TX_PIN: &str = "PA9";
-/// USART1 RX — PA10
-pub const GSM_UART_RX_PIN: &str = "PA10";
+/// UART2 TX — GPIO17
+pub const GSM_UART_TX_PIN: u8 = 17;
+/// UART2 RX — GPIO16
+pub const GSM_UART_RX_PIN: u8 = 16;
 pub const GSM_UART_BAUD: u32 = 115_200;
-/// PWRKEY — PA0
-pub const GSM_PWRKEY_PIN: &str = "PA0";
-/// STATUS — PA1
-pub const GSM_STATUS_PIN: &str = "PA1";
-/// DTR — PA2
-pub const GSM_DTR_PIN: &str = "PA2";
+/// PWRKEY — GPIO5
+pub const GSM_PWRKEY_PIN: u8 = 5;
+/// STATUS — GPIO33 (input-only!)
+pub const GSM_STATUS_PIN: u8 = 33;
+/// DTR — GPIO23
+pub const GSM_DTR_PIN: u8 = 23;
 
 // ── Монетоприёмник NRI G-13.6000 ──────────────────────────────────────────
-// Питание: +12V DC (pin 1=GND, pin 2=+12V)
+// Питание: +12V DC
 // Выходы: 6 линий, active low (pin 3-4, 7-10)
 // Подключение через NPN транзистор (BC547/2N2222):
 //   NRI output → 10kΩ → Base, Emitter → GND,
-//   Collector → STM32 GPIO + pull-up 10kΩ → +3.3V
-// Транзистор инвертирует: NRI low → GPIO HIGH (монета обнаружена)
+//   Collector → ESP32 GPIO + pull-up 10kΩ → +3.3V
 
 pub const COIN_CHANNEL_COUNT: usize = 6;
-/// Coin channel GPIO pins (PB8-PB13, через NPN транзистор)
-pub const COIN_CH1_PIN: &str = "PB8";
-pub const COIN_CH2_PIN: &str = "PB9";
-pub const COIN_CH3_PIN: &str = "PB10";
-pub const COIN_CH4_PIN: &str = "PB11";
-pub const COIN_CH5_PIN: &str = "PB12";
-pub const COIN_CH6_PIN: &str = "PB13";
-/// Total blocking pin (NRI pin 6, active HIGH — без инверсии)
-pub const COIN_BLOCK_PIN: &str = "PB14";
+/// Coin channel GPIO pins (GPIO13-18, через NPN транзистор)
+pub const COIN_CH1_PIN: u8 = 13;
+pub const COIN_CH2_PIN: u8 = 14;
+pub const COIN_CH3_PIN: u8 = 15;
+pub const COIN_CH4_PIN: u8 = 16;
+pub const COIN_CH5_PIN: u8 = 17;
+pub const COIN_CH6_PIN: u8 = 18;
+/// Total blocking pin (GPIO19, active HIGH)
+pub const COIN_BLOCK_PIN: u8 = 19;
 
 // ── Хопперы ──────────────────────────────────────────────────────────────
 
@@ -65,31 +78,37 @@ pub const COIN_PULSE_MIN_MS: u64 = 30;
 pub const COIN_PULSE_MAX_MS: u64 = 300;
 pub const PAUSE_BETWEEN_ERROR_CODES_MS: u64 = 400;
 
-// ── Кнопки (PA3-PA6) ────────────────────────────────────────────────────
+// ── Кнопки (GPIO32-35 — input-only pins на ESP32!) ───────────────────────
 
-pub const BTN_PREV_PIN: &str = "PA3";
-pub const BTN_NEXT_PIN: &str = "PA4";
-pub const BTN_OK_PIN: &str = "PA5";
-pub const BTN_CANCEL_PIN: &str = "PA6";
+pub const BTN_PREV_PIN: u8 = 32;
+pub const BTN_NEXT_PIN: u8 = 33;
+pub const BTN_OK_PIN: u8 = 34;
+pub const BTN_CANCEL_PIN: u8 = 35;
 
-// ── Двери (PA7, PA8) ────────────────────────────────────────────────────
+// ── Двери (GPIO36, GPIO39 — input-only!) ────────────────────────────────
 
-pub const DOOR_1_PIN: &str = "PA7";
-pub const DOOR_2_PIN: &str = "PA8";
+pub const DOOR_1_PIN: u8 = 36;
+pub const DOOR_2_PIN: u8 = 39;
 pub const MAX_DOORS: usize = 2;
 
-// ── 1-Wire iButton (PA11) ──────────────────────────────────────────────
+// ── 1-Wire iButton (GPIO4) ──────────────────────────────────────────────
 
-pub const IBUTTON_PIN: &str = "PA11";
+pub const IBUTTON_PIN: u8 = 4;
 
-// ── LED ──────────────────────────────────────────────────────────────────
+// ── LED (встроенный синий на DevKit) ──────────────────────────────────────
 
-pub const LED_RED_PIN: &str = "PC15";
-pub const LED_GREEN_PIN: &str = "PB0";
+pub const LED_PIN: u8 = 2;
 
-// ── Power Fail (PB1) ────────────────────────────────────────────────────
+// ── Hopper пины ──────────────────────────────────────────────────────────
 
-pub const POWER_FAIL_PIN: &str = "PB1";
+/// Hopper A Enable — GPIO25
+pub const HOPPER_A_ENABLE_PIN: u8 = 25;
+/// Hopper A Sensor — GPIO26
+pub const HOPPER_A_SENSOR_PIN: u8 = 26;
+/// Hopper B Enable — GPIO27
+pub const HOPPER_B_ENABLE_PIN: u8 = 27;
+/// Hopper B Sensor — GPIO14
+pub const HOPPER_B_SENSOR_PIN: u8 = 14;
 
 // ── Таймауты (в секундах) ────────────────────────────────────────────────
 
@@ -105,3 +124,10 @@ pub const STATE_PERSIST_DEBOUNCE_S: u64 = 5;
 pub const FIRMWARE_VERSION: u8 = 2;
 pub const SETTINGS_VERSION: u8 = 1;
 pub const STATE_VERSION: u8 = 1;
+
+// ── ESP32 характеристики ─────────────────────────────────────────────────
+
+/// SRAM: 520KB (в 26 раз больше чем STM32F103!)
+pub const SRAM_SIZE: usize = 520 * 1024;
+/// Flash: 4MB (в 64 раза больше!)
+pub const FLASH_SIZE: usize = 4096 * 1024;

@@ -107,23 +107,45 @@ impl<'a> TcpTransport<'a> {
     }
 }
 
+/// Обёртка ошибки TCP для совместимости с embedded_io_async::Error
+#[derive(Debug, Clone, Copy, defmt::Format)]
+pub struct TcpError(pub embassy_net::tcp::Error);
+
+impl core::fmt::Display for TcpError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "TcpError({:?})", self.0)
+    }
+}
+
+impl core::error::Error for TcpError {}
+
+impl embedded_io_async::Error for TcpError {
+    fn kind(&self) -> embedded_io_async::ErrorKind {
+        match self.0 {
+            embassy_net::tcp::Error::ConnectionReset => {
+                embedded_io_async::ErrorKind::ConnectionAborted
+            }
+        }
+    }
+}
+
 impl embedded_io_async::ErrorType for TcpTransport<'_> {
-    type Error = embassy_net::tcp::Error;
+    type Error = TcpError;
 }
 
 impl embedded_io_async::Read for TcpTransport<'_> {
     async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
-        self.socket.read(buf).await
+        self.socket.read(buf).await.map_err(TcpError)
     }
 }
 
 impl embedded_io_async::Write for TcpTransport<'_> {
     async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
-        self.socket.write(buf).await
+        self.socket.write(buf).await.map_err(TcpError)
     }
 
     async fn flush(&mut self) -> Result<(), Self::Error> {
-        self.socket.flush().await
+        self.socket.flush().await.map_err(TcpError)
     }
 }
 

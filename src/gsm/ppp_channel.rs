@@ -109,13 +109,15 @@ pub fn net_config_static(ip: [u8; 4], gateway: [u8; 4], dns: [u8; 4]) -> embassy
         gateway: Some(embassy_net::Ipv4Address::new(
             gateway[0], gateway[1], gateway[2], gateway[3],
         )),
-        dns_servers: heapless::Vec::from_iter(
-            [embassy_net::Ipv4Address::new(
-                dns[0], dns[1], dns[2], dns[3],
-            )]
-            .iter()
-            .copied(),
-        ),
+        dns_servers: {
+            let mut dns_vec: heapless::Vec<embassy_net::Ipv4Address, 3> = heapless::Vec::new();
+            dns_vec
+                .push(embassy_net::Ipv4Address::new(
+                    dns[0], dns[1], dns[2], dns[3],
+                ))
+                .ok();
+            dns_vec
+        },
     })
 }
 

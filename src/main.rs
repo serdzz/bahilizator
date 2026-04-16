@@ -1,14 +1,28 @@
-//! Бахилизатор — Rust/Embassy порт для STM32F103C8T6 Bluepill
+//! Бахилизатор — Rust/Embassy порт для ESP32 DevKit V1 (Xtensa LX6)
+//!
+//! Перенос с STM32F103C8T6 Bluepill на ESP32
+//! Xtensa LX6 dual-core, 520KB SRAM, 4MB Flash, WiFi+BT
 
 #![no_std]
 #![no_main]
 
-use defmt_rtt as _; // ensure defmt transport is linked
+use esp_backtrace as _; // panic handler
+use esp_println as _; // defmt-espflash global logger
+
+defmt::timestamp!(""); // заглушка — пока нет таймера
+
+/// defmt panic handler — использует esp_backtrace для backtrace
+#[defmt::panic_handler]
+fn panic() -> ! {
+    loop {
+        core::hint::spin_loop();
+    }
+}
+
 use embassy_executor::Spawner;
 use embassy_sync::{
     blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel, signal::Signal,
 };
-use panic_probe as _;
 use static_cell::StaticCell;
 
 use bahilizator::{buttons, coin_acceptor, flash, gsm, hopper, ibutton, nvram, state, ui, vending};
@@ -111,20 +125,36 @@ async fn task_state_persist(
     nvram::persist_task(state, &PERSIST_SIGNAL).await;
 }
 
-// ── main — точка входа ──────────────────────────────────────────────────
+// ── main — точка входа ESP32 ─────────────────────────────────────────────
 
-#[embassy_executor::main]
+#[esp_rtos::main]
 async fn main(spawner: Spawner) {
-    defmt::info!("Бахилизатор v2.0 — запуск...");
+    defmt::info!("Бахилизатор v2.0 ESP32 — запуск...");
 
-    let _p = embassy_stm32::init(embassy_stm32::Config::default());
+    // Инициализация ESP32
+    let peripherals = esp_hal::init(esp_hal::Config::default());
+
+    // TODO: Настроить периферию через esp_hal::Peripherals
+    // I2C: SDA=GPIO21, SCL=GPIO22
+    // UART0 (USB): TX=GPIO1, RX=GPIO3 — debug
+    // UART2 (GSM): TX=GPIO17, RX=GPIO16
+    // Coin CH1-6: GPIO13-18 (через NPN)
+    // Coin BLOCK: GPIO19
+    // Hopper A: Enable=GPIO25, Sensor=GPIO26
+    // Hopper B: Enable=GPIO27, Sensor=GPIO14
+    // Buttons: GPIO32-35 (input-only!)
+    // Doors: GPIO36, GPIO39 (input-only!)
+    // iButton 1-Wire: GPIO4
+    // GSM PWRKEY: GPIO5, STATUS: GPIO33 (input-only)
+    // LED: GPIO2 (встроенный синий)
+    let _ = peripherals;
 
     // Инициализация состояния
     let state = STATE_CELL.init(embassy_sync::mutex::Mutex::new(core::cell::RefCell::new(
         state::VendingState::default(),
     )));
 
-    // Загрузка из Flash/EEPROM
+    // Загрузка из Flash/NVS и EEPROM
     {
         let mut guard = state.lock().await;
         let st = guard.get_mut();
@@ -133,17 +163,17 @@ async fn main(spawner: Spawner) {
     }
 
     // Spawn задач
-    spawner.spawn(task_vending(state).unwrap());
-    spawner.spawn(task_coin_acceptor(state).unwrap());
-    spawner.spawn(task_hopper().unwrap());
-    spawner.spawn(task_buttons().unwrap());
-    spawner.spawn(task_gsm(state).unwrap());
-    spawner.spawn(task_ibutton(None, state).unwrap()); // None = PA11 пин ещё не подключён
-    spawner.spawn(task_state_persist(state).unwrap());
+    let _ = spawner.spawn(task_vending(state));
+    let _ = spawner.spawn(task_coin_acceptor(state));
+    let _ = spawner.spawn(task_hopper());
+    let _ = spawner.spawn(task_buttons());
+    let _ = spawner.spawn(task_gsm(state));
+    let _ = spawner.spawn(task_ibutton(None, state));
+    let _ = spawner.spawn(task_state_persist(state));
 
     defmt::info!("Все задачи запущены");
 
-    // TODO: IWDG feed loop
+    // TWDT feed loop
     loop {
         embassy_time::Timer::after_secs(1).await;
     }

@@ -151,7 +151,10 @@ impl Hopper {
         if !self.config.is_hopper_a {
             self.start_payout();
             // Короткий импульс для очистки ошибки
-            cortex_m::asm::delay(720); // ~10µs at 72MHz
+            // ESP32: busy-wait ~10µs (240MHz / 3 ≈ 80 cycles/µs → ~800 cycles)
+            for _ in 0..800 {
+                core::hint::spin_loop();
+            }
             self.stop_payout();
         }
     }

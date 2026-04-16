@@ -80,7 +80,7 @@ async fn eeprom_read_byte(_mem_addr: u16) -> u8 {
     // i2c.write(device_addr, &[word_addr]).await
     // i2c.read(device_addr, &mut [0; 1]).await
 
-    // Safety: заглушка — в реальной интеграции заменяется на embassy-stm32 I2C
+    // Safety: заглушка — в реальной интеграции заменяется на esp-hal I2C
     0xFF
 }
 

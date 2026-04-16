@@ -1,16 +1,10 @@
-//! Скрипт сборки: копируем memory.x в OUT_DIR для линкера
-
-use std::env;
-use std::fs::File;
-use std::io::Write;
-use std::path::PathBuf;
+//! Скрипт сборки для ESP32-C3
+//!
+//! esp-hal предоставляет свой linker script (linkall.x).
+//! defmt.x генерируется автоматически.
 
 fn main() {
-    let out = PathBuf::from(env::var("OUT_DIR").unwrap());
-    File::create(out.join("memory.x"))
-        .unwrap()
-        .write_all(include_bytes!("memory.x"))
-        .unwrap();
-    println!("cargo:rustc-link-search={}", out.display());
-    println!("cargo:rerun-if-changed=memory.x");
+    // Ничего не нужно копировать — esp-hal и defmt сами
+    // предоставляют linker scripts через cargo:rustc-link-arg
+    println!("cargo:rerun-if-changed=build.rs");
 }

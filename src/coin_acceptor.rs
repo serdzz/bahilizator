@@ -313,7 +313,7 @@ async fn get_channel_mask(
 /// Транзистор инвертирует: NRI active low → NPN → HIGH на GPIO STM32
 /// Поэтому HIGH на GPIO = монета обнаружена на линии
 ///
-/// TODO: заменить на реальные GPIO через embassy-stm32
+/// TODO: заменить на реальные GPIO через esp-hal
 fn read_coin_channels() -> u8 {
     // Заглушка — нет активных линий
     0x00
@@ -324,7 +324,7 @@ fn read_coin_channels() -> u8 {
 /// NRI G-13 output active low → NPN транзистор (BC547) → HIGH на GPIO
 /// Поэтому HIGH на GPIO = импульс от монеты
 ///
-/// TODO: заменить на реальное GPIO через embassy-stm32
+/// TODO: заменить на реальное GPIO через esp-hal
 fn read_coin_pulse_pin() -> bool {
     false // заглушка — нет монеты
 }
