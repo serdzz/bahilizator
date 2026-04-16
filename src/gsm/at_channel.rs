@@ -28,7 +28,7 @@ pub enum AtResponse {
     Ok,
     Error,
     Data,
-    Prompt,      // ">" — готов принять SMS текст
+    Prompt, // ">" — готов принять SMS текст
     Timeout,
     CmeError(u16),
     CmsError(u16),
@@ -39,7 +39,10 @@ pub enum AtResponse {
 #[derive(Debug, Clone)]
 pub enum Urc {
     /// Входящее SMS: +CMT: <sender>,<timestamp>\n<text>
-    IncomingSms { sender: String<20>, text: String<160> },
+    IncomingSms {
+        sender: String<20>,
+        text: String<160>,
+    },
     /// GPRS событие: +CGEV: ...
     GprsEvent(String<40>),
     /// Call Ready — модем готов
@@ -58,7 +61,6 @@ pub enum Urc {
 //
 /// Обёртка для отправки AT команд через CMUX DLC1 и
 /// парсинга ответов из DLC1
-
 pub struct CmuxAtChannel {
     /// DLCI для AT команд (обычно 1)
     pub dlci: u8,
@@ -129,7 +131,9 @@ impl CmuxAtChannel {
             let text = if let Some(pos) = buf_str.find('\n') {
                 let rest = &buf_str[pos + 1..];
                 let trimmed = rest.trim_end_matches('\r');
-                let mut t = String::new(); t.push_str(trimmed).ok(); t
+                let mut t = String::new();
+                t.push_str(trimmed).ok();
+                t
             } else {
                 String::new()
             };
@@ -138,7 +142,8 @@ impl CmuxAtChannel {
         }
 
         if buf_str.contains("+CGEV:") {
-            let mut s = String::new(); s.push_str(buf_str.trim()).ok();
+            let mut s = String::new();
+            s.push_str(buf_str.trim()).ok();
             self.rx_buffer.clear();
             return Some(Urc::GprsEvent(s));
         }
@@ -163,9 +168,7 @@ impl CmuxAtChannel {
             return Some(Urc::SmsSent(code as u16));
         }
 
-        if buf_str.contains("UNDER-VOLTAGE WARNING")
-            || buf_str.contains("OVER-VOLTAGE WARNING")
-        {
+        if buf_str.contains("UNDER-VOLTAGE WARNING") || buf_str.contains("OVER-VOLTAGE WARNING") {
             self.rx_buffer.clear();
             return Some(Urc::VoltageWarning);
         }
@@ -188,7 +191,6 @@ impl CmuxAtChannel {
 //
 /// Инкапсулирует последовательность AT команд для SIM800L
 /// Включает: GPRS attach, SMS send/receive, TCP connect
-
 pub struct GsmAtClient {
     /// AT канал через CMUX DLC1
     pub channel: CmuxAtChannel,
@@ -315,13 +317,25 @@ impl GsmAtClient {
         let mut cmd = String::<40>::new();
         use core::fmt::Write;
         let _ = write!(cmd, "AT+CMGS=\"{}\"\r", number);
-        frames.push(cmux::encode_cmux_frame(self.channel.dlci, cmux::UIH, cmd.as_bytes())).ok();
+        frames
+            .push(cmux::encode_cmux_frame(
+                self.channel.dlci,
+                cmux::UIH,
+                cmd.as_bytes(),
+            ))
+            .ok();
 
         // Шаг 2: текст + Ctrl+Z (0x1A)
         let mut msg_bytes = Vec::<u8, 200>::new();
         msg_bytes.extend_from_slice(text.as_bytes()).ok();
         msg_bytes.push(0x1A).ok(); // Ctrl+Z
-        frames.push(cmux::encode_cmux_frame(self.channel.dlci, cmux::UIH, &msg_bytes)).ok();
+        frames
+            .push(cmux::encode_cmux_frame(
+                self.channel.dlci,
+                cmux::UIH,
+                &msg_bytes,
+            ))
+            .ok();
 
         frames
     }
@@ -332,8 +346,11 @@ impl GsmAtClient {
 /// Разобрать числовой код ошибки после ":"
 fn parse_error_code(s: &str) -> u16 {
     let trimmed = s.trim();
-    let num_str = trimmed.split(|c: char| !c.is_ascii_digit()).next().unwrap_or("0");
-    u16::from_str_radix(num_str, 10).unwrap_or(0)
+    let num_str = trimmed
+        .split(|c: char| !c.is_ascii_digit())
+        .next()
+        .unwrap_or("0");
+    num_str.parse::<u16>().unwrap_or(0)
 }
 
 /// Разобрать число после ":" (для +CMGS и т.д.)
@@ -352,8 +369,8 @@ fn extract_between_quotes(s: &str, start: usize) -> Option<String<20>> {
     let mut second_quote = None;
     let mut count = 0;
 
-    for i in start..bytes.len() {
-        if bytes[i] == b'"' {
+    for (i, &b) in bytes.iter().enumerate().skip(start) {
+        if b == b'"' {
             count += 1;
             if count == 1 {
                 first_quote = Some(i);

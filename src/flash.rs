@@ -12,15 +12,15 @@
 //!
 //! Перенос из flash.c (оригинал — MSP430 FRAM/Info Flash)
 
-use crate::config;
-use crate::state::Settings;
 use crate::error::FlashError;
+use crate::state::Settings;
 
 // ── Адреса Flash ─────────────────────────────────────────────────────────
 
 /// Последняя страница Flash для 64KB варианта (page 63)
 const SETTINGS_FLASH_ADDR: u32 = 0x0800_FC00;
 /// Размер страницы Flash (STM32F103: 1024 байта)
+#[allow(dead_code)]
 const FLASH_PAGE_SIZE: usize = 1024;
 
 // ── Регистры Flash STM32F103 ────────────────────────────────────────────
@@ -29,12 +29,14 @@ const FLASH_PAGE_SIZE: usize = 1024;
 const FLASH_BASE: u32 = 0x4002_2000;
 
 /// Flash Access Control Register (offset 0x00)
-const FLASH_ACR: u32 = FLASH_BASE + 0x00;
+#[allow(dead_code)]
+const FLASH_ACR: u32 = FLASH_BASE;
 
 /// Flash Key Register (offset 0x04)
 const FLASH_KEYR: u32 = FLASH_BASE + 0x04;
 
 /// Flash Option Key Register (offset 0x08)
+#[allow(dead_code)]
 const FLASH_OPTKEYR: u32 = FLASH_BASE + 0x08;
 
 /// Flash Status Register (offset 0x0C)
@@ -44,9 +46,11 @@ const FLASH_SR: u32 = FLASH_BASE + 0x0C;
 const FLASH_CR: u32 = FLASH_BASE + 0x10;
 
 /// Flash Option Control Register (offset 0x14)
+#[allow(dead_code)]
 const FLASH_OBR: u32 = FLASH_BASE + 0x14;
 
 /// Flash Option Write Byte Register (offset 0x18)
+#[allow(dead_code)]
 const FLASH_WRPR: u32 = FLASH_BASE + 0x18;
 
 // ── Биты FLASH_SR ──────────────────────────────────────────────────────
@@ -58,11 +62,12 @@ const FLASH_SR_EOP: u32 = 0x20;
 
 // ── Биты FLASH_CR ──────────────────────────────────────────────────────
 
-const FLASH_CR_PG: u32 = 0x01;       // Programming
-const FLASH_CR_PER: u32 = 0x02;      // Page Erase
-const FLASH_CR_MER: u32 = 0x04;      // Mass Erase
-const FLASH_CR_STRT: u32 = 0x40;     // Start
-const FLASH_CR_LOCK: u32 = 0x80;     // Lock
+const FLASH_CR_PG: u32 = 0x01; // Programming
+const FLASH_CR_PER: u32 = 0x02; // Page Erase
+#[allow(dead_code)]
+const FLASH_CR_MER: u32 = 0x04; // Mass Erase
+const FLASH_CR_STRT: u32 = 0x40; // Start
+const FLASH_CR_LOCK: u32 = 0x80; // Lock
 
 // ── Magic number для валидации Settings ─────────────────────────────────
 
@@ -71,15 +76,14 @@ const SETTINGS_MAGIC: u32 = 0xDEAD_BEEF;
 
 // ── Структура Settings во Flash ─────────────────────────────────────────
 //
-/// Формат хранения во Flash:
-///   [0..4]   = magic (0xDEADBEEF)
-///   [4..8]   = CRC16 данных (младшие 2 байта, старшие = 0)
-///   [8..]    = Settings (packed)
-///   [8+size..8+size+2] = CRC16 Settings (дубликат для двойной проверки)
-///
-/// При чтении: magic + CRC → если оба валидны, Settings ок
-/// При записи: erase page → write magic → write CRC → write settings → write CRC2
-
+// Формат хранения во Flash:
+//   [0..4]   = magic (0xDEADBEEF)
+//   [4..8]   = CRC16 данных (младшие 2 байта, старшие = 0)
+//   [8..]    = Settings (packed)
+//   [8+size..8+size+2] = CRC16 Settings (дубликат для двойной проверки)
+//
+// При чтении: magic + CRC → если оба валидны, Settings ок
+// При записи: erase page → write magic → write CRC → write settings → write CRC2
 // ── Низкоуровневый доступ к регистрам ──────────────────────────────────
 
 /// Прочитать регистр Flash
@@ -118,7 +122,10 @@ fn clear_flash_errors() {
     unsafe {
         // Записываем 0 в EOP, PGERR, WRPRTERR (write 1 to clear)
         let sr = read_flash_reg(FLASH_SR);
-        write_flash_reg(FLASH_SR, sr | FLASH_SR_EOP | FLASH_SR_PGERR | FLASH_SR_WRPRTERR);
+        write_flash_reg(
+            FLASH_SR,
+            sr | FLASH_SR_EOP | FLASH_SR_PGERR | FLASH_SR_WRPRTERR,
+        );
     }
 }
 
@@ -262,7 +269,7 @@ pub fn load_settings() -> Result<Settings, FlashError> {
     let settings = unsafe {
         let ptr = (SETTINGS_FLASH_ADDR + 8) as *const Settings;
         // Проверяем выравнивание
-        if (ptr as usize) % core::mem::align_of::<Settings>() != 0 {
+        if !(ptr as usize).is_multiple_of(core::mem::align_of::<Settings>()) {
             return Err(FlashError::ReadFailed);
         }
         core::ptr::read_volatile(ptr)
@@ -316,8 +323,8 @@ pub fn save_settings(settings: &Settings) -> Result<(), FlashError> {
     let base = SETTINGS_FLASH_ADDR;
 
     // Magic: 0xDEADBEEF (2 half-words)
-    flash_program_halfword(base, 0xBEEF as u16)?;
-    flash_program_halfword(base + 2, 0xDEAD as u16)?;
+    flash_program_halfword(base, 0xBEEF_u16)?;
+    flash_program_halfword(base + 2, 0xDEAD_u16)?;
 
     // CRC16
     flash_program_halfword(base + 4, crc)?;

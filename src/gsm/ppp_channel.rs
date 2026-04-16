@@ -41,7 +41,6 @@ pub const NET_SOCKET_COUNT: usize = 3;
 /// PppChannel управляет жизненным циклом PPP.
 /// Реальный PPP протокол обрабатывается embassy-net-ppp Runner.
 /// Здесь — только состояние и вспомогательные функции.
-
 pub struct PppChannel {
     /// Текущее состояние PPP
     state: PppState,
@@ -107,10 +106,16 @@ pub fn net_config_static(ip: [u8; 4], gateway: [u8; 4], dns: [u8; 4]) -> embassy
             embassy_net::Ipv4Address::new(ip[0], ip[1], ip[2], ip[3]),
             24,
         ),
-        gateway: Some(embassy_net::Ipv4Address::new(gateway[0], gateway[1], gateway[2], gateway[3])),
-        dns_servers: heapless::Vec::from_iter([
-            embassy_net::Ipv4Address::new(dns[0], dns[1], dns[2], dns[3]),
-        ].iter().copied()),
+        gateway: Some(embassy_net::Ipv4Address::new(
+            gateway[0], gateway[1], gateway[2], gateway[3],
+        )),
+        dns_servers: heapless::Vec::from_iter(
+            [embassy_net::Ipv4Address::new(
+                dns[0], dns[1], dns[2], dns[3],
+            )]
+            .iter()
+            .copied(),
+        ),
     })
 }
 

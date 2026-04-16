@@ -10,12 +10,12 @@
 //!
 //! EXTI ISR отправляет сырые события в Channel, задача обрабатывает их
 
-use embassy_sync::channel::{Sender};
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
+use embassy_sync::channel::Sender;
 use embassy_sync::mutex::Mutex;
 
-use crate::state::{Cash, VendingState};
 use crate::config;
+use crate::state::{Cash, VendingState};
 
 // ── CoinEvent ────────────────────────────────────────────────────────────
 
@@ -156,10 +156,7 @@ async fn run_normal_mode(
                         if ch < config::COIN_CHANNEL_COUNT as u8 {
                             let value = get_coin_value(state, ch as usize).await;
                             if value > 0 {
-                                let _ = coin_tx.try_send(CoinEvent {
-                                    channel: ch,
-                                    value,
-                                });
+                                let _ = coin_tx.try_send(CoinEvent { channel: ch, value });
                             }
                         }
                     }
@@ -222,7 +219,7 @@ async fn run_pulse_mode(
                 // Импульс завершился (уровень стал высоким)
                 if !coin_active {
                     let elapsed = now - stage_start;
-                    if elapsed >= PULSE_MIN_MS && elapsed < PULSE_MAX_MS {
+                    if (PULSE_MIN_MS..PULSE_MAX_MS).contains(&elapsed) {
                         // Валидный импульс — считаем
                         pulse_count += 1;
                         stage_start = now;

@@ -11,8 +11,8 @@
 //! State machine: IDLE → PAYING → CHECKING → COMPLETED/ERROR
 //! Sensor polling каждую 1мс для точного детектирования импульсов
 
-use embassy_sync::channel::{Receiver, Sender};
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
+use embassy_sync::channel::{Receiver, Sender};
 
 use crate::config;
 use crate::error::DispenserError;
@@ -49,18 +49,13 @@ pub enum HopperEvent {
 // Перенос из hopper.c: hopper_operation_level[]
 // HOPPER_IDLE = 0, HOPPER_PAY, HOPPER_ERROR_LO, HOPPER_ERROR_HI
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 enum HopperState {
+    #[default]
     Idle,
     Paying,
     ErrorLo,
     ErrorHi,
-}
-
-impl Default for HopperState {
-    fn default() -> Self {
-        HopperState::Idle
-    }
 }
 
 // ── HopperConfig — конфигурация хоппера ──────────────────────────────────
@@ -205,11 +200,9 @@ impl Hopper {
                 // Датчик монеты активен (низкий уровень)
                 // Для HOPPER_B/C: мотор должен быть включён (IS_HOPPER_B_PAY)
                 // Для HOPPER_A: мотор может не быть включён (особенность)
-                if self.coin_sensed {
-                    if self.config.is_hopper_a || self.motor_on {
-                        self.pulse_time = now;
-                        self.state = HopperState::Paying;
-                    }
+                if self.coin_sensed && (self.config.is_hopper_a || self.motor_on) {
+                    self.pulse_time = now;
+                    self.state = HopperState::Paying;
                 }
                 HopperEvent::None
             }
@@ -222,9 +215,7 @@ impl Hopper {
                     // Вычисляем длительность импульса
                     let elapsed = now.wrapping_sub(self.pulse_time);
 
-                    if elapsed >= config::COIN_PULSE_MIN_MS
-                        && elapsed <= config::COIN_PULSE_MAX_MS
-                    {
+                    if (config::COIN_PULSE_MIN_MS..=config::COIN_PULSE_MAX_MS).contains(&elapsed) {
                         // Валидная монета
                         self.coins_dispensed += 1;
                         if self.coins_dispensed >= self.coins_to_payout {
@@ -233,13 +224,17 @@ impl Hopper {
                             self.coins_dispensed = 0;
                         }
                         self.state = HopperState::Idle;
-                        return HopperEvent::CoinDispensed { hopper: self.config.id };
+                        return HopperEvent::CoinDispensed {
+                            hopper: self.config.id,
+                        };
                     } else if elapsed > config::COIN_PULSE_MAX_MS {
                         // Таймаут — монета застряла
                         // В оригинале: HOPPER_A_CONTROL_HI; *error=1;
                         self.stop_payout();
                         self.state = HopperState::Idle;
-                        return HopperEvent::Timeout { hopper: self.config.id };
+                        return HopperEvent::Timeout {
+                            hopper: self.config.id,
+                        };
                     }
                     // Если elapsed < COIN_PULSE_MIN_MS — дребезг, игнорируем
                 }

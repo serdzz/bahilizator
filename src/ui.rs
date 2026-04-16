@@ -7,8 +7,8 @@
 //!   0x33 → 0x32 → 0x28 → 0x0C → 0x06 → 0x01
 //! Перенос из lcd.c (оригинальный MSP430 код) на Embassy async I2C
 
-use embassy_sync::signal::Signal;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
+use embassy_sync::signal::Signal;
 use heapless::String;
 
 use crate::config;
@@ -17,10 +17,11 @@ use crate::config;
 // P0=RS, P1=RW, P2=EN, P3=BL, P4=D4, P5=D5, P6=D6, P7=D7
 
 const RS_BIT: u8 = 0x01; // P0 — Register Select
+#[allow(dead_code)]
 const RW_BIT: u8 = 0x02; // P1 — Read/Write (всегда 0 = запись)
 const EN_BIT: u8 = 0x04; // P2 — Enable strobe
 const BL_BIT: u8 = 0x08; // P3 — Backlight
-// D4..D7 на P4..P7: старший nibble данных = (data & 0x0F) << 4
+                         // D4..D7 на P4..P7: старший nibble данных = (data & 0x0F) << 4
 
 // ── HD44780 команды ──────────────────────────────────────────────────────
 
@@ -32,14 +33,17 @@ const CMD_SET_CGRAM_ADDR: u8 = 0x40;
 const CMD_SET_DDRAM_ADDR: u8 = 0x80;
 
 // Параметры команд
-const ENTRY_INCREMENT: u8 = 0x02;   // Инкремент курсора
-const ENTRY_SHIFT_OFF: u8 = 0x00;  // Без сдвига дисплея
-const DISPLAY_ON: u8 = 0x04;       // Дисплей включён
-const CURSOR_ON: u8 = 0x02;         // Курсор видимый
-const CURSOR_BLINK: u8 = 0x01;      // Курсор мигает
-const MODE_4BIT: u8 = 0x00;         // 4-bit режим (бит DL=0)
-const LINES_2: u8 = 0x08;           // 2 строки
-const DOTS_5X8: u8 = 0x00;         // Шрифт 5x8
+const ENTRY_INCREMENT: u8 = 0x02; // Инкремент курсора
+const ENTRY_SHIFT_OFF: u8 = 0x00; // Без сдвига дисплея
+const DISPLAY_ON: u8 = 0x04; // Дисплей включён
+const CURSOR_ON: u8 = 0x02; // Курсор видимый
+const CURSOR_BLINK: u8 = 0x01; // Курсор мигает
+#[allow(dead_code)]
+const MODE_4BIT: u8 = 0x00; // 4-bit режим (бит DL=0)
+#[allow(dead_code)]
+const LINES_2: u8 = 0x08; // 2 строки
+#[allow(dead_code)]
+const DOTS_5X8: u8 = 0x00; // Шрифт 5x8
 
 // ── Таймауты HD44780 ─────────────────────────────────────────────────────
 
@@ -63,7 +67,11 @@ pub enum DisplayCommand {
     /// Вывести текст в позицию (x, y)
     Text { x: u8, y: u8, text: String<16> },
     /// Вывести текст с выравниванием
-    TextAligned { align: Align, y: u8, text: String<40> },
+    TextAligned {
+        align: Align,
+        y: u8,
+        text: String<40>,
+    },
     /// Показать/скрыть курсор
     Cursor { visible: bool },
     /// Обновить дисплей из буфера (scroll)
@@ -164,7 +172,8 @@ impl Hd44780I2c {
         embassy_time::Timer::after_millis(CLEAR_DELAY_MS).await;
 
         // Шаг 7: Entry Mode Set — Increment, No Shift (0x06)
-        self.write_cmd(CMD_ENTRY_MODE_SET | ENTRY_INCREMENT | ENTRY_SHIFT_OFF).await;
+        self.write_cmd(CMD_ENTRY_MODE_SET | ENTRY_INCREMENT | ENTRY_SHIFT_OFF)
+            .await;
 
         // Шаг 8: Загрузить custom chars (латышские символы)
         self.load_custom_chars().await;
@@ -243,7 +252,8 @@ impl Hd44780I2c {
     /// location: 0-7 (8 доступных слотов)
     /// char_map: 8 байт, каждый — одна строка 5 пикселей
     pub async fn set_custom_char(&mut self, location: u8, char_map: &[u8; 8]) {
-        self.write_cmd(CMD_SET_CGRAM_ADDR | ((location & 0x07) << 3)).await;
+        self.write_cmd(CMD_SET_CGRAM_ADDR | ((location & 0x07) << 3))
+            .await;
         for &row in char_map {
             self.write_data(row).await;
         }
@@ -254,7 +264,8 @@ impl Hd44780I2c {
     /// Включить/выключить курсор
     pub async fn set_cursor_visible(&mut self, visible: bool) {
         if visible {
-            self.write_cmd(CMD_DISPLAY_CONTROL | DISPLAY_ON | CURSOR_ON | CURSOR_BLINK).await;
+            self.write_cmd(CMD_DISPLAY_CONTROL | DISPLAY_ON | CURSOR_ON | CURSOR_BLINK)
+                .await;
         } else {
             self.write_cmd(CMD_DISPLAY_CONTROL | DISPLAY_ON).await;
         }
@@ -272,7 +283,7 @@ impl Hd44780I2c {
     /// Используется при scroll-анимации.
     pub async fn refresh(&mut self) {
         // Выводим строку 0
-        self.write_cmd(CMD_SET_DDRAM_ADDR | 0x00).await;
+        self.write_cmd(CMD_SET_DDRAM_ADDR).await;
         for x in 0..config::LCD_COLS as usize {
             let ch = self.buf[0][x];
             self.write_data(ch).await;
@@ -366,10 +377,9 @@ pub async fn display_task(signal: &'static Signal<CriticalSectionRawMutex, Displ
 
     loop {
         // Ждём команду с таймаутом (для scroll-обновлений)
-        let cmd = embassy_futures::select::select(
-            signal.wait(),
-            embassy_time::Timer::after_millis(50),
-        ).await;
+        let cmd =
+            embassy_futures::select::select(signal.wait(), embassy_time::Timer::after_millis(50))
+                .await;
 
         match cmd {
             embassy_futures::select::Either::First(cmd) => {
@@ -397,11 +407,15 @@ async fn process_display_command(lcd: &mut Hd44780I2c, cmd: DisplayCommand) {
                 Align::Left => 0,
                 Align::Center => {
                     let len = text.len() as u8;
-                    if len >= config::LCD_COLS { 0 } else { (config::LCD_COLS - len) / 2 }
+                    if len >= config::LCD_COLS {
+                        0
+                    } else {
+                        (config::LCD_COLS - len) / 2
+                    }
                 }
                 Align::Right => {
                     let len = text.len() as u8;
-                    if len >= config::LCD_COLS { 0 } else { config::LCD_COLS - len }
+                    config::LCD_COLS.saturating_sub(len)
                 }
             };
             lcd.set_cursor(x, y).await;

@@ -21,12 +21,13 @@ use core::fmt::Write;
 use embassy_net::tcp::TcpSocket;
 use embassy_net::Stack;
 use embassy_time::{Duration, Instant};
-use embedded_io_async::Write as _;
 
 use rust_mqtt::buffer::BufferProvider;
-use rust_mqtt::client::Client;
 use rust_mqtt::client::event::Event;
-use rust_mqtt::client::options::{ConnectOptions, PublicationOptions, SubscriptionOptions, TopicReference};
+use rust_mqtt::client::options::{
+    ConnectOptions, PublicationOptions, SubscriptionOptions, TopicReference,
+};
+use rust_mqtt::client::Client;
 use rust_mqtt::config::KeepAlive;
 use rust_mqtt::types::{MqttString, QoS, TopicFilter, TopicName};
 
@@ -53,6 +54,12 @@ const CLIENT_ID_LEN: usize = 32;
 pub struct BumpBuffer {
     buffer: [u8; MQTT_BUFFER_SIZE],
     cursor: usize,
+}
+
+impl Default for BumpBuffer {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl BumpBuffer {
@@ -106,19 +113,16 @@ impl embedded_io_async::ErrorType for TcpTransport<'_> {
 
 impl embedded_io_async::Read for TcpTransport<'_> {
     async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
-        use embedded_io_async::Read as _;
         self.socket.read(buf).await
     }
 }
 
 impl embedded_io_async::Write for TcpTransport<'_> {
     async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
-        use embedded_io_async::Write as _;
         self.socket.write(buf).await
     }
 
     async fn flush(&mut self) -> Result<(), Self::Error> {
-        use embedded_io_async::Write as _;
         self.socket.flush().await
     }
 }
@@ -170,7 +174,6 @@ impl MqttConfig {
 ///   - topic: полный топик (например "bahilizator/1/state")
 ///   - payload: JSON payload (до 256 байт)
 ///   - qos: QoS уровень (0, 1 или 2)
-
 pub async fn publish_once(
     stack: Stack<'_>,
     dns: &mut DnsResolver<'_>,
@@ -180,14 +183,16 @@ pub async fn publish_once(
     qos: QoS,
 ) -> Result<(), MqttError> {
     // DNS резолвинг брокера
-    let broker_ip = dns.resolve_or_fallback(
-        &config.broker_host,
-        config.broker_fallback_ip,
-    ).await;
+    let broker_ip = dns
+        .resolve_or_fallback(&config.broker_host, config.broker_fallback_ip)
+        .await;
 
     defmt::debug!(
         "MQTT: connecting to {}.{}.{}.{}:{}",
-        broker_ip[0], broker_ip[1], broker_ip[2], broker_ip[3],
+        broker_ip[0],
+        broker_ip[1],
+        broker_ip[2],
+        broker_ip[3],
         MQTT_PORT
     );
 
@@ -200,7 +205,9 @@ pub async fn publish_once(
         embassy_net::Ipv4Address::new(broker_ip[0], broker_ip[1], broker_ip[2], broker_ip[3]),
         MQTT_PORT,
     );
-    socket.connect(remote).await
+    socket
+        .connect(remote)
+        .await
         .map_err(|_| MqttError::TcpConnectFailed)?;
 
     defmt::debug!("MQTT: TCP connected");
@@ -213,18 +220,16 @@ pub async fn publish_once(
 
     let keepalive = KeepAlive::Seconds(
         core::num::NonZero::new(mqtt_topics::MQTT_KEEPALIVE_SECS)
-            .unwrap_or_else(|| core::num::NonZero::new(60).unwrap_or_else(|| unreachable!()))
+            .unwrap_or_else(|| core::num::NonZero::new(60).unwrap_or_else(|| unreachable!())),
     );
 
-    let connect_options = ConnectOptions::new()
-        .clean_start()
-        .keep_alive(keepalive);
+    let connect_options = ConnectOptions::new().clean_start().keep_alive(keepalive);
 
     let client_id_str = config.client_id();
-    let client_id = MqttString::from_str(&client_id_str)
-        .map_err(|_| MqttError::BufferTooSmall)?;
+    let client_id = MqttString::from_str(&client_id_str).map_err(|_| MqttError::BufferTooSmall)?;
 
-    client.connect(transport, &connect_options, Some(client_id))
+    client
+        .connect(transport, &connect_options, Some(client_id))
         .await
         .map_err(|e| {
             defmt::error!("MQTT: connect error: {:?}", e);
@@ -234,23 +239,23 @@ pub async fn publish_once(
     defmt::debug!("MQTT: CONNECT OK");
 
     // PUBLISH
-    let topic_name = TopicName::new(
-        MqttString::from_str(topic).map_err(|_| MqttError::BufferTooSmall)?
-    ).ok_or(MqttError::BufferTooSmall)?;
+    let topic_name =
+        TopicName::new(MqttString::from_str(topic).map_err(|_| MqttError::BufferTooSmall)?)
+            .ok_or(MqttError::BufferTooSmall)?;
 
     let pub_options = match qos {
-        QoS::AtMostOnce => PublicationOptions::new(
-            TopicReference::Name(topic_name.as_borrowed()),
-        ),
-        QoS::AtLeastOnce => PublicationOptions::new(
-            TopicReference::Name(topic_name.as_borrowed()),
-        ).at_least_once(),
-        QoS::ExactlyOnce => PublicationOptions::new(
-            TopicReference::Name(topic_name.as_borrowed()),
-        ).exactly_once(),
+        QoS::AtMostOnce => PublicationOptions::new(TopicReference::Name(topic_name.as_borrowed())),
+        QoS::AtLeastOnce => {
+            PublicationOptions::new(TopicReference::Name(topic_name.as_borrowed())).at_least_once()
+        }
+        QoS::ExactlyOnce => {
+            PublicationOptions::new(TopicReference::Name(topic_name.as_borrowed())).exactly_once()
+        }
     };
 
-    client.publish(&pub_options, payload.into()).await
+    client
+        .publish(&pub_options, payload.into())
+        .await
         .map_err(|_| MqttError::PublishFailed)?;
 
     // Ждём PUBACK для QoS 1+
@@ -269,7 +274,9 @@ pub async fn publish_once(
     }
 
     // DISCONNECT
-    let _ = client.disconnect(&rust_mqtt::client::options::DisconnectOptions::new()).await;
+    let _ = client
+        .disconnect(&rust_mqtt::client::options::DisconnectOptions::new())
+        .await;
 
     defmt::debug!("MQTT: publish done, disconnected");
     Ok(())
@@ -281,7 +288,6 @@ pub async fn publish_once(
 ///
 /// Только для приёма настроек от сервера.
 /// В интеграции вызывается в отдельной embassy task.
-
 pub async fn subscribe_and_listen(
     stack: Stack<'_>,
     dns: &mut DnsResolver<'_>,
@@ -289,10 +295,9 @@ pub async fn subscribe_and_listen(
     topic: &str,
 ) -> Result<(), MqttError> {
     // DNS
-    let broker_ip = dns.resolve_or_fallback(
-        &config.broker_host,
-        config.broker_fallback_ip,
-    ).await;
+    let broker_ip = dns
+        .resolve_or_fallback(&config.broker_host, config.broker_fallback_ip)
+        .await;
 
     // TCP
     let mut rx_buf = [0u8; TCP_RX_BUF_SIZE];
@@ -303,7 +308,9 @@ pub async fn subscribe_and_listen(
         embassy_net::Ipv4Address::new(broker_ip[0], broker_ip[1], broker_ip[2], broker_ip[3]),
         MQTT_PORT,
     );
-    socket.connect(remote).await
+    socket
+        .connect(remote)
+        .await
         .map_err(|_| MqttError::TcpConnectFailed)?;
 
     // MQTT
@@ -313,30 +320,31 @@ pub async fn subscribe_and_listen(
 
     let keepalive = KeepAlive::Seconds(
         core::num::NonZero::new(mqtt_topics::MQTT_KEEPALIVE_SECS)
-            .unwrap_or_else(|| core::num::NonZero::new(60).unwrap_or_else(|| unreachable!()))
+            .unwrap_or_else(|| core::num::NonZero::new(60).unwrap_or_else(|| unreachable!())),
     );
 
-    let connect_options = ConnectOptions::new()
-        .clean_start()
-        .keep_alive(keepalive);
+    let connect_options = ConnectOptions::new().clean_start().keep_alive(keepalive);
 
     let client_id_str = config.client_id();
-    let client_id = MqttString::from_str(&client_id_str)
-        .map_err(|_| MqttError::BufferTooSmall)?;
+    let client_id = MqttString::from_str(&client_id_str).map_err(|_| MqttError::BufferTooSmall)?;
 
-    client.connect(transport, &connect_options, Some(client_id))
+    client
+        .connect(transport, &connect_options, Some(client_id))
         .await
         .map_err(|_| MqttError::ConnectFailed)?;
 
     // SUBSCRIBE
-    let topic_filter = TopicFilter::new(
-        MqttString::from_str(topic).map_err(|_| MqttError::BufferTooSmall)?
-    ).ok_or(MqttError::SubscribeFailed)?;
+    let topic_filter =
+        TopicFilter::new(MqttString::from_str(topic).map_err(|_| MqttError::BufferTooSmall)?)
+            .ok_or(MqttError::SubscribeFailed)?;
 
-    client.subscribe(
-        topic_filter.as_borrowed().into(),
-        SubscriptionOptions::new().at_least_once(),
-    ).await.map_err(|_| MqttError::SubscribeFailed)?;
+    client
+        .subscribe(
+            topic_filter.as_borrowed(),
+            SubscriptionOptions::new().at_least_once(),
+        )
+        .await
+        .map_err(|_| MqttError::SubscribeFailed)?;
 
     defmt::debug!("MQTT: SUBSCRIBE OK on {:?}", topic);
 
@@ -345,8 +353,11 @@ pub async fn subscribe_and_listen(
         match client.poll().await {
             Ok(Event::Publish(publish)) => {
                 // Входящее сообщение — настройки от сервера
-                defmt::debug!("MQTT: received on {:?}: {} bytes",
-                    publish.topic, publish.message.len());
+                defmt::debug!(
+                    "MQTT: received on {:?}: {} bytes",
+                    publish.topic,
+                    publish.message.len()
+                );
                 // TODO: обработать payload (настройки JSON)
             }
             Ok(Event::Pingresp) => {

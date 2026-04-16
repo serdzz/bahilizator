@@ -11,8 +11,6 @@
 
 use heapless::String;
 
-use crate::state::SMS_BUF_SIZE;
-
 // ── AT команды — строковое представление ──────────────────────────────────
 
 /// Построить команду установки формата SMS
@@ -105,7 +103,6 @@ pub const URC_OVER_VOLTAGE: &str = "OVER-VOLTAGE";
 /// Шаг 3: Отправить текст + Ctrl+Z (0x1A) → CMUX frame DLC1
 ///
 /// В оригинале (gsm.c): gsmSendSms() + waitForPrompt() + gsmWriteMessage()
-
 pub async fn send_sms_text(
     channel: &mut crate::gsm::at_channel::CmuxAtChannel,
     number: &str,
@@ -123,14 +120,15 @@ pub async fn send_sms_text(
 
     // Шаг 3: Отправить текст + Ctrl+Z
     let mut msg_bytes = heapless::Vec::<u8, 200>::new();
-    msg_bytes.extend_from_slice(text.as_bytes()).map_err(|_| crate::error::GsmError::UartError)?;
-    msg_bytes.push(0x1A).map_err(|_| crate::error::GsmError::UartError)?; // Ctrl+Z
+    msg_bytes
+        .extend_from_slice(text.as_bytes())
+        .map_err(|_| crate::error::GsmError::UartError)?;
+    msg_bytes
+        .push(0x1A)
+        .map_err(|_| crate::error::GsmError::UartError)?; // Ctrl+Z
 
-    let frame = crate::gsm::cmux::encode_cmux_frame(
-        channel.dlci,
-        crate::gsm::cmux::UIH,
-        &msg_bytes,
-    );
+    let frame =
+        crate::gsm::cmux::encode_cmux_frame(channel.dlci, crate::gsm::cmux::UIH, &msg_bytes);
     // TODO: записать frame в UART TX
     let _ = frame;
 

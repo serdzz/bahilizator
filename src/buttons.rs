@@ -9,8 +9,8 @@
 //! В оригинале (MSP430 IAR): GetButtonPressed() через getSwitchState()
 //! В Rust/Embassy: EXTI interrupt → Channel → задача обрабатывает
 
-use embassy_sync::channel::Sender;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
+use embassy_sync::channel::Sender;
 
 use crate::config;
 
@@ -88,9 +88,7 @@ pub fn exti_free_item_switch(_active: bool) {
 ///
 /// Читает события из EXTI ISR (через атомарные переменные),
 /// устраняет дребезг, отправляет в Channel
-pub async fn run(
-    button_tx: Sender<'static, CriticalSectionRawMutex, ButtonEvent, 4>,
-) {
+pub async fn run(button_tx: Sender<'static, CriticalSectionRawMutex, ButtonEvent, 4>) {
     let mut last_button_time: [u64; 4] = [0; 4]; // Время последнего нажатия каждой кнопки
 
     loop {

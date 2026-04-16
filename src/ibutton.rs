@@ -13,10 +13,10 @@
 //! Перенос из 1-wire.c: bit-bang заменён на one-wire-bus crate,
 //! но логика проверки ключей по whitelist сохранена.
 
-use embassy_sync::channel::Sender;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
+use embassy_sync::channel::Sender;
 
-use crate::state::{IBUTTON_LEN, Settings, VendingState};
+use crate::state::{Settings, VendingState, IBUTTON_LEN};
 
 // ── 1-Wire команды ────────────────────────────────────────────────────────
 
@@ -25,7 +25,7 @@ use crate::state::{IBUTTON_LEN, Settings, VendingState};
 /// one-wire-bus crate не экспортирует эту константу — определяем сами
 const CMD_READ_ROM: u8 = 0x33;
 
-use one_wire_bus::{OneWire, Address};
+use one_wire_bus::{Address, OneWire};
 
 // ── IbuttonEvent — событие от iButton ─────────────────────────────────────
 
@@ -49,7 +49,6 @@ pub struct IbuttonEvent {
 /// Внимание: при работе блокирует CPU — для 1-Wire это нормально,
 /// т.к. тайминги требуют µs точности (6–480 µs).
 /// Общее время чтения ROM: ~15 мс — приемлемо для 200 мс опроса.
-
 pub struct EmbassyDelay {
     /// Тактовая частота CPU (MHz)
     clock_mhz: u32,
@@ -85,7 +84,6 @@ impl embedded_hal::blocking::delay::DelayUs<u16> for EmbassyDelay {
 ///
 /// В оригинале (1-wire.c): bit-bang на GPIO
 /// У нас: one-wire-bus crate + embassy-stm32 OutputOpenDrain
-
 pub struct IbuttonDriver {
     /// 1-Wire шина (one-wire-bus)
     bus: OneWire<embassy_stm32::gpio::OutputOpenDrain<'static>>,
@@ -107,8 +105,8 @@ impl IbuttonDriver {
     /// ```
     pub fn new(pin: embassy_stm32::gpio::OutputOpenDrain<'static>) -> Self {
         let delay = EmbassyDelay::new(72); // STM32F103C8T6: 72 MHz
-        // embassy-stm32 OutputOpenDrain имеет Error=Infallible,
-        // поэтому OneWire::new() не может вернуть ошибку
+                                           // embassy-stm32 OutputOpenDrain имеет Error=Infallible,
+                                           // поэтому OneWire::new() не может вернуть ошибку
         let bus = OneWire::new(pin).unwrap();
 
         Self { bus, delay }
@@ -183,7 +181,6 @@ impl IbuttonDriver {
 ///
 /// Без изменений по сравнению с оригиналом — логика whitelist
 /// не зависит от реализации 1-Wire протокола
-
 #[derive(Debug, Clone, Copy, defmt::Format, PartialEq)]
 pub enum KeyAccess {
     /// Сервисный ключ (полный доступ)
@@ -220,7 +217,6 @@ pub fn check_key(settings: &Settings, key: &[u8; IBUTTON_LEN]) -> Option<KeyAcce
 //
 /// Конвертировать one_wire_bus::Address в массив 8 байт
 /// Address(u64) хранится в little-endian: family byte → serial → CRC
-
 pub fn address_to_bytes(addr: &Address) -> [u8; IBUTTON_LEN] {
     addr.0.to_le_bytes()
 }
@@ -229,7 +225,6 @@ pub fn address_to_bytes(addr: &Address) -> [u8; IBUTTON_LEN] {
 //
 /// Делегируем CRC вычисление в one_wire_bus::crc
 /// Оставляем для совместимости с другими модулями
-
 /// Вычислить CRC-8 по Dallas/Maxim (делегирует в one_wire_bus::crc::crc8)
 pub fn compute_crc(data: &[u8]) -> u8 {
     one_wire_bus::crc::crc8(data)
@@ -252,7 +247,6 @@ pub fn check_crc(key: &[u8; IBUTTON_LEN]) -> bool {
 ///   let pin = p.PA11.into_output_open_drain(...);
 ///   let driver = IbuttonDriver::new(pin);
 ///   spawner.spawn(task_ibutton(Some(driver), ...).unwrap());
-
 pub async fn run(
     driver: Option<IbuttonDriver>,
     ibutton_tx: Sender<'static, CriticalSectionRawMutex, IbuttonEvent, 1>,

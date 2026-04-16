@@ -4,25 +4,22 @@
 #![no_main]
 
 use defmt_rtt as _; // ensure defmt transport is linked
-use panic_probe as _;
 use embassy_executor::Spawner;
 use embassy_sync::{
-    blocking_mutex::raw::CriticalSectionRawMutex,
-    channel::Channel,
-    signal::Signal,
+    blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel, signal::Signal,
 };
+use panic_probe as _;
 use static_cell::StaticCell;
 
-use bahilizator::{
-    buttons, coin_acceptor, flash, gsm, hopper, ibutton, nvram, state, ui, vending,
-};
+use bahilizator::{buttons, coin_acceptor, flash, gsm, hopper, ibutton, nvram, state, ui, vending};
 
 // ── Статические каналы и сигналы ────────────────────────────────────────
 
 static COIN_CHANNEL: Channel<CriticalSectionRawMutex, coin_acceptor::CoinEvent, 4> = Channel::new();
 static BUTTON_CHANNEL: Channel<CriticalSectionRawMutex, buttons::ButtonEvent, 4> = Channel::new();
 static HOPPER_CMD_CHANNEL: Channel<CriticalSectionRawMutex, hopper::HopperCmd, 4> = Channel::new();
-static HOPPER_EVENT_CHANNEL: Channel<CriticalSectionRawMutex, hopper::HopperEvent, 4> = Channel::new();
+static HOPPER_EVENT_CHANNEL: Channel<CriticalSectionRawMutex, hopper::HopperEvent, 4> =
+    Channel::new();
 static GSM_CMD_CHANNEL: Channel<CriticalSectionRawMutex, gsm::GsmCommand, 4> = Channel::new();
 static SMS_EVENT_CHANNEL: Channel<CriticalSectionRawMutex, gsm::SmsEvent, 4> = Channel::new();
 static IBUTTON_CHANNEL: Channel<CriticalSectionRawMutex, ibutton::IbuttonEvent, 1> = Channel::new();
@@ -32,16 +29,18 @@ static PERSIST_SIGNAL: Signal<CriticalSectionRawMutex, state::PersistReason> = S
 
 // ── Общее состояние ────────────────────────────────────────────────────
 
-static STATE_CELL: StaticCell<embassy_sync::mutex::Mutex<
-    CriticalSectionRawMutex,
-    core::cell::RefCell<state::VendingState>,
->> = StaticCell::new();
+static STATE_CELL: StaticCell<
+    embassy_sync::mutex::Mutex<CriticalSectionRawMutex, core::cell::RefCell<state::VendingState>>,
+> = StaticCell::new();
 
 // ── Embassy tasks ────────────────────────────────────────────────────────
 
 #[embassy_executor::task]
 async fn task_vending(
-    state: &'static embassy_sync::mutex::Mutex<CriticalSectionRawMutex, core::cell::RefCell<state::VendingState>>,
+    state: &'static embassy_sync::mutex::Mutex<
+        CriticalSectionRawMutex,
+        core::cell::RefCell<state::VendingState>,
+    >,
 ) {
     vending::run(
         state,
@@ -58,7 +57,10 @@ async fn task_vending(
 
 #[embassy_executor::task]
 async fn task_coin_acceptor(
-    state: &'static embassy_sync::mutex::Mutex<CriticalSectionRawMutex, core::cell::RefCell<state::VendingState>>,
+    state: &'static embassy_sync::mutex::Mutex<
+        CriticalSectionRawMutex,
+        core::cell::RefCell<state::VendingState>,
+    >,
 ) {
     coin_acceptor::run(COIN_CHANNEL.sender(), state).await;
 }
@@ -75,22 +77,36 @@ async fn task_buttons() {
 
 #[embassy_executor::task]
 async fn task_gsm(
-    state: &'static embassy_sync::mutex::Mutex<CriticalSectionRawMutex, core::cell::RefCell<state::VendingState>>,
+    state: &'static embassy_sync::mutex::Mutex<
+        CriticalSectionRawMutex,
+        core::cell::RefCell<state::VendingState>,
+    >,
 ) {
-    gsm::run(GSM_CMD_CHANNEL.receiver(), SMS_EVENT_CHANNEL.sender(), state).await;
+    gsm::run(
+        GSM_CMD_CHANNEL.receiver(),
+        SMS_EVENT_CHANNEL.sender(),
+        state,
+    )
+    .await;
 }
 
 #[embassy_executor::task]
 async fn task_ibutton(
     driver: Option<ibutton::IbuttonDriver>,
-    state: &'static embassy_sync::mutex::Mutex<CriticalSectionRawMutex, core::cell::RefCell<state::VendingState>>,
+    state: &'static embassy_sync::mutex::Mutex<
+        CriticalSectionRawMutex,
+        core::cell::RefCell<state::VendingState>,
+    >,
 ) {
     ibutton::run(driver, IBUTTON_CHANNEL.sender(), state).await;
 }
 
 #[embassy_executor::task]
 async fn task_state_persist(
-    state: &'static embassy_sync::mutex::Mutex<CriticalSectionRawMutex, core::cell::RefCell<state::VendingState>>,
+    state: &'static embassy_sync::mutex::Mutex<
+        CriticalSectionRawMutex,
+        core::cell::RefCell<state::VendingState>,
+    >,
 ) {
     nvram::persist_task(state, &PERSIST_SIGNAL).await;
 }
@@ -104,9 +120,9 @@ async fn main(spawner: Spawner) {
     let _p = embassy_stm32::init(embassy_stm32::Config::default());
 
     // Инициализация состояния
-    let state = STATE_CELL.init(embassy_sync::mutex::Mutex::new(
-        core::cell::RefCell::new(state::VendingState::default()),
-    ));
+    let state = STATE_CELL.init(embassy_sync::mutex::Mutex::new(core::cell::RefCell::new(
+        state::VendingState::default(),
+    )));
 
     // Загрузка из Flash/EEPROM
     {

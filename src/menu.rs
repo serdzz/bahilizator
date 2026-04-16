@@ -6,16 +6,15 @@
 //! Навигация: Up/Down — перемещение, Enter — выбор/вход, Back — выход
 //! Scroller: автопрокрутка каждые 1.5с для строк >16 символов
 
-use crate::state::{MessageKind, VendingState};
 use crate::config;
-use heapless::String;
+use crate::state::{MessageKind, VendingState};
 use core::fmt::Write;
+use heapless::String;
 
 // ── Пункты сервисного меню ───────────────────────────────────────────────
 //
 /// Перенос из bah_menu.c: MenuItem с уровнем доступа и вложенностью
 /// Уровни: 0 = сервисный ключ, 1 = технический ключ
-
 #[derive(Debug, Clone, Copy, defmt::Format, PartialEq)]
 #[repr(u8)]
 pub enum MenuItem {
@@ -69,14 +68,22 @@ impl MenuItem {
     /// Следующий пункт меню (циклически)
     pub fn next(self) -> Self {
         let cur = self as u8;
-        let next = if cur >= (MenuItem::Count as u8 - 1) { 0 } else { cur + 1 };
+        let next = if cur >= (MenuItem::Count as u8 - 1) {
+            0
+        } else {
+            cur + 1
+        };
         Self::from_u8(next)
     }
 
     /// Предыдущий пункт меню (циклически)
     pub fn prev(self) -> Self {
         let cur = self as u8;
-        let prev = if cur == 0 { MenuItem::Count as u8 - 1 } else { cur - 1 };
+        let prev = if cur == 0 {
+            MenuItem::Count as u8 - 1
+        } else {
+            cur - 1
+        };
         Self::from_u8(prev)
     }
 
@@ -109,17 +116,18 @@ impl MenuItem {
 
     /// Является ли пункт действием (не редактируемое поле)
     pub fn is_action(self) -> bool {
-        matches!(self,
+        matches!(
+            self,
             Self::HopperTest
-            | Self::DisplayTest
-            | Self::GsmSettings
-            | Self::CoinCalibration
-            | Self::SendReportState
-            | Self::SendReportAccounting
-            | Self::SendReportErrors
-            | Self::ClearErrors
-            | Self::ResetKeys
-            | Self::GsmInfo
+                | Self::DisplayTest
+                | Self::GsmSettings
+                | Self::CoinCalibration
+                | Self::SendReportState
+                | Self::SendReportAccounting
+                | Self::SendReportErrors
+                | Self::ClearErrors
+                | Self::ResetKeys
+                | Self::GsmInfo
         )
     }
 
@@ -155,7 +163,6 @@ pub enum MenuAction {
 /// Режимы: Left (без прокрутки), ScrollBounce (туда-сюда)
 /// Интервал прокрутки: 1500мс (TEXT_SCROLL_INTERVAL в оригинале)
 /// Интервал паузы на краях: 2000мс (TEXT_STOP_INTERVAL)
-
 pub const SCROLL_INTERVAL_MS: u64 = 1500;
 pub const SCROLL_PAUSE_MS: u64 = 2000;
 pub const DISPLAY_WIDTH: usize = config::LCD_COLS as usize;
@@ -179,6 +186,12 @@ pub struct Scroller {
     pub direction: i8,
     /// Время следующего обновления (ticks)
     pub next_update: u64,
+}
+
+impl Default for Scroller {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Scroller {
@@ -281,7 +294,6 @@ impl Scroller {
 //
 /// Перенос из bah_menu.c: навигация с поддержкой Up/Down/Enter/Back
 /// Добавлен scroller для длинных строк
-
 pub struct MenuNavigator {
     /// Текущий пункт меню
     pub current: MenuItem,
@@ -293,6 +305,12 @@ pub struct MenuNavigator {
     pub scroller: Scroller,
     /// Время последней активности (для auto-exit)
     pub last_activity_ms: u64,
+}
+
+impl Default for MenuNavigator {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl MenuNavigator {
@@ -344,7 +362,9 @@ impl MenuNavigator {
         // Действия (не редактирование)
         match self.current {
             MenuItem::SendReportState => MenuAction::SendMessage(MessageKind::ReportState),
-            MenuItem::SendReportAccounting => MenuAction::SendMessage(MessageKind::ReportPeriodAccounting),
+            MenuItem::SendReportAccounting => {
+                MenuAction::SendMessage(MessageKind::ReportPeriodAccounting)
+            }
             MenuItem::SendReportErrors => MenuAction::SendMessage(MessageKind::ReportErrors),
             MenuItem::ClearErrors => MenuAction::SendMessage(MessageKind::ResetErrors),
             MenuItem::ResetKeys => MenuAction::SendMessage(MessageKind::ResetKeys),
@@ -388,19 +408,23 @@ impl MenuNavigator {
     fn read_current_value(&self, state: &VendingState) -> i32 {
         match self.current {
             MenuItem::ItemLevel => state.data.item_level,
-            MenuItem::CoinLevelA => *state.data.coin_levels.get(0).unwrap_or(&0),
+            MenuItem::CoinLevelA => *state.data.coin_levels.first().unwrap_or(&0),
             MenuItem::CoinLevelB => *state.data.coin_levels.get(1).unwrap_or(&0),
             MenuItem::Language => state.settings.user_language as i32,
             MenuItem::MachineId => state.settings.machine_id,
-            MenuItem::CoinValue0 => {
-                *state.settings.coin_acceptor.coin_values.get(0).unwrap_or(&0)
-            }
-            MenuItem::HopperCoinValueA => {
-                state.settings.coin_hoppers.get(0).map(|h| h.coin_value).unwrap_or(0)
-            }
-            MenuItem::ItemWarningLevel => {
-                state.settings.item_dispenser.warning_level
-            }
+            MenuItem::CoinValue0 => *state
+                .settings
+                .coin_acceptor
+                .coin_values
+                .first()
+                .unwrap_or(&0),
+            MenuItem::HopperCoinValueA => state
+                .settings
+                .coin_hoppers
+                .first()
+                .map(|h| h.coin_value)
+                .unwrap_or(0),
+            MenuItem::ItemWarningLevel => state.settings.item_dispenser.warning_level,
             MenuItem::PhoneNumber00 => 0, // Телефон — не число
             _ => 0,
         }
@@ -426,30 +450,30 @@ impl MenuNavigator {
         match self.current {
             MenuItem::CashOnHand => {
                 let _ = line1.push_str("НАЛИЧНОСТЬ");
-                let _ = write_i32(&mut line2, state.data.cash);
+                write_i32(&mut line2, state.data.cash);
             }
             MenuItem::ItemLevel => {
                 let _ = line1.push_str("ТОВАР");
                 if self.editing {
-                    let _ = write_i32(&mut line2, self.edit_value);
+                    write_i32(&mut line2, self.edit_value);
                 } else {
-                    let _ = write_i32(&mut line2, state.data.item_level);
+                    write_i32(&mut line2, state.data.item_level);
                 }
             }
             MenuItem::CoinLevelA => {
                 let _ = line1.push_str("МОНЕТЫ A");
                 if self.editing {
-                    let _ = write_i32(&mut line2, self.edit_value);
+                    write_i32(&mut line2, self.edit_value);
                 } else {
-                    let _ = write_i32(&mut line2, *state.data.coin_levels.get(0).unwrap_or(&0));
+                    write_i32(&mut line2, *state.data.coin_levels.first().unwrap_or(&0));
                 }
             }
             MenuItem::CoinLevelB => {
                 let _ = line1.push_str("МОНЕТЫ B");
                 if self.editing {
-                    let _ = write_i32(&mut line2, self.edit_value);
+                    write_i32(&mut line2, self.edit_value);
                 } else {
-                    let _ = write_i32(&mut line2, *state.data.coin_levels.get(1).unwrap_or(&0));
+                    write_i32(&mut line2, *state.data.coin_levels.get(1).unwrap_or(&0));
                 }
             }
             MenuItem::HopperTest => {
@@ -471,26 +495,45 @@ impl MenuNavigator {
             MenuItem::Language => {
                 let _ = line1.push_str("ЯЗЫК");
                 match state.settings.user_language {
-                    crate::state::Language::Latvian => { let _ = line2.push_str("Latvija"); }
-                    crate::state::Language::Russian => { let _ = line2.push_str("Русский"); }
+                    crate::state::Language::Latvian => {
+                        let _ = line2.push_str("Latvija");
+                    }
+                    crate::state::Language::Russian => {
+                        let _ = line2.push_str("Русский");
+                    }
                 }
             }
             MenuItem::MachineId => {
                 let _ = line1.push_str("ID АВТОМАТА");
-                let _ = write_i32(&mut line2, state.settings.machine_id);
+                write_i32(&mut line2, state.settings.machine_id);
             }
             MenuItem::CoinValue0 => {
                 let _ = line1.push_str("НОМИНАЛ Ch0");
-                let _ = write_i32(&mut line2, *state.settings.coin_acceptor.coin_values.get(0).unwrap_or(&0));
+                write_i32(
+                    &mut line2,
+                    *state
+                        .settings
+                        .coin_acceptor
+                        .coin_values
+                        .first()
+                        .unwrap_or(&0),
+                );
             }
             MenuItem::HopperCoinValueA => {
                 let _ = line1.push_str("ХОППЕР A VAL");
-                let _ = write_i32(&mut line2,
-                    state.settings.coin_hoppers.get(0).map(|h| h.coin_value).unwrap_or(0));
+                write_i32(
+                    &mut line2,
+                    state
+                        .settings
+                        .coin_hoppers
+                        .first()
+                        .map(|h| h.coin_value)
+                        .unwrap_or(0),
+                );
             }
             MenuItem::ItemWarningLevel => {
                 let _ = line1.push_str("ПРЕДУПР.ТОВАР");
-                let _ = write_i32(&mut line2, state.settings.item_dispenser.warning_level);
+                write_i32(&mut line2, state.settings.item_dispenser.warning_level);
             }
             MenuItem::PhoneNumber00 => {
                 let _ = line1.push_str("ТЕЛЕФОН 0");
@@ -518,7 +561,7 @@ impl MenuNavigator {
             }
             MenuItem::Version => {
                 let _ = line1.push_str("ВЕРСИЯ");
-                let _ = write_i32(&mut line2, config::FIRMWARE_VERSION as i32);
+                write_i32(&mut line2, config::FIRMWARE_VERSION as i32);
             }
             MenuItem::GsmInfo => {
                 let _ = line1.push_str("GSM ИНФО");

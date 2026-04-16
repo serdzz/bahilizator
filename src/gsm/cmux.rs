@@ -18,19 +18,19 @@ use heapless::Vec;
 pub const CMUX_FLAG: u8 = 0xF9;
 
 // Типы кадров (control field)
-pub const SABM: u8 = 0x2F;   // Set Asynchronous Balanced Mode — установить канал
-pub const UA: u8 = 0x63;     // Unnumbered Acknowledge — подтверждение
-pub const DM: u8 = 0x0F;    // Disconnected Mode — отказ
-pub const DISC: u8 = 0x43;  // Disconnect — разорвать канал
-pub const UIH: u8 = 0xEF;   // Unnumbered Information with Header check — данные
-pub const UI: u8 = 0x03;    // Unnumbered Information — данные без контроля
+pub const SABM: u8 = 0x2F; // Set Asynchronous Balanced Mode — установить канал
+pub const UA: u8 = 0x63; // Unnumbered Acknowledge — подтверждение
+pub const DM: u8 = 0x0F; // Disconnected Mode — отказ
+pub const DISC: u8 = 0x43; // Disconnect — разорвать канал
+pub const UIH: u8 = 0xEF; // Unnumbered Information with Header check — данные
+pub const UI: u8 = 0x03; // Unnumbered Information — данные без контроля
 
 // Управление мультиплексором (MSC — Modem Status Command)
-pub const MSC_CMD: u8 = 0xFD;  // MSC SET
+pub const MSC_CMD: u8 = 0xFD; // MSC SET
 pub const MSC_ACK: u8 = 0x73; // MSC ACK
 
 // Биты управления потоком в MSC
-pub const FC_BIT: u8 = 0x02;  // Flow Control (1 = остановить передачу)
+pub const FC_BIT: u8 = 0x02; // Flow Control (1 = остановить передачу)
 pub const RTC_BIT: u8 = 0x04; // Ready To Communicate
 pub const RTR_BIT: u8 = 0x08; // Ready To Receive
 
@@ -84,10 +84,15 @@ enum DecoderState {
 /// получаем Option<CmuxFrame> когда кадр завершён.
 ///
 /// Basic Mode: флаг F9 только на границах, без экранирования
-
 pub struct CmuxDecoder {
     state: DecoderState,
     current: Vec<u8, 300>,
+}
+
+impl Default for CmuxDecoder {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl CmuxDecoder {
@@ -119,11 +124,9 @@ impl CmuxDecoder {
                     }
                     // Пустой кадр (два флага подряд) — skip
                     self.state = DecoderState::Idle;
-                } else {
-                    if self.current.push(byte).is_err() {
-                        // Переполнение буфера — сброс
-                        self.state = DecoderState::Idle;
-                    }
+                } else if self.current.push(byte).is_err() {
+                    // Переполнение буфера — сброс
+                    self.state = DecoderState::Idle;
                 }
                 None
             }
@@ -153,7 +156,6 @@ impl CmuxDecoder {
 ///   Length (1-2 байта): EA(1) + 7/15 бит длины
 ///   Data (length байт)
 ///   FCS (1 байт): CRC-8 по address + control
-
 pub fn parse_cmux_frame(raw: &[u8]) -> Option<CmuxFrame> {
     if raw.len() < 3 {
         return None; // Минимум: address + control + length(1)
@@ -170,7 +172,7 @@ pub fn parse_cmux_frame(raw: &[u8]) -> Option<CmuxFrame> {
     // Если EA=0 — двухбайтовая длина
     let len_byte = raw[2];
     let ea = len_byte & 0x01;
-    let mut data_len = ((len_byte >> 1) as usize);
+    let mut data_len = (len_byte >> 1) as usize;
     let mut header_len: usize = 3;
 
     if ea == 0 {
@@ -223,7 +225,6 @@ pub fn parse_cmux_frame(raw: &[u8]) -> Option<CmuxFrame> {
 ///
 /// Формат: F9 | Address | Control | Length | Data | FCS | F9
 /// Address: EA=1, CR=1 (команда от инициатора), DLCI
-
 pub fn encode_cmux_frame(dlci: u8, control: u8, data: &[u8]) -> Vec<u8, 300> {
     let mut frame = Vec::new();
 
@@ -244,7 +245,7 @@ pub fn encode_cmux_frame(dlci: u8, control: u8, data: &[u8]) -> Vec<u8, 300> {
         frame.push(((len as u8) << 1) | 0x01).ok();
     } else {
         // Двухбайтовая длина: EA=0 в первом
-        frame.push(((len as u8 & 0x7F) << 1) | 0x00).ok();
+        frame.push((len as u8 & 0x7F) << 1).ok();
         frame.push((len >> 7) as u8).ok();
     }
 
@@ -266,7 +267,6 @@ pub fn encode_cmux_frame(dlci: u8, control: u8, data: &[u8]) -> Vec<u8, 300> {
 /// Вычислить FCS для кадра CMUX (CRC-8)
 /// Полином: x^8 + x^2 + x + 1 (= 0x07, инициализация 0xFF)
 /// GSM 07.10 Basic Mode: FCS считается по address + control полям
-
 pub fn compute_fcs(data: &[u8]) -> u8 {
     let mut fcs: u8 = 0xFF;
     for &byte in data {
@@ -288,7 +288,6 @@ pub fn compute_fcs(data: &[u8]) -> u8 {
 /// Управление потоком данных на конкретном DLCI
 /// MSC SET — установить статус модема (flow control)
 /// MSC ACK — подтвердить
-
 /// Создать MSC SET кадр для DLCI
 pub fn encode_msc_set(dlci: u8, fc_on: bool) -> Vec<u8, 12> {
     let mut msc_data = Vec::new();
@@ -296,7 +295,7 @@ pub fn encode_msc_set(dlci: u8, fc_on: bool) -> Vec<u8, 12> {
     // Адрес DLCI в MSC: EA=1, CR=1, DLCI
     msc_data.push(((dlci & 0x3F) << 2) | 0x01 | 0x02).ok();
     msc_data.push(0x01).ok(); // Length = 1
-    // Сигналы: FC, RTC, RTR, DV
+                              // Сигналы: FC, RTC, RTR, DV
     let signals = if fc_on { 0x0D } else { 0x05 }; // FC=0/1, RTC=1, RTR=1
     msc_data.push(signals | 0x0E).ok(); // EA=1
     msc_data
@@ -331,10 +330,15 @@ pub fn encode_dm(dlci: u8) -> Vec<u8, 300> {
 /// 4. Установить SABM на DLC1 → UA
 /// 5. Установить SABM на DLC2 → UA
 /// 6. Каналы готовы
-
 pub struct CmuxInitState {
     pub stage: u8,
     pub dlci_established: [bool; 3],
+}
+
+impl Default for CmuxInitState {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl CmuxInitState {

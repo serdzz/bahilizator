@@ -7,11 +7,11 @@
 //! Все отчёты — heapless::String<160> (SMS limit)
 //! Формат приближен к оригиналу, но сжат для 160 символов
 
-use heapless::String;
 use core::fmt::Write;
+use heapless::String;
 
-use crate::state::{Accounting, MessageKind, VendingState};
 use crate::config;
+use crate::state::{Accounting, MessageKind, VendingState};
 
 const SMS_MAX_LEN: usize = 160;
 
@@ -21,8 +21,12 @@ const SMS_MAX_LEN: usize = 160;
 pub fn generate_report(state: &VendingState, kind: MessageKind) -> String<SMS_MAX_LEN> {
     match kind {
         MessageKind::ReportState => report_state(state),
-        MessageKind::ReportPeriodAccounting => report_accounting(&state.data.period_accounting, false),
-        MessageKind::ReportOverallAccounting => report_accounting(&state.data.overall_accounting, true),
+        MessageKind::ReportPeriodAccounting => {
+            report_accounting(&state.data.period_accounting, false)
+        }
+        MessageKind::ReportOverallAccounting => {
+            report_accounting(&state.data.overall_accounting, true)
+        }
         MessageKind::ReportErrors => report_errors(state),
         MessageKind::ReportIntrusion => report_intrusion(state),
         MessageKind::ReportNoIntrusion => report_no_intrusion(),
@@ -53,7 +57,6 @@ pub fn generate_report(state: &VendingState, kind: MessageKind) -> String<SMS_MA
 //
 /// В оригинале: CreateReportHeader — "ID: x\nTime: ..."
 /// Для SMS экономим символы — формат компактный
-
 fn report_header(state: &VendingState) -> String<SMS_MAX_LEN> {
     let mut s = String::new();
     let _ = write!(s, "ID:{} ", state.settings.machine_id);
@@ -64,7 +67,6 @@ fn report_header(state: &VendingState) -> String<SMS_MAX_LEN> {
 //
 /// В оригинале: CreateStateReport → header + items + hoppers + errors
 /// Формат SMS: "ID:x Item:xx HA:xx HB:xx Err:yes/no"
-
 fn report_state(state: &VendingState) -> String<SMS_MAX_LEN> {
     let mut s = report_header(state);
 
@@ -94,7 +96,6 @@ fn report_state(state: &VendingState) -> String<SMS_MAX_LEN> {
 //
 /// В оригинале: CreateAccountingReport → header + "Overall/Period\nIn:x\nOut:x\nProfit:x\nSold:x\nFree:x\nErrors:yes/no"
 /// Формат SMS: "ID:x [Overall/Period] IN:xx OUT:xx PROF:xx SOLD:xx FREE:xx Err:yes/no"
-
 fn report_accounting(accounting: &Accounting, overall: bool) -> String<SMS_MAX_LEN> {
     let mut s = String::new();
 
@@ -106,15 +107,20 @@ fn report_accounting(accounting: &Accounting, overall: bool) -> String<SMS_MAX_L
     }
 
     // Внесено / Выдано / Прибыль
-    let _ = write!(s, "IN:{} OUT:{} PROF:{} ",
+    let _ = write!(
+        s,
+        "IN:{} OUT:{} PROF:{} ",
         accounting.cash_in,
         accounting.cash_out,
-        accounting.cash_in - accounting.cash_out);
+        accounting.cash_in - accounting.cash_out
+    );
 
     // Продано / Бесплатно
-    let _ = write!(s, "SOLD:{} FREE:{} ",
-        accounting.items_out,
-        accounting.free_items_out);
+    let _ = write!(
+        s,
+        "SOLD:{} FREE:{} ",
+        accounting.items_out, accounting.free_items_out
+    );
 
     // Пополнения монет (если есть)
     for i in 0..config::HOPPER_COUNT {
@@ -137,7 +143,6 @@ fn report_accounting(accounting: &Accounting, overall: bool) -> String<SMS_MAX_L
 /// В оригинале: CreateErrorsReport → header + список ошибок по имени
 /// Формат SMS: "ERR:xxx CASH:xxxx ITEM:xxxx DOOR:x"
 /// Битовые ошибки + касса + товар + дверь (из описания задачи)
-
 fn report_errors(state: &VendingState) -> String<SMS_MAX_LEN> {
     let mut s = String::new();
 
@@ -169,7 +174,6 @@ fn report_errors(state: &VendingState) -> String<SMS_MAX_LEN> {
 //
 /// В оригинале: CreateIntrusionReport → "Intrusions:\nDoor 1 opened\nDoor 2 closed"
 /// Формат SMS: "ALARM! D1:open D2:closed"
-
 fn report_intrusion(state: &VendingState) -> String<SMS_MAX_LEN> {
     let mut s = String::new();
     let _ = s.push_str("ALARM! ");
@@ -196,7 +200,6 @@ fn report_no_intrusion() -> String<SMS_MAX_LEN> {
 //
 /// В оригинале: CreatePowerUpMessage → header + "Power up!"
 /// Формат SMS: "BAH #x UP" / "BAH #x DOWN"
-
 fn report_power_up(state: &VendingState) -> String<SMS_MAX_LEN> {
     let mut s = String::new();
     let _ = write!(s, "BAH #{} UP", state.settings.machine_id);
@@ -213,7 +216,6 @@ fn report_power_down(state: &VendingState) -> String<SMS_MAX_LEN> {
 //
 /// В оригинале: CreateItemWarningLevelMessage → header + "Items level is low!" + item body
 /// Формат SMS: "LOW! Item:xx"
-
 fn report_item_warning(state: &VendingState) -> String<SMS_MAX_LEN> {
     let mut s = String::new();
     let _ = write!(s, "LOW! Item:{}", state.data.item_level);
@@ -222,7 +224,6 @@ fn report_item_warning(state: &VendingState) -> String<SMS_MAX_LEN> {
 
 /// В оригинале: CreateHopperWarningLevelMessage → header + "Coins level is low!" + hopper body
 /// Формат SMS: "LOW! H1:xx H2:xx"
-
 fn report_hopper_warning(state: &VendingState) -> String<SMS_MAX_LEN> {
     let mut s = String::new();
     let _ = s.push_str("LOW! ");

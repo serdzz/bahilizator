@@ -4,8 +4,8 @@
 //! Кольцевой буфер на 32 события с форматированием
 //! Транзакции — FIFO буфер с автоматическим закрытием
 
-use crate::state::{Cash, Level, Timestamp};
 use crate::error::Errors;
+use crate::state::{Cash, Level, Timestamp};
 
 // ── Константы ────────────────────────────────────────────────────────────
 
@@ -29,7 +29,6 @@ pub struct TransactionEntry {
 /// Перенос из bah_events.c: EVENT_TYPE_NONE, ACCESS, ACTION,
 /// COINS_REFILL, ITEMS_REFILL, ERROR
 /// Дополнено: CoinIn, ItemDispensed, HopperError, Door, Power, Gsm, Ibutton
-
 #[derive(Debug, Clone, Copy, Default, defmt::Format, PartialEq)]
 #[repr(u8)]
 pub enum EventKind {
@@ -91,7 +90,6 @@ pub struct EventEntry {
 /// Фиксированный кольцевой буфер на EVENT_RING_SIZE событий.
 /// Новые события перезаписывают самые старые.
 /// Перенос из bah_events.c: AddEmptyEvent, GetNextEvent, GetLastEvent
-
 pub struct EventRing {
     /// Кольцевой буфер
     buf: [EventEntry; EVENT_RING_SIZE],
@@ -99,6 +97,12 @@ pub struct EventRing {
     head: usize,
     /// Количество записанных событий (до EVENT_RING_SIZE)
     count: usize,
+}
+
+impl Default for EventRing {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl EventRing {
@@ -190,9 +194,12 @@ pub fn format_event(event: &EventEntry) -> heapless::String<32> {
             let _ = write!(s, "GSM err:{}", event.info.param1);
         }
         EventKind::IbuttonKey => {
-            let _ = write!(s, "iBtn {:02X}{:02X}..",
+            let _ = write!(
+                s,
+                "iBtn {:02X}{:02X}..",
                 (event.info.param1 >> 8) as u8,
-                (event.info.param1 & 0xFF) as u8);
+                (event.info.param1 & 0xFF) as u8
+            );
         }
         EventKind::ErrorCleared => {
             let _ = s.push_str("Err cleared");
@@ -224,7 +231,12 @@ pub fn format_event(event: &EventEntry) -> heapless::String<32> {
 //
 /// Добавить событие в массив (старый формат из state.rs — FIFO сдвиг)
 /// Оставлено для совместимости с VendingStateData.events
-pub fn log_event(events: &mut [EventEntry], kind: EventKind, info: EventInfo, timestamp: Timestamp) {
+pub fn log_event(
+    events: &mut [EventEntry],
+    kind: EventKind,
+    info: EventInfo,
+    timestamp: Timestamp,
+) {
     let len = events.len();
     if len > 1 {
         events.copy_within(0..len - 1, 1);
@@ -268,8 +280,8 @@ pub fn open_transaction(
     // Найти следующий свободный слот (или самый старый)
     let mut idx = 0;
     let len = transactions.len();
-    for i in 0..len {
-        if transactions[i].closed || transactions[i].timestamp == 0 {
+    for (i, tx) in transactions.iter().enumerate().take(len) {
+        if tx.closed || tx.timestamp == 0 {
             idx = i;
             break;
         }

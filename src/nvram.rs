@@ -10,8 +10,8 @@
 //! Перенос из fram.c (оригинал — SPI FRAM FM25L04)
 //! В текущей ревизии железа — I2C EEPROM 24C08
 
-use embassy_sync::mutex::Mutex;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
+use embassy_sync::mutex::Mutex;
 use embassy_sync::signal::Signal;
 
 use crate::config;
@@ -50,9 +50,9 @@ pub const STATE_OFFSET_IN_SECTOR: u16 = 4;
 ///   [0..2] = magic (0xBABE)
 ///   [2..4] = CRC16 данных
 ///   [4..]  = VendingStateData
-
 #[derive(Debug, Clone, Copy, Default)]
 #[repr(C, packed)]
+#[allow(dead_code)]
 struct SectorHeader {
     magic: u16,
     crc: u16,
@@ -62,7 +62,7 @@ struct SectorHeader {
 
 /// Индекс текущего активного сектора (0..3)
 /// Определяется при загрузке поиском сектора с валидным magic
-static mut current_sector: u8 = 0;
+static mut CURRENT_SECTOR: u8 = 0;
 
 // ── Низкоуровневые I2C функции ──────────────────────────────────────────
 
@@ -72,6 +72,7 @@ static mut current_sector: u8 = 0;
 /// в младших битах I2C адреса (A0, A1). Поэтому:
 ///   device_addr = 0x50 | (mem_addr >> 8) & 0x03
 ///   word_addr   = mem_addr & 0xFF
+#[allow(dead_code)]
 async fn eeprom_read_byte(_mem_addr: u16) -> u8 {
     // В реальном железе:
     // let device_addr = EEPROM_ADDR | ((mem_addr >> 8) as u8 & 0x03);
@@ -184,10 +185,7 @@ pub async fn load_state() -> Result<VendingStateData, NvramError> {
 
         // Читаем VendingStateData
         let mut state_buf = [0u8; core::mem::size_of::<VendingStateData>()];
-        eeprom_sequential_read(
-            base + STATE_OFFSET_IN_SECTOR,
-            &mut state_buf,
-        ).await;
+        eeprom_sequential_read(base + STATE_OFFSET_IN_SECTOR, &mut state_buf).await;
 
         // Проверяем CRC
         let computed_crc = crc16(&state_buf);
@@ -196,12 +194,11 @@ pub async fn load_state() -> Result<VendingStateData, NvramError> {
             // VendingStateData — #[derive(Copy)] без ссылок,
             // представление в памяти совпадает с побайтовой
             // копией (packed struct без padding).
-            let state: VendingStateData = unsafe {
-                core::ptr::read(state_buf.as_ptr() as *const VendingStateData)
-            };
+            let state: VendingStateData =
+                unsafe { core::ptr::read(state_buf.as_ptr() as *const VendingStateData) };
 
             // Сохраняем найденный сектор как текущий
-            unsafe { current_sector = s as u8 };
+            unsafe { CURRENT_SECTOR = s as u8 };
 
             // Проверяем версию
             if state.version > config::STATE_VERSION {
@@ -229,7 +226,7 @@ pub fn load_state_default() -> VendingStateData {
 /// 3. Пишем CRC + VendingStateData в новый сектор
 /// 4. Устанавливаем magic = 0xBABE
 pub async fn save_state(state: &VendingStateData) -> Result<(), NvramError> {
-    let old_sector = unsafe { current_sector };
+    let old_sector = unsafe { CURRENT_SECTOR };
     let new_sector = next_sector(old_sector);
     let new_base = sector_base_addr(new_sector);
 
@@ -260,17 +257,12 @@ pub async fn save_state(state: &VendingStateData) -> Result<(), NvramError> {
         if remaining >= EEPROM_PAGE_SIZE as u16 {
             // Полная страница
             let mut page = [0u8; EEPROM_PAGE_SIZE];
-            page.copy_from_slice(
-                &state_bytes[offset as usize..offset as usize + EEPROM_PAGE_SIZE],
-            );
+            page.copy_from_slice(&state_bytes[offset as usize..offset as usize + EEPROM_PAGE_SIZE]);
             eeprom_page_write(data_base + offset, &page).await;
         } else {
             // Неполная страница — пишем побайтово
             for i in 0..remaining {
-                eeprom_write_byte(
-                    data_base + offset + i,
-                    state_bytes[(offset + i) as usize],
-                ).await;
+                eeprom_write_byte(data_base + offset + i, state_bytes[(offset + i) as usize]).await;
             }
         }
         offset += EEPROM_PAGE_SIZE as u16;
@@ -286,7 +278,7 @@ pub async fn save_state(state: &VendingStateData) -> Result<(), NvramError> {
     eeprom_write_byte(sector_base_addr(old_sector) + 1, 0x00).await;
 
     // Переключаемся на новый сектор
-    unsafe { current_sector = new_sector };
+    unsafe { CURRENT_SECTOR = new_sector };
 
     Ok(())
 }
@@ -319,7 +311,7 @@ pub async fn persist_task(
             let s = {
                 let guard = state.lock().await;
                 let st = guard.borrow();
-                st.data.clone()
+                st.data
             };
             save_state(&s).await.ok();
             last_persist = embassy_time::Instant::now();

@@ -24,12 +24,12 @@ pub mod mqtt_topics;
 pub mod ppp_channel;
 pub mod sms;
 
-use embassy_sync::channel::{Receiver, Sender};
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
+use embassy_sync::channel::{Receiver, Sender};
 use embassy_sync::mutex::Mutex;
 
-use crate::state::VendingState;
 use crate::error::GsmError;
+use crate::state::VendingState;
 
 // ── Этапы инициализации GSM ─────────────────────────────────────────────
 
@@ -68,7 +68,10 @@ pub enum GsmInitStage {
 #[derive(Debug, Clone, Copy, defmt::Format)]
 pub enum GsmCommand {
     /// Отправить SMS на телефон с индексом phone_idx
-    SendSms { phone_idx: u8, kind: crate::state::MessageKind },
+    SendSms {
+        phone_idx: u8,
+        kind: crate::state::MessageKind,
+    },
     /// Запросить время у модема
     GetTime,
     /// Проверить GPRS подключение
@@ -133,14 +136,18 @@ impl Default for GsmStatus {
 // ── Таймауты ────────────────────────────────────────────────────────────
 
 /// Таймаут ожидания ответа от модема (мс)
+#[allow(dead_code)]
 const GSM_RESPONSE_TIMEOUT_MS: u64 = 5000;
 /// Таймаут ожидания Call Ready (с)
+#[allow(dead_code)]
 const GSM_CALL_READY_TIMEOUT_S: u64 = 15;
 /// Таймаут инициализации модема (с)
+#[allow(dead_code)]
 const GSM_INIT_TIMEOUT_S: u64 = 30;
 /// Задержка между AT командами (мс)
 const GSM_CMD_DELAY_MS: u64 = 200;
 /// Таймаут отправки SMS (с)
+#[allow(dead_code)]
 const GSM_SMS_TIMEOUT_S: u64 = 10;
 /// Интервал проверки GPRS (с)
 const GSM_GPRS_CHECK_INTERVAL_S: u64 = 60;
@@ -390,7 +397,7 @@ pub async fn run(
                     embassy_time::Timer::after_millis(GSM_CMD_DELAY_MS).await;
                 }
 
-                let _ = (phone_idx, sms_event_tx.clone());
+                let _ = (phone_idx, sms_event_tx);
             }
             Ok(GsmCommand::GetTime) => {
                 send_at_cmd("AT+CCLK?\r").await.ok();
@@ -417,7 +424,7 @@ pub async fn run(
         // Периодическая проверка GPRS
         if status.ready && last_gprs_check.elapsed().as_secs() >= GSM_GPRS_CHECK_INTERVAL_S {
             if !status.gprs_attached {
-                gsm_check_gprs(&mut status);
+                let _ = gsm_check_gprs(&mut status).await;
             }
             last_gprs_check = embassy_time::Instant::now();
         }
@@ -442,7 +449,7 @@ fn extract_phone_number(state: &VendingState, idx: u8) -> heapless::String<17> {
             if b == 0 {
                 break;
             }
-            if b >= b'0' && b <= b'9' || b == b'+' {
+            if b.is_ascii_digit() || b == b'+' {
                 result.push(b as char).ok();
             }
         }

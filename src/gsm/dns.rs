@@ -86,7 +86,6 @@ impl DnsCacheEntry {
 ///   let resolver = DnsResolver::new(stack);
 ///   let ip = resolver.resolve("broker.example.com").await.ok();
 ///   ```
-
 pub struct DnsResolver<'a> {
     /// embassy-net DNS socket
     dns: DnsSocket<'a>,
@@ -120,22 +119,32 @@ impl<'a> DnsResolver<'a> {
         }
 
         // Шаг 2: DNS запрос через embassy-net
-        match self.dns.query(hostname, embassy_net::dns::DnsQueryType::A).await {
+        match self
+            .dns
+            .query(hostname, embassy_net::dns::DnsQueryType::A)
+            .await
+        {
             Ok(addrs) => {
-                // Ищем первый IPv4 адрес
-                for addr in addrs.iter() {
-                    if let embassy_net::IpAddress::Ipv4(v4) = addr {
-                        let ip = v4.octets();
-                        defmt::trace!("DNS: {} = {}.{}.{}.{}",
-                            hostname, ip[0], ip[1], ip[2], ip[3]);
+                // embassy-net с proto-ipv4 возвращает только Ipv4
+                let addr = addrs.first();
+                if let Some(embassy_net::IpAddress::Ipv4(v4)) = addr {
+                    let ip = v4.octets();
+                    defmt::trace!(
+                        "DNS: {} = {}.{}.{}.{}",
+                        hostname,
+                        ip[0],
+                        ip[1],
+                        ip[2],
+                        ip[3]
+                    );
 
-                        // Кэшируем
-                        self.update_cache(hostname, ip);
-                        return Ok(ip);
-                    }
+                    // Кэшируем
+                    self.update_cache(hostname, ip);
+                    Ok(ip)
+                } else {
+                    // Адреса найдены, но нет IPv4
+                    Err(DnsError::HostNotFound)
                 }
-                // Адреса найдены, но нет IPv4
-                Err(DnsError::HostNotFound)
             }
             Err(_) => {
                 defmt::warn!("DNS: query failed for {:?}", hostname);
@@ -163,10 +172,8 @@ impl<'a> DnsResolver<'a> {
     /// Поиск в кэше по hostname
     fn lookup_cache(&self, hostname: &str) -> Option<[u8; 4]> {
         for entry in &self.cache {
-            if !entry.is_empty() && !entry.is_expired() {
-                if entry.hostname_str() == hostname {
-                    return Some(entry.ip);
-                }
+            if !entry.is_empty() && !entry.is_expired() && entry.hostname_str() == hostname {
+                return Some(entry.ip);
             }
         }
         None
