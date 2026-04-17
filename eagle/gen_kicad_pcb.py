@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 """Generate bahilizator.kicad_pcb — KiCad 10 format, 2-layer board.
 
-KiCad 10 PCB format:
-- Uses (footprint ...) not (module ...)
-- (property "Reference" ...) not (fp_text reference ...)
-- (version 20260206) required
-- (net N "name") at top level, no (nets) wrapper
-- Footprints reference library, pads come from library
+Strict S-expression format matching real KiCad output.
 """
 import uuid
 
@@ -63,19 +58,47 @@ PLACEMENT = {
     'J_SWD':(70,5,0),
 }
 
+# Use tabs for indentation like real KiCad
+T = '\t'
+
+def prop(ref_name, value, x, y, rot, layer, hide=False):
+    """Generate a property block in KiCad PCB format."""
+    lines = []
+    hide_str = '\n\t\t\t(hide yes)' if hide else ''
+    lines.append(f'{T}{T}(property "{ref_name}" "{value}"')
+    lines.append(f'{T}{T}{T}(at {x} {y} {rot})')
+    lines.append(f'{T}{T}{T}(layer "{layer}")')
+    lines.append(f'{T}{T}{T}(uuid "{u()}")')
+    lines.append(f'{T}{T}{T}(effects')
+    lines.append(f'{T}{T}{T}{T}(font')
+    lines.append(f'{T}{T}{T}{T}{T}(size 1 1)')
+    lines.append(f'{T}{T}{T}{T}{T}(thickness 0.15)')
+    lines.append(f'{T}{T}{T}{T})')
+    if hide:
+        lines.append(f'{T}{T}{T}{T}(hide yes)')
+    lines.append(f'{T}{T}{T})')
+    lines.append(f'{T}{T})')
+    return '\n'.join(lines)
+
 L = []
 
-# Header — KiCad 10 format
-L.append('(kicad_pcb (version 20241229) (generator "pcbnew")')
-L.append('  (general (thickness 1.6))')
-L.append('  (paper "A4")')
-L.append('  (title_block')
-L.append('    (title "Бахилизатор v2.0 — STM32F103C8T6 Bluepill")')
-L.append('    (date "2026-04-16") (rev "2.0")')
-L.append('  )')
+# Header
+L.append('(kicad_pcb')
+L.append(f'{T}(version 20241229)')
+L.append(f'{T}(generator "pcbnew")')
+L.append(f'{T}(generator_version "10.0")')
+L.append(f'{T}(general')
+L.append(f'{T}{T}(thickness 1.6)')
+L.append(f'{T})')
+L.append(f'{T}(paper "A4")')
+L.append(f'{T}(title_block')
+L.append(f'{T}{T}(title "Bahilizator v2.0 - STM32F103C8T6 Bluepill")')
+L.append(f'{T}{T}(date "2026-04-17")')
+L.append(f'{T}{T}(rev "2.0")')
+L.append(f'{T})')
 
 # Layers
-L.append('  (layers')
+L.append(f'{T}(layers')
 for num, name, tp in [(0,"F.Cu","signal"),(31,"B.Cu","signal"),
     (32,"B.Adhes","user"),(33,"F.Adhes","user"),(34,"B.Paste","user"),
     (35,"F.Paste","user"),(36,"B.SilkS","user"),(37,"F.SilkS","user"),
@@ -83,122 +106,142 @@ for num, name, tp in [(0,"F.Cu","signal"),(31,"B.Cu","signal"),
     (41,"Cmts.User","user"),(42,"Eco1.User","user"),(43,"Eco2.User","user"),
     (44,"Edge.Cuts","user"),(45,"Margin","user"),(46,"B.CrtYd","user"),
     (47,"F.CrtYd","user"),(48,"B.Fab","user"),(49,"F.Fab","user")]:
-    L.append(f'    ({num} "{name}" {tp})')
-L.append('  )')
+    L.append(f'{T}{T}({num} "{name}" {tp})')
+L.append(f'{T})')
 
 # Setup
-L.append('  (setup')
-L.append('    (pad_to_mask_clearance 0.05)')
-L.append('    (grid_origin 0 0)')
-L.append('  )')
+L.append(f'{T}(setup')
+L.append(f'{T}{T}(pad_to_mask_clearance 0.05)')
+L.append(f'{T}{T}(grid_origin 0 0)')
+L.append(f'{T})')
 
 # Net classes
-L.append('  (net_class "Default" "Default"')
+L.append(f'{T}(net_class "Default" "Default"')
 for k,v in [('clearance',0.2),('trace_width',0.25),('via_dia',0.8),('via_drill',0.4)]:
-    L.append(f'    ({k} {v})')
-L.append('    (add_net "")')
+    L.append(f'{T}{T}({k} {v})')
+L.append(f'{T}{T}(add_net "")')
 for n in ALL_NETS:
-    L.append(f'    (add_net "{n}")')
-L.append('  )')
-L.append('  (net_class "Power" "Power nets"')
+    L.append(f'{T}{T}(add_net "{n}")')
+L.append(f'{T})')
+L.append(f'{T}(net_class "Power" "Power nets"')
 for k,v in [('clearance',0.3),('trace_width',0.4),('via_dia',0.8),('via_drill',0.4)]:
-    L.append(f'    ({k} {v})')
+    L.append(f'{T}{T}({k} {v})')
 for n in POWER_NETS:
-    L.append(f'    (add_net "{n}")')
-L.append('  )')
+    L.append(f'{T}{T}(add_net "{n}")')
+L.append(f'{T})')
 
-# Nets at top level (KiCad PCB format)
-L.append('  (net 0 "")')
+# Nets
+L.append(f'{T}(net 0 "")')
 for i,n in enumerate(ALL_NETS, 1):
-    L.append(f'  (net {i} "{n}")')
+    L.append(f'{T}(net {i} "{n}")')
 
-# Footprints — KiCad 10 format uses (footprint ...) with (property "Reference" ...)
+# Footprints
 for ref,(x,y,rot) in sorted(PLACEMENT.items(), key=lambda kv: kv[0]):
     fp = get_fp(ref)
     is_smd = any(k in fp for k in ['SMD','QFP','SOIC','SOT','0805'])
-    L.append(f'  (footprint "{fp}"')
-    L.append(f'    (layer "F.Cu")')
-    L.append(f'    (at {x} {y} {rot})')
-    L.append(f'    (attr {"smd" if is_smd else "through_hole"})')
-    L.append(f'    (property "Reference" "{ref}"')
-    L.append(f'      (at 0 -1.5 0)')
-    L.append(f'      (layer "F.SilkS")')
-    L.append(f'      (uuid "{u()}")')
-    L.append(f'      (effects (font (size 1 1) (thickness 0.15))))')
-    L.append(f'    )')
-    L.append(f'    (property "Value" "{ref}"')
-    L.append(f'      (at 0 1.5 0)')
-    L.append(f'      (layer "F.Fab")')
-    L.append(f'      (uuid "{u()}")')
-    L.append(f'      (effects (font (size 1 1) (thickness 0.15))))')
-    L.append(f'    )')
-    L.append(f'  )')
+    L.append(f'{T}(footprint "{fp}"')
+    L.append(f'{T}{T}(layer "F.Cu")')
+    L.append(f'{T}{T}(at {x} {y} {rot})')
+    L.append(f'{T}{T}(attr {"smd" if is_smd else "through_hole"})')
+    # Reference property — proper multi-line format
+    L.append(prop("Reference", ref, 0, -1.5, 0, "F.SilkS"))
+    # Value property
+    L.append(prop("Value", ref, 0, 1.5, 0, "F.Fab"))
+    # Footprint property (hidden)
+    L.append(prop("Footprint", "", 0, 0, 0, "F.Fab", hide=True))
+    # Datasheet property (hidden)
+    L.append(prop("Datasheet", "", 0, 0, 0, "F.Fab", hide=True))
+    L.append(f'{T})')
 
 # Board outline
-L.append(f'  (gr_rect')
-L.append(f'    (start 0 0) (end {BOARD_W} {BOARD_H})')
-L.append(f'    (stroke (width 0.15) (type solid))')
-L.append(f'    (fill none)')
-L.append(f'    (layer "Edge.Cuts")')
-L.append(f'    (uuid "{u()}")')
-L.append(f'  )')
+L.append(f'{T}(gr_rect')
+L.append(f'{T}{T}(start 0 0)')
+L.append(f'{T}{T}(end {BOARD_W} {BOARD_H})')
+L.append(f'{T}{T}(stroke')
+L.append(f'{T}{T}{T}(width 0.15)')
+L.append(f'{T}{T}{T}(type solid)')
+L.append(f'{T}{T})')
+L.append(f'{T}{T}(fill none)')
+L.append(f'{T}{T}(layer "Edge.Cuts")')
+L.append(f'{T}{T}(uuid "{u()}")')
+L.append(f'{T})')
 
-# Silkscreen labels
-L.append(f'  (gr_text "Бахилизатор v2.0"')
-L.append(f'    (at 50 3 0) (layer "F.SilkS")')
-L.append(f'    (uuid "{u()}")')
-L.append(f'    (effects (font (size 3 3) (thickness 0.5))))')
-L.append(f'  )')
-L.append(f'  (gr_text "STM32F103C8T6"')
-L.append(f'    (at 50 7 0) (layer "F.SilkS")')
-L.append(f'    (uuid "{u()}")')
-L.append(f'    (effects (font (size 1.5 1.5) (thickness 0.3))))')
-L.append(f'  )')
+# Silkscreen
+L.append(f'{T}(gr_text "Bahilizator v2.0"')
+L.append(f'{T}{T}(at 50 3 0)')
+L.append(f'{T}{T}(layer "F.SilkS")')
+L.append(f'{T}{T}(uuid "{u()}")')
+L.append(f'{T}{T}(effects')
+L.append(f'{T}{T}{T}(font')
+L.append(f'{T}{T}{T}{T}(size 3 3)')
+L.append(f'{T}{T}{T}{T}(thickness 0.5)')
+L.append(f'{T}{T}{T})')
+L.append(f'{T}{T})')
+L.append(f'{T})')
+L.append(f'{T}(gr_text "STM32F103C8T6"')
+L.append(f'{T}{T}(at 50 7 0)')
+L.append(f'{T}{T}(layer "F.SilkS")')
+L.append(f'{T}{T}(uuid "{u()}")')
+L.append(f'{T}{T}(effects')
+L.append(f'{T}{T}{T}(font')
+L.append(f'{T}{T}{T}{T}(size 1.5 1.5)')
+L.append(f'{T}{T}{T}{T}(thickness 0.3)')
+L.append(f'{T}{T}{T})')
+L.append(f'{T}{T})')
+L.append(f'{T})')
 
-# Copper zones
-L.append(f'  (zone (net {net_map["GND"]}) (net_name "GND") (layer "B.Cu") (uuid "{u()}")')
-L.append(f'    (hatch edge 0.5)')
-L.append(f'    (connect_pads (clearance 0.5))')
-L.append(f'    (min_thickness 0.25)')
-L.append(f'    (fill (mode solid) (thermal_gap 0.5) (thermal_bridge_width 0.5))')
-L.append(f'    (polygon')
-L.append(f'      (pts')
-L.append(f'        (xy 1 1) (xy {BOARD_W-1} 1) (xy {BOARD_W-1} {BOARD_H-1}) (xy 1 {BOARD_H-1})')
-L.append(f'      )')
-L.append(f'    )')
-L.append(f'  )')
-L.append(f'  (zone (net {net_map["VDD"]}) (net_name "VDD") (layer "F.Cu") (uuid "{u()}")')
-L.append(f'    (hatch edge 0.5)')
-L.append(f'    (connect_pads (clearance 0.5))')
-L.append(f'    (min_thickness 0.25)')
-L.append(f'    (fill (mode solid) (thermal_gap 0.5) (thermal_bridge_width 0.5))')
-L.append(f'    (polygon')
-L.append(f'      (pts')
-L.append(f'        (xy 1 1) (xy {BOARD_W-1} 1) (xy {BOARD_W-1} {BOARD_H-1}) (xy 1 {BOARD_H-1})')
-L.append(f'      )')
-L.append(f'    )')
-L.append(f'  )')
+# Zones
+for net_name, net_id, layer in [("GND", net_map["GND"], "B.Cu"), ("VDD", net_map["VDD"], "F.Cu")]:
+    L.append(f'{T}(zone')
+    L.append(f'{T}{T}(net {net_id})')
+    L.append(f'{T}{T}(net_name "{net_name}")')
+    L.append(f'{T}{T}(layer "{layer}")')
+    L.append(f'{T}{T}(uuid "{u()}")')
+    L.append(f'{T}{T}(hatch edge 0.508)')
+    L.append(f'{T}{T}(connect_pads')
+    L.append(f'{T}{T}{T}(clearance 0.508)')
+    L.append(f'{T}{T})')
+    L.append(f'{T}{T}(min_thickness 0.254)')
+    L.append(f'{T}{T}(filled_areas_thickness no)')
+    L.append(f'{T}{T}(fill')
+    L.append(f'{T}{T}{T}(thermal_gap 0.508)')
+    L.append(f'{T}{T}{T}(thermal_bridge_width 0.508)')
+    L.append(f'{T}{T})')
+    L.append(f'{T}{T}(polygon')
+    L.append(f'{T}{T}{T}(pts')
+    L.append(f'{T}{T}{T}{T}(xy 1 1) (xy {BOARD_W-1} 1) (xy {BOARD_W-1} {BOARD_H-1}) (xy 1 {BOARD_H-1})')
+    L.append(f'{T}{T}{T})')
+    L.append(f'{T}{T})')
+    L.append(f'{T})')
 
 # Mounting holes
 for cx,cy in [(5,5),(BOARD_W-5,5),(5,BOARD_H-5),(BOARD_W-5,BOARD_H-5)]:
-    L.append(f'  (footprint "MountingHole:MountingHole_Pad"')
-    L.append(f'    (layer "F.Cu")')
-    L.append(f'    (at {cx} {cy} 0)')
-    L.append(f'    (attr board_only exclude_from_pos_files exclude_from_bom)')
-    L.append(f'    (property "Reference" "REF**"')
-    L.append(f'      (at 0 -1.5 0) (layer "F.SilkS")')
-    L.append(f'      (uuid "{u()}")')
-    L.append(f'      (effects (font (size 1 1) (thickness 0.15))))')
-    L.append(f'    )')
-    L.append(f'    (pad "1" thru_hole circle (at 0 0) (size 3.5 3.5) (drill 1.5)')
-    L.append(f'      (layers "*.Cu" "*.Mask") (remove_unused_layers no)')
-    L.append(f'      (net 0 "")')
-    L.append(f'    )')
-    L.append(f'  )')
+    L.append(f'{T}(footprint "MountingHole:MountingHole_Pad"')
+    L.append(f'{T}{T}(layer "F.Cu")')
+    L.append(f'{T}{T}(at {cx} {cy} 0)')
+    L.append(f'{T}{T}(attr board_only exclude_from_pos_files exclude_from_bom)')
+    L.append(prop("Reference", "REF**", 0, -1.5, 0, "F.SilkS"))
+    L.append(prop("Value", "MountingHole_Pad", 0, 1.5, 0, "F.Fab"))
+    L.append(f'{T}{T}(pad "1" thru_hole circle (at 0 0) (size 3.5 3.5) (drill 1.5)')
+    L.append(f'{T}{T}{T}(layers "*.Cu" "*.Mask") (remove_unused_layers no)')
+    L.append(f'{T}{T}{T}(net 0 "")')
+    L.append(f'{T}{T})')
+    L.append(f'{T})')
 
 L.append(')')  # end kicad_pcb
 
 with open('bahilizator.kicad_pcb', 'w') as f:
     f.write('\n'.join(L))
+
+# Validate parentheses
+depth = 0
+for c in '\n'.join(L):
+    if c == '(': depth += 1
+    elif c == ')': depth -= 1
+    if depth < 0:
+        print("ERROR: Unbalanced parentheses!")
+        break
+else:
+    print(f"OK: parens balanced (depth={depth})")
 
 print(f"Generated: {len(L)} lines, {len(PLACEMENT)} footprints, {len(ALL_NETS)} nets")
