@@ -172,3 +172,4 @@ WARNING: Missing tag on  instantiated at /Users/sergejlepin/work/automated-syste
 INFO: 117 warnings found while generating netlist.
 INFO: 54 errors found while generating netlist.
 
+WARNING: Routing failed on attempt 1/2, expanding area by 1.5x:  @ [/Users/sergejlepin/work/automated-systemssl/bahilizator/eagle/bahilizator_skidl.py:143]
