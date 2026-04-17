@@ -137,7 +137,7 @@ L.append('  (title_block')
 L.append('    (title "Бахилизатор v2.0 — STM32F103C8T6 Bluepill")')
 L.append('    (date "2026-04-17") (rev "2.0")')
 L.append('    (comment 1 "Vending machine controller")')
-L.append('    (comment 2 "SIM800L + HD44780 + NRI G-13 + Hoppers")')
+L.append('    (comment 2 "SIM800L, HD44780, NRI G-13, Hoppers")')
 L.append('  )')
 
 # lib_symbols — minimal, just declare we use these libs

@@ -66,7 +66,7 @@ PLACEMENT = {
 L = []
 
 # Header — KiCad 10 format
-L.append('(kicad_pcb (version 20260206) (generator "pcbnew" "10.0")')
+L.append('(kicad_pcb (version 20241229) (generator "pcbnew")')
 L.append('  (general (thickness 1.6))')
 L.append('  (paper "A4")')
 L.append('  (title_block')
