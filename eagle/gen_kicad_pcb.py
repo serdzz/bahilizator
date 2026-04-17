@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Generate bahilizator.kicad_pcb — 2-layer board for STM32F103C8T6 Bluepill.
+"""Generate bahilizator.kicad_pcb — KiCad 10 format, 2-layer board.
 
-KiCad PCB file order: general, paper, title_block, layers, setup,
-net_class, (segments/vias), modules, graphic items, zones, nets.
-Nets must come LAST.
+KiCad 10 PCB format:
+- Uses (footprint ...) not (module ...)
+- (property "Reference" ...) not (fp_text reference ...)
+- (version 20260206) required
+- (net N "name") at top level, no (nets) wrapper
+- Footprints reference library, pads come from library
 """
 import uuid
 
@@ -60,10 +63,10 @@ PLACEMENT = {
     'J_SWD':(70,5,0),
 }
 
-L = []  # output lines
+L = []
 
-# ── Header ──
-L.append('(kicad_pcb (version 20221018) (generator skidl-pcb-gen)')
+# Header — KiCad 10 format
+L.append('(kicad_pcb (version 20260206) (generator "pcbnew" "10.0")')
 L.append('  (general (thickness 1.6))')
 L.append('  (paper "A4")')
 L.append('  (title_block')
@@ -71,7 +74,7 @@ L.append('    (title "Бахилизатор v2.0 — STM32F103C8T6 Bluepill")')
 L.append('    (date "2026-04-16") (rev "2.0")')
 L.append('  )')
 
-# ── Layers ──
+# Layers
 L.append('  (layers')
 for num, name, tp in [(0,"F.Cu","signal"),(31,"B.Cu","signal"),
     (32,"B.Adhes","user"),(33,"F.Adhes","user"),(34,"B.Paste","user"),
@@ -83,13 +86,13 @@ for num, name, tp in [(0,"F.Cu","signal"),(31,"B.Cu","signal"),
     L.append(f'    ({num} "{name}" {tp})')
 L.append('  )')
 
-# ── Setup ──
+# Setup
 L.append('  (setup')
 L.append('    (pad_to_mask_clearance 0.05)')
 L.append('    (grid_origin 0 0)')
 L.append('  )')
 
-# ── Net classes ──
+# Net classes
 L.append('  (net_class "Default" "Default"')
 for k,v in [('clearance',0.2),('trace_width',0.25),('via_dia',0.8),('via_drill',0.4)]:
     L.append(f'    ({k} {v})')
@@ -104,64 +107,98 @@ for n in POWER_NETS:
     L.append(f'    (add_net "{n}")')
 L.append('  )')
 
-# ── Modules (footprints) ──
-for ref,(x,y,rot) in sorted(PLACEMENT.items(), key=lambda kv: kv[0]):
-    fp = get_fp(ref)
-    L.append(f'  (module "{fp}" (layer "F.Cu")')
-    L.append(f'    (at {x} {y}) (rotation {rot})')
-    L.append(f'    (uuid {u()})')
-    L.append(f'    (attr smd)' if 'SMD' in fp or 'QFP' in fp or 'SOIC' in fp or 'SOT' in fp or '0805' in fp else '    (attr through_hole)')
-    L.append(f'    (fp_text reference "{ref}" (at 0 -1.5) (layer "F.SilkS")')
-    L.append(f'      (effects (font (size 1 1) (thickness 0.15)))')
-    L.append(f'    )')
-    L.append(f'  )')
-
-# ── Graphic items ──
-L.append(f'  (gr_rect (start 0 0) (end {BOARD_W} {BOARD_H})')
-L.append(f'    (stroke (width 0.15) (type solid)) (fill none)')
-L.append(f'    (layer "Edge.Cuts") (uuid {u()})')
-L.append(f'  )')
-L.append(f'  (gr_text "Бахилизатор v2.0" (at 50 3) (layer "F.SilkS")')
-L.append(f'    (effects (font (size 3 3) (thickness 0.5))) (uuid {u()})')
-L.append(f'  )')
-L.append(f'  (gr_text "STM32F103C8T6" (at 50 7) (layer "F.SilkS")')
-L.append(f'    (effects (font (size 1.5 1.5) (thickness 0.3))) (uuid {u()})')
-L.append(f'  )')
-
-# ── Zones ──
-L.append(f'  (zone (net {net_map["GND"]}) (net_name "GND") (layer "B.Cu") (uuid {u()})')
-L.append(f'    (hatch edge 0.5)')
-L.append(f'    (connect_pads (clearance 0.5))')
-L.append(f'    (min_thickness 0.25)')
-L.append(f'    (fill (mode solid) (thermal_gap 0.5) (thermal_bridge_width 0.5))')
-L.append(f'    (polygon (pts (xy 1 1) (xy {BOARD_W-1} 1) (xy {BOARD_W-1} {BOARD_H-1}) (xy 1 {BOARD_H-1})))')
-L.append(f'  )')
-L.append(f'  (zone (net {net_map["VDD"]}) (net_name "VDD") (layer "F.Cu") (uuid {u()})')
-L.append(f'    (hatch edge 0.5)')
-L.append(f'    (connect_pads (clearance 0.5))')
-L.append(f'    (min_thickness 0.25)')
-L.append(f'    (fill (mode solid) (thermal_gap 0.5) (thermal_bridge_width 0.5))')
-L.append(f'    (polygon (pts (xy 1 1) (xy {BOARD_W-1} 1) (xy {BOARD_W-1} {BOARD_H-1}) (xy 1 {BOARD_H-1})))')
-L.append(f'  )')
-
-# ── Mounting holes ──
-for cx,cy in [(5,5),(BOARD_W-5,5),(5,BOARD_H-5),(BOARD_W-5,BOARD_H-5)]:
-    L.append(f'  (module "MountingHole:MountingHole_Pad" (layer "F.Cu")')
-    L.append(f'    (at {cx} {cy}) (uuid {u()})')
-    L.append(f'    (attr board_only exclude_from_pos_files exclude_from_bom)')
-    L.append(f'    (pad "1" thru_hole circle (at 0 0) (size 3.5 3.5) (drill 1.5)')
-    L.append(f'      (layers "*.Cu" "*.Mask") (remove_unused_layers no) (net 0 "")')
-    L.append(f'    )')
-    L.append(f'  )')
-
-# ── Nets — individual (net ...) at top level, NO (nets) wrapper in PCB ──
+# Nets at top level (KiCad PCB format)
 L.append('  (net 0 "")')
 for i,n in enumerate(ALL_NETS, 1):
     L.append(f'  (net {i} "{n}")')
+
+# Footprints — KiCad 10 format uses (footprint ...) with (property "Reference" ...)
+for ref,(x,y,rot) in sorted(PLACEMENT.items(), key=lambda kv: kv[0]):
+    fp = get_fp(ref)
+    is_smd = any(k in fp for k in ['SMD','QFP','SOIC','SOT','0805'])
+    L.append(f'  (footprint "{fp}"')
+    L.append(f'    (layer "F.Cu")')
+    L.append(f'    (at {x} {y} {rot})')
+    L.append(f'    (attr {"smd" if is_smd else "through_hole"})')
+    L.append(f'    (property "Reference" "{ref}"')
+    L.append(f'      (at 0 -1.5 0)')
+    L.append(f'      (layer "F.SilkS")')
+    L.append(f'      (uuid "{u()}")')
+    L.append(f'      (effects (font (size 1 1) (thickness 0.15))))')
+    L.append(f'    )')
+    L.append(f'    (property "Value" "{ref}"')
+    L.append(f'      (at 0 1.5 0)')
+    L.append(f'      (layer "F.Fab")')
+    L.append(f'      (uuid "{u()}")')
+    L.append(f'      (effects (font (size 1 1) (thickness 0.15))))')
+    L.append(f'    )')
+    L.append(f'  )')
+
+# Board outline
+L.append(f'  (gr_rect')
+L.append(f'    (start 0 0) (end {BOARD_W} {BOARD_H})')
+L.append(f'    (stroke (width 0.15) (type solid))')
+L.append(f'    (fill none)')
+L.append(f'    (layer "Edge.Cuts")')
+L.append(f'    (uuid "{u()}")')
+L.append(f'  )')
+
+# Silkscreen labels
+L.append(f'  (gr_text "Бахилизатор v2.0"')
+L.append(f'    (at 50 3 0) (layer "F.SilkS")')
+L.append(f'    (uuid "{u()}")')
+L.append(f'    (effects (font (size 3 3) (thickness 0.5))))')
+L.append(f'  )')
+L.append(f'  (gr_text "STM32F103C8T6"')
+L.append(f'    (at 50 7 0) (layer "F.SilkS")')
+L.append(f'    (uuid "{u()}")')
+L.append(f'    (effects (font (size 1.5 1.5) (thickness 0.3))))')
+L.append(f'  )')
+
+# Copper zones
+L.append(f'  (zone (net {net_map["GND"]}) (net_name "GND") (layer "B.Cu") (uuid "{u()}")')
+L.append(f'    (hatch edge 0.5)')
+L.append(f'    (connect_pads (clearance 0.5))')
+L.append(f'    (min_thickness 0.25)')
+L.append(f'    (fill (mode solid) (thermal_gap 0.5) (thermal_bridge_width 0.5))')
+L.append(f'    (polygon')
+L.append(f'      (pts')
+L.append(f'        (xy 1 1) (xy {BOARD_W-1} 1) (xy {BOARD_W-1} {BOARD_H-1}) (xy 1 {BOARD_H-1})')
+L.append(f'      )')
+L.append(f'    )')
+L.append(f'  )')
+L.append(f'  (zone (net {net_map["VDD"]}) (net_name "VDD") (layer "F.Cu") (uuid "{u()}")')
+L.append(f'    (hatch edge 0.5)')
+L.append(f'    (connect_pads (clearance 0.5))')
+L.append(f'    (min_thickness 0.25)')
+L.append(f'    (fill (mode solid) (thermal_gap 0.5) (thermal_bridge_width 0.5))')
+L.append(f'    (polygon')
+L.append(f'      (pts')
+L.append(f'        (xy 1 1) (xy {BOARD_W-1} 1) (xy {BOARD_W-1} {BOARD_H-1}) (xy 1 {BOARD_H-1})')
+L.append(f'      )')
+L.append(f'    )')
+L.append(f'  )')
+
+# Mounting holes
+for cx,cy in [(5,5),(BOARD_W-5,5),(5,BOARD_H-5),(BOARD_W-5,BOARD_H-5)]:
+    L.append(f'  (footprint "MountingHole:MountingHole_Pad"')
+    L.append(f'    (layer "F.Cu")')
+    L.append(f'    (at {cx} {cy} 0)')
+    L.append(f'    (attr board_only exclude_from_pos_files exclude_from_bom)')
+    L.append(f'    (property "Reference" "REF**"')
+    L.append(f'      (at 0 -1.5 0) (layer "F.SilkS")')
+    L.append(f'      (uuid "{u()}")')
+    L.append(f'      (effects (font (size 1 1) (thickness 0.15))))')
+    L.append(f'    )')
+    L.append(f'    (pad "1" thru_hole circle (at 0 0) (size 3.5 3.5) (drill 1.5)')
+    L.append(f'      (layers "*.Cu" "*.Mask") (remove_unused_layers no)')
+    L.append(f'      (net 0 "")')
+    L.append(f'    )')
+    L.append(f'  )')
 
 L.append(')')  # end kicad_pcb
 
 with open('bahilizator.kicad_pcb', 'w') as f:
     f.write('\n'.join(L))
 
-print(f"Generated: {len(L)} lines, {len(PLACEMENT)} components, {len(ALL_NETS)} nets")
+print(f"Generated: {len(L)} lines, {len(PLACEMENT)} footprints, {len(ALL_NETS)} nets")
