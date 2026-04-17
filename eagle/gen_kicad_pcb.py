@@ -28,7 +28,7 @@ DOOR_NETS = ['DOOR1', 'DOOR2']
 # Footprint assignments
 FOOTPRINTS = {
     'U1':  'Package_QFP:LQFP-48_7x7mm_P0.5mm',
-    'U2':  'Package_DIP:DIP-16_W7.62mm',
+    'U2':  'Package_SO:SOIC-16_3.9x9.9mm_P1.27mm',
     'U3':  'Package_SOIC:SOIC-8_3.9x4.9mm_P1.27mm',
     'Y1':  'Crystal:Crystal_HC49-U_Vertical',
     'J_SWD':  'Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical',
