@@ -41,7 +41,7 @@ def get_fp(ref):
     if ref in FOOTPRINTS:
         return FOOTPRINTS[ref]
     if ref.startswith('Q_'):
-        return 'Package_TO_SOT_THT:TO-92_Inline_Wide'
+        return 'Package_TO_SOT_SMD:SOT-23'
     if ref.startswith('R_') or ref.startswith('R_CB') or ref.startswith('R_CC') or ref.startswith('R_BTN') or ref.startswith('R_DOOR') or ref.startswith('R_STS'):
         return 'Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder'
     if ref.startswith('C_') or ref.startswith('C_OSC'):
